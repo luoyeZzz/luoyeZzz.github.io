@@ -638,6 +638,21 @@ function saveQuotes(data) {
   fs.writeFileSync(QUOTES_JS, "window.QUOTES = " + JSON.stringify(list, null, 2) + ";\n", "utf8");
   return true;
 }
+async function ensureGitIdentity(remote) {
+  const cur = await git(['config', 'user.email']);
+  if (cur.out && cur.out.trim()) return false;
+  let owner = '';
+  try {
+    const url = remote || (await git(['remote', 'get-url', 'origin'])).out || '';
+    const m = url.match(/github\.com[:\/]([^\/]+)\//i);
+    if (m) owner = m[1];
+  } catch (e) {}
+  const name = owner || 'Luoyue';
+  const email = owner ? owner + '@users.noreply.github.com' : 'luoye@local';
+  await git(['config', 'user.name', name]);
+  await git(['config', 'user.email', email]);
+  return true;
+}
 function nextNo() {
   const posts = listPosts();
   let max = 0;
@@ -1004,6 +1019,7 @@ try { buildSitemap(); buildRobots(); } catch (e) {}
       if (action === 'init') {
         log.push((await git(['init'])).out);
         log.push((await git(['add', '-A'])).out);
+        if (await ensureGitIdentity(body.remote)) log.push('已自动配置 git 身份（提交作者）');
         log.push((await git(['commit', '-m', '初始化网站'])).out);
         if (body.remote) {
           await git(['remote', 'remove', 'origin']);
@@ -1029,6 +1045,7 @@ try { buildSitemap(); buildRobots(); } catch (e) {}
         }
 
         log.push((await git(['add', '-A'])).out);
+        if (await ensureGitIdentity(remote)) log.push('已自动配置 git 身份（提交作者）');
         log.push((await git(['commit', '-m', msg])).out);
 
         // 有 token 时：临时把 remote 换成带令牌的地址，推完立刻还原，令牌不落盘
