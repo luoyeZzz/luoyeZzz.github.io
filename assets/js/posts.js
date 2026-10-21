@@ -6,7 +6,7 @@
  *   read = 阅读时长（分钟）
  */
 window.POSTS = [
-                            {
+                                {
     slug: "first",
     file: "posts/post-first.html",
     no: "04",
