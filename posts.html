@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>文章 ｜ 洛月</title>
+<meta name="description" content="洛月的全部文章：日常、读书、还有一些没寄出去的信。">
+<meta name="theme-color" content="#FBF5F0">
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script>
+  (function () {
+    try {
+      var q = new URLSearchParams(location.search).get("theme");
+      if (q === "dark" || q === "light") { document.documentElement.setAttribute("data-theme", q); return; }
+      if (localStorage.getItem("sb-theme") === "dark") { document.documentElement.setAttribute("data-theme", "dark"); }
+    } catch (e) {}
+  })();
+</script>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">跳到正文</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-left">
+    <a class="back-btn" href="index.html" aria-label="返回首页">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg>
+      <span>首页</span>
+    </a>
+    <a class="brand" href="index.html">
+      <img src="assets/img/moon.svg" alt="" width="24" height="24">
+      <span class="brand-txt"><b>洛月</b><i>LUOYUE</i></span>
+    </a>
+    </div>
+    <nav class="topnav" id="topnav">
+      <a href="index.html">首页</a>
+      <a href="posts.html" class="is-current" aria-current="page">文章</a>
+      <a href="quotes.html">台词</a>
+      <a href="about.html">关于</a>
+    </nav>
+    <div class="topbar-tools">
+      <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="切换夜间模式" title="切换夜间模式">
+        <svg class="ic-sun" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.2"/>
+          <path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.4 5.4l1.6 1.6M17 17l1.6 1.6M18.6 5.4L17 7M7 17l-1.6 1.6"/>
+        </svg>
+        <svg class="ic-moon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 14.5A8 8 0 0 1 9.5 4 8.2 8.2 0 1 0 20 14.5z"/>
+        </svg>
+      </button>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="topnav" aria-label="打开菜单">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="page-head">
+    <div class="wrap">
+      <p class="page-kicker">アーカイブ <span class="sep">/</span> ARCHIVE</p>
+      <h1 class="page-title">全部文章</h1>
+      <p class="page-lead">日常、读书、还有一些没寄出去的信。都不长，适合在睡前读。</p>
+      <div class="post-search"><input id="post-search" type="search" placeholder="搜索标题、摘要、分类…" aria-label="搜索文章"><span class="post-search-count" id="post-search-count"></span></div>
+      <div class="filter-bar" id="post-filters"></div>
+    </div>
+  </section>
+
+  <div class="post-wrap">
+    <div class="post-grid" id="post-list"></div>
+    <p class="post-empty" id="post-empty">这个分类下还没有文章。</p>
+  </div>
+
+</main>
+
+<footer class="site-foot">
+  <div class="foot-inner">
+    <div class="foot-brand">
+      <p class="foot-jp">洛月</p>
+      <p class="foot-note">把日常写成轻小说。<br>在句尾留一点空白。</p>
+    </div>
+    <nav class="foot-nav" aria-label="页脚导航">
+      <a href="index.html">首页</a>
+      <a href="posts.html">文章</a>
+      
+      <a href="quotes.html">台词</a>
+      <a href="about.html">关于</a>
+    </nav>
+    <p class="foot-tag" aria-hidden="true">つきがきれい</p>
+  </div>
+  <div class="foot-copy">
+    <span>© <span data-year>2026</span> 洛叶 · 内容与图片版权归原作者所有</span>
+    <span>已运行 <b data-since="2026-09-12">0</b> 天 · 手写 HTML / CSS</span>
+  </div>
+</footer>
+
+<script src="assets/js/posts.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>

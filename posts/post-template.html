@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>文章标题 ｜ 洛月</title>
+<meta name="description" content="这里写一句摘要，会出现在文章列表里。">
+<meta name="theme-color" content="#FBF5F0">
+<link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
+<script>
+  (function () {
+    try {
+      var q = new URLSearchParams(location.search).get("theme");
+      if (q === "dark" || q === "light") { document.documentElement.setAttribute("data-theme", q); return; }
+      if (localStorage.getItem("sb-theme") === "dark") { document.documentElement.setAttribute("data-theme", "dark"); }
+    } catch (e) {}
+  })();
+</script>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">跳到正文</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-left">
+    <a class="back-btn" href="../posts.html" aria-label="返回文章">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg>
+      <span>文章</span>
+    </a>
+    <a class="brand" href="../index.html">
+      <img src="../assets/img/moon.svg" alt="" width="24" height="24">
+      <span class="brand-txt"><b>洛月</b><i>LUOYUE</i></span>
+    </a>
+    </div>
+    <nav class="topnav" id="topnav">
+      <a href="../index.html">首页</a>
+      <a href="../posts.html" class="is-current" aria-current="page">文章</a>
+      <a href="../quotes.html">台词</a>
+      <a href="../about.html">关于</a>
+    </nav>
+    <div class="topbar-tools">
+      <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="切换夜间模式" title="切换夜间模式">
+        <svg class="ic-sun" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.4 5.4l1.6 1.6M17 17l1.6 1.6M18.6 5.4L17 7M7 17l-1.6 1.6"/></svg>
+        <svg class="ic-moon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8.2 8.2 0 1 0 20 14.5z"/></svg>
+      </button>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="topnav" aria-label="打开菜单"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <article>
+
+    <!-- ① 标题区：改标题、日期、时长、分类 -->
+    <header class="article-head">
+      <p class="article-kicker"><span>日々</span><span>2026.11.01</span><span>5 min</span></p>
+      <h1 class="article-title">文章标题写在这里</h1>
+    </header>
+
+    <!-- ② 头图：cover-1 是真图，cover-2/3/4 是渐变色；竖排日文用 cover-word -->
+    <div class="article-cover cover-2">
+      <span class="cover-word" lang="ja">そらの話</span>
+      <img class="cover-flower" src="../assets/img/flower.svg" alt="" aria-hidden="true">
+    </div>
+
+    <div class="prose">
+
+      <!-- ③ 普通段落：第一段的第一个字会自动变成大号首字 -->
+      <p>第一段写在这里。首字会自动放大、变成粉色，这是 CSS 做的，你不用管。</p>
+      <p>第二段正常写就行。换行在 HTML 里不会生效，想分段就再写一个 &lt;p&gt; 标签。</p>
+
+      <!-- ④ 小标题：左边会自动出现一条粉色竖线 -->
+      <h2>小标题</h2>
+      <p>小标题下面的正文。</p>
+
+      <!-- ⑤ 对白框（就是你说的那个“新奇”的框） -->
+      <div class="dialogue">「这一句是第一个人说的。」<br>「这一句是第二个人说的。」</div>
+
+      <!-- ⑥ 手写注释：浅黄色便签，轻微倾斜 -->
+      <div class="note">注：这里适合写一点补充说明、吐槽、或者后记。</div>
+
+      <!-- ⑦ 引用：左边一条粉线，字号略小 -->
+      <blockquote>「有些句子不是为了推动剧情，只是为了让某个人被记住。」</blockquote>
+
+      <!-- ⑧ 普通图片：整宽，配一行小字说明 -->
+      <figure>
+        <img src="../assets/img/hero-room.jpg" alt="窗边的积雨云">
+        <figcaption>图：某个下午的窗外</figcaption>
+      </figure>
+
+      <!-- ⑨ 拍立得图片：白边 + 旋转，适合放小照片 -->
+      <figure class="polaroid">
+        <img src="../assets/img/feature-cover.jpg" alt="夜空插画">
+        <figcaption>拍立得样式</figcaption>
+      </figure>
+
+      <h2>另一个小标题</h2>
+      <p>继续写。文章长短都无所谓，模板只是给你几个可用的积木。</p>
+
+    </div>
+
+    <!-- ⑩ 文章底部：标签 + 返回 + 上一篇/下一篇 -->
+    <div class="article-foot">
+      <div class="article-tags">
+        <a class="tag-chip" href="../posts.html">日々</a>
+        <a class="tag-chip" href="../posts.html">随笔</a>
+      </div>
+      <a class="link-arrow" href="../posts.html">← 返回列表</a>
+    </div>
+
+    <nav class="pager">
+      <a href="post-sky.html"><span>NEWER</span><b>第一次把天空写进小说里</b></a>
+      <a href="post-konbini.html"><span>OLDER</span><b>关于清晨六点的便利店</b></a>
+    </nav>
+
+  </article>
+</main>
+
+<footer class="site-foot">
+  <div class="foot-inner">
+    <div class="foot-brand">
+      <p class="foot-jp">洛月</p>
+      <p class="foot-note">把日常写成轻小说。<br>在句尾留一点空白。</p>
+    </div>
+    <nav class="foot-nav" aria-label="页脚导航">
+      <a href="../index.html">首页</a>
+      <a href="../posts.html">文章</a>
+      
+      <a href="../quotes.html">台词</a>
+      <a href="../about.html">关于</a>
+    </nav>
+    <p class="foot-tag" aria-hidden="true">つきがきれい</p>
+  </div>
+  <div class="foot-copy">
+    <span>© <span data-year>2026</span> 洛叶 · 内容与图片版权归原作者所有</span>
+    <span>已运行 <b data-since="2026-09-12">0</b> 天 · 手写 HTML / CSS</span>
+  </div>
+</footer>
+
+<script src="../assets/js/main.js"></script>
+</body>
+</html>

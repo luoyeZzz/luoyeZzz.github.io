@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>台词收藏 ｜ 洛月</title>
+<meta name="description" content="从喜欢的作品里，抄下那些让人停下来重读的句子。">
+<meta name="theme-color" content="#FBF5F0">
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script>
+  (function () {
+    try {
+      var q = new URLSearchParams(location.search).get("theme");
+      if (q === "dark" || q === "light") { document.documentElement.setAttribute("data-theme", q); return; }
+      if (localStorage.getItem("sb-theme") === "dark") { document.documentElement.setAttribute("data-theme", "dark"); }
+    } catch (e) {}
+  })();
+</script>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">跳到正文</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-left">
+      <a class="back-btn" href="index.html" aria-label="返回首页">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg>
+        <span>首页</span>
+      </a>
+      <a class="brand" href="index.html">
+        <img src="assets/img/moon.svg" alt="" width="24" height="24">
+        <span class="brand-txt"><b>洛月</b><i>LUOYUE</i></span>
+      </a>
+    </div>
+    <nav class="topnav" id="topnav">
+      <a href="index.html">首页</a>
+      <a href="posts.html">文章</a>
+      
+      
+      <a href="quotes.html" class="is-current" aria-current="page">台词</a>
+      <a href="about.html">关于</a>
+    </nav>
+    <div class="topbar-tools">
+      <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="切换夜间模式" title="切换夜间模式">
+        <svg class="ic-sun" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.4 5.4l1.6 1.6M17 17l1.6 1.6M18.6 5.4L17 7M7 17l-1.6 1.6"/></svg>
+        <svg class="ic-moon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8.2 8.2 0 1 0 20 14.5z"/></svg>
+      </button>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="topnav" aria-label="打开菜单"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="page-head">
+    <div class="wrap">
+      <p class="page-kicker">ことば <span class="sep">/</span> QUOTES</p>
+      <h1 class="page-title">台词收藏</h1>
+      <p class="page-lead">从喜欢的作品里，抄下那些让人停下来重读的句子。标了「意译」的是凭记忆复述的。</p>
+    </div>
+  </section>
+
+  <div class="post-wrap">
+    <div class="quote-grid" id="quote-list"></div>
+    <div class="empty-home" id="quote-empty" style="display:none">
+      <b>还没有收藏</b><br>在写作工具的「台词」里加几句。<br>
+      <a class="link-arrow" href="index.html">回首页 →</a>
+    </div>
+  </div>
+
+</main>
+
+<footer class="site-foot">
+  <div class="foot-inner">
+    <div class="foot-brand">
+      <p class="foot-jp">洛月</p>
+      <p class="foot-note">把日常写成轻小说。<br>在句尾留一点空白。</p>
+    </div>
+    <nav class="foot-nav" aria-label="页脚导航">
+      <a href="index.html">首页</a>
+      <a href="posts.html">文章</a>
+      
+      <a href="quotes.html">台词</a>
+      <a href="about.html">关于</a>
+    </nav>
+    <p class="foot-tag" aria-hidden="true">つきがきれい</p>
+  </div>
+  <div class="foot-copy">
+    <span>© <span data-year>2026</span> 洛叶 · 内容与图片版权归原作者所有</span>
+    <span>已运行 <b data-since="2026-09-12">0</b> 天 · 手写 HTML / CSS</span>
+  </div>
+</footer>
+
+<script src="assets/js/quotes-data.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://luoyeZzz.github.io/sitemap.xml

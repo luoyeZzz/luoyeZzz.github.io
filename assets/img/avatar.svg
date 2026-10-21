@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FBDDE7"/>
+      <stop offset="48%" stop-color="#F7C6D8"/>
+      <stop offset="100%" stop-color="#EED3C8"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="32%" cy="26%" r="70%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity=".85"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="12"/></filter>
+  </defs>
+  <rect width="240" height="240" rx="120" fill="url(#bg)"/>
+  <circle cx="92" cy="82" r="86" fill="url(#glow)"/>
+  <ellipse cx="190" cy="196" rx="90" ry="62" fill="#FFF3EA" opacity=".45" filter="url(#soft)"/>
+  <g transform="translate(168 58)" opacity=".5">
+    <g fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round">
+      <ellipse cx="0" cy="-13" rx="6.5" ry="10.5"/>
+      <ellipse cx="0" cy="-13" rx="6.5" ry="10.5" transform="rotate(72)"/>
+      <ellipse cx="0" cy="-13" rx="6.5" ry="10.5" transform="rotate(144)"/>
+      <ellipse cx="0" cy="-13" rx="6.5" ry="10.5" transform="rotate(216)"/>
+      <ellipse cx="0" cy="-13" rx="6.5" ry="10.5" transform="rotate(288)"/>
+    </g>
+  </g>
+  <text x="120" y="146" text-anchor="middle"
+        font-family="Yu Mincho, YuMincho, Songti SC, SimSun, serif"
+        font-size="96" fill="#FFFFFF" fill-opacity=".92">月</text>
+  <g fill="#FFFFFF" opacity=".55">
+    <circle cx="60" cy="176" r="3"/><circle cx="74" cy="196" r="2"/>
+    <circle cx="188" cy="96" r="2.4"/><circle cx="52" cy="58" r="2"/>
+  </g>
+</svg>

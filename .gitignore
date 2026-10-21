@@ -1,0 +1,12 @@
+﻿# 开发截图，不用上传
+preview/
+
+# 工具日志 / 临时文件
+tools/*.log
+tools/*.err
+tools/*.bak
+tools/_*
+
+# 系统
+Thumbs.db
+desktop.ini
