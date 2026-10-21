@@ -13,3 +13,5 @@ tools/_*
 # 系统
 Thumbs.db
 desktop.ini
+# 删除的备份（回收站）
+_trash/
