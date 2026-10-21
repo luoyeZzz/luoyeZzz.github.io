@@ -1552,8 +1552,8 @@ body.nav-open .nav-toggle span:nth-child(3){ transform: translateY(-6.5px) rotat
 [data-theme="dark"] .quote-card::before{ color: var(--sakura-3); opacity: .55; }
 
 /* 邮箱复制按钮 + 提示 */
-button.pill{ font: inherit; cursor: pointer; }
-button.pill .pill-addr{ font-family: var(--mono); letter-spacing: .02em; }
+button.pill{ font-family: inherit; cursor: pointer; }
+button.pill .pill-addr{ letter-spacing: .04em; }
 .copy-tip{
   position: fixed; left: 50%; bottom: 2rem; transform: translate(-50%, 12px);
   padding: .6rem 1.1rem; border-radius: 999px;
