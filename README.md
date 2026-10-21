@@ -214,6 +214,37 @@ preview/                   页面截图，可直接删
 | 站内搜索 | 文章列表页 | 搜标题、摘要、分类；支持 `posts.html?q=关键词` 分享 |
 | 首页文案 | 工具「首页文案」标签 | 大标题两行、副标题两行、页脚两行 |
 | sitemap / robots | 工具「发布」弹窗 | 填「站点地址」后自动生成 `sitemap.xml` 与 `robots.txt`，每次保存文章自动更新 |
+## 推送方式：SSH（推荐，国内免梯子）
+
+GitHub 的 HTTPS 在部分网络下会被重置，改用 **SSH over 443** 就通了。
+
+### 已经配好的（这台机器）
+
+```
+~/.ssh/id_ed25519        私钥
+~/.ssh/config            github.com → ssh.github.com:443
+remote = git@github.com:luoyeZzz/luoyeZzz.github.io.git
+```
+
+工具里「发布」的仓库地址保持这个 SSH 地址，**令牌留空**。
+
+### 换电脑 / 重装系统怎么办
+
+双击 `tools/git-ssh-setup.bat`，它会：
+
+1. 没有密钥就生成一个
+2. 写好 `~/.ssh/config`
+3. 把仓库地址从 HTTPS 换成 SSH
+4. 把**公钥打印出来**，复制到 https://github.com/settings/keys
+
+然后用工具推送即可。忘了也不怕——跑这个脚本就恢复。
+
+**也可以备份** `C:\Users\你\.ssh` 整个文件夹，换电脑后放回去，连 GitHub 都不用重新加公钥。
+
+### 会影响网速吗
+
+不会。SSH 只在推送时连接 `ssh.github.com:443`，不做全局代理、不改系统网络设置，
+平时上网、下载、看视频都不受影响。
 ## 换电脑 / 重装系统
 
 **把整个 `luoyueWeb` 文件夹复制走就行。** 项目里没有任何绝对路径：
