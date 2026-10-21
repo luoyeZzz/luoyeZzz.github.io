@@ -1550,3 +1550,17 @@ body.nav-open .nav-toggle span:nth-child(3){ transform: translateY(-6.5px) rotat
   border-color: rgba(255,255,255,.1);
 }
 [data-theme="dark"] .quote-card::before{ color: var(--sakura-3); opacity: .55; }
+
+/* 邮箱复制按钮 + 提示 */
+button.pill{ font: inherit; cursor: pointer; }
+button.pill .pill-addr{ font-family: var(--mono); letter-spacing: .02em; }
+.copy-tip{
+  position: fixed; left: 50%; bottom: 2rem; transform: translate(-50%, 12px);
+  padding: .6rem 1.1rem; border-radius: 999px;
+  background: var(--ink); color: var(--bg);
+  font-family: var(--ui); font-size: .78rem; letter-spacing: .04em;
+  box-shadow: var(--shadow); opacity: 0; z-index: 200;
+  transition: opacity .25s var(--ease), transform .25s var(--ease);
+  pointer-events: none; max-width: 90vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.copy-tip.is-on{ opacity: 1; transform: translate(-50%, 0); }

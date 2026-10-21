@@ -435,3 +435,35 @@
       '</figure>';
   }).join('');
 })();
+
+/* ---------------- 点击复制（邮箱等） ---------------- */
+(function () {
+  function fallbackCopy(str, cb) {
+    var ta = document.createElement('textarea');
+    ta.value = str; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); cb(); } catch (e) {}
+    ta.remove();
+  }
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest ? e.target.closest('[data-copy]') : null;
+    if (!el) return;
+    var text = el.getAttribute('data-copy');
+    function done() {
+      var tip = document.createElement('div');
+      tip.className = 'copy-tip';
+      tip.textContent = '已复制 ' + text;
+      document.body.appendChild(tip);
+      requestAnimationFrame(function () { tip.classList.add('is-on'); });
+      setTimeout(function () {
+        tip.classList.remove('is-on');
+        setTimeout(function () { tip.remove(); }, 300);
+      }, 1600);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function () { fallbackCopy(text, done); });
+    } else {
+      fallbackCopy(text, done);
+    }
+  });
+})();
