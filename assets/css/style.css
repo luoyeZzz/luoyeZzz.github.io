@@ -7,6 +7,7 @@
   --bg:        #FBF5F0;
   --bg-2:      #F6ECE5;
   --paper:     #FFFFFF;
+  --card:      #FFFDFB;
   --paper-2:   #FFF9F5;
   --ink:       #2F2430;
   --ink-2:     #6B5A66;
@@ -38,6 +39,7 @@
   --bg:        #15111A;
   --bg-2:      #1B1522;
   --paper:     #211A2A;
+  --card:      #241C2C;
   --paper-2:   #251D2F;
   --ink:       #F2E8EF;
   --ink-2:     #BBA9B8;
@@ -1504,9 +1506,11 @@ body.nav-open .nav-toggle span:nth-child(3){ transform: translateY(-6.5px) rotat
 .post-search input{
   flex: 1; padding: .62rem 1rem;
   font-family: var(--ui); font-size: .85rem; color: var(--ink);
-  background: var(--card, #FFFDFB); border: 1px solid var(--line);
+  background: var(--card); border: 1px solid var(--line);
   border-radius: 999px; outline: none; transition: .2s;
 }
+.post-search input::placeholder{ color: var(--ink-3); opacity: 1; }
+.post-search input{ caret-color: var(--sakura-2); }
 .post-search input:focus{ border-color: var(--sakura); box-shadow: 0 0 0 3px var(--sakura-3); }
 .post-search-count{ font-family: var(--mono); font-size: .62rem; letter-spacing: .1em; color: var(--ink-3); white-space: nowrap; }
 /* ================= 台词收藏 ================= */
