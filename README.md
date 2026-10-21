@@ -11,10 +11,9 @@
 | `index.html` | 首页：加载动画、首屏（昼夜两套背景 + 两位看板娘）、最新文章、入口卡、简介、页脚 |
 | `posts.html` | 文章列表：标签筛选（全部 / 日々 / 読書 / お知らせ） |
 | `about.html` | 关于：身份卡、喜欢的角色、时间线、联系方式 |
-| `posts/post-sky.html` | 正文：第一次把天空写进小说里 |
-| `posts/post-konbini.html` | 正文：关于清晨六点的便利店 |
-| `posts/post-quotes.html` | 正文：轻小说里让我心动的三句台词 |
+| `quotes.html` | 台词收藏：卡片流，数据在 `assets/js/quotes-data.js` |
 | `posts/post-first.html` | 正文：开始用这个网站的理由 |
+| `posts/post-template.html` | 新文章模板：带 ①~⑩ 注释，复制改名就能写 |
 
 **昼夜双主题**：白天是窗边积雨云 + 逢坂大河，夜里是流星夜空 + 哥伦比娅；
 台词、名牌、背光、月亮都会跟着换。默认浅色，右上角切换，选择记在浏览器里。
@@ -24,11 +23,12 @@
 ## 目录
 
 ```
-index.html  posts.html  about.html
-posts/                     全部正文页（post-sky / post-konbini / post-quotes / post-first / post-template）
+index.html  posts.html  quotes.html  about.html
+posts/                     全部正文页（post-first / post-template）
 assets/
-  css/style.css            全站样式（两套主题、两套看板娘、内页排版）
+  css/style.css            全站样式（两套主题、两套看板娘、顶栏三栏网格、内页排版）
   js/posts.js              文章数据 ← 加文章改这里
+  js/quotes-data.js        台词数据（工具生成）
   js/main.js               加载动画 / 主题 / 卡片渲染 / 标签筛选 / 花瓣
   img/
     hero-room.jpg          首屏·白天背景（1920×1080，窗边积雨云）
@@ -36,11 +36,9 @@ assets/
     feature-cover.jpg      头条卡片封面
     taiga-photo.jpg        白天看板娘（原图装框，未处理）
     columbina-photo.jpg    夜晚看板娘（2000×3000，缩放到 2K）
-    roxy2-light/dark.jpg   备用立绘：洛琪希·持杖
-    roxy-light/dark.jpg    备用立绘：洛琪希·抱帽
-    mask-a/b/c.png         抠图遮罩（已内联进 CSS）
+    posts/                 工具上传的正文图 / 头像 / 自定义封面
     moon.svg  favicon.svg  月亮标识
-    flower.svg  petal.svg  noise.svg  sky.svg  avatar.svg
+    flower.svg  petal.svg  noise.svg  sky.svg  sun.svg  avatar.svg
 preview/                   页面截图，可直接删
 ```
 
@@ -271,6 +269,8 @@ preview/                   页面截图，可直接删
 2. **遮罩元素不能加 `drop-shadow`**：滤镜按矩形包围盒计算，立绘周围会多出一个方块光晕。
 3. **小字号不要用衬线**：Windows 缺中文衬线，会回退宋体，20px 以下带点阵化，出现锯齿。所有小字统一走 `--ui`（微软雅黑）。
 4. **旋转的文字会糊**：气泡倾斜后文字要重采样，字号小就发虚。这是已知取舍，暂时保留倾斜。
+5. **顶栏是三栏网格**：`.topbar-inner` 用 `grid-template-columns: 1fr auto 1fr`，导航锁在正中。首页没有「返回」键、其他页有，右侧图标数量也不一样，用弹性布局（`space-between`）会让四个导航按钮在不同页面左右跳 7~10px，别改回去。窄屏（≤860）导航变抽屉，才临时切回 flex。
+6. **滚动条槽常驻**：`html{overflow-y:scroll}`。进站动画会给 body 加 `overflow:hidden`，如果不常驻滚动条，动画结束那一刻整页会横向抖 7px——顶栏、首屏一起跳。
 
 ---
 
