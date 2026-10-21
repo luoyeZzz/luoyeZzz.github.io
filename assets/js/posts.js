@@ -6,6 +6,19 @@
  *   read = 阅读时长（分钟）
  */
 window.POSTS = [
+        {
+    slug: "post-05",
+    file: "posts/post-05.html",
+    no: "05",
+    title: "艰难的维护",
+    word: "本当に難しい",
+    date: "2026.10.22",
+    tag: "杂记",
+    tone: 4,
+    read: 1,
+    cover: "",
+    excerpt: "维护网站实在艰难"
+  },
   {
     slug: "first",
     file: "posts/post-first.html",
