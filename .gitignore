@@ -1,6 +1,9 @@
 ﻿# 开发截图，不用上传
 preview/
 
+# 写作工具本体（本地用，不需要公开）
+tools/
+
 # 工具日志 / 临时文件
 tools/*.log
 tools/*.err
