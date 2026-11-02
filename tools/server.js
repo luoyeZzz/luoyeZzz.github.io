@@ -316,9 +316,28 @@ const server = http.createServer(async function (req, res) {
       ensureDir(TRASH);
       const items = fs.readdirSync(TRASH).filter(function (f) { return /\.md$/i.test(f); }).map(function (f) {
         const i = f.indexOf('__');
-        return { file: f, slug: i > 0 ? f.slice(i + 2).replace(/\.md$/, '') : f.replace(/\.md$/, ''), time: i > 0 ? f.slice(0, i) : '' };
+        const slug = i > 0 ? f.slice(i + 2).replace(/\.md$/, '') : f.replace(/\.md$/, '');
+        let title = slug;
+        let date = '';
+        try {
+          const raw = fs.readFileSync(path.join(TRASH, f), 'utf8').slice(0, 2000);
+          const t = raw.match(/^title:\s*(.+)$/m);
+          const d = raw.match(/^date:\s*(.+)$/m);
+          if (t) title = t[1].trim().replace(/^["']|["']$/g, '');
+          if (d) date = d[1].trim();
+        } catch (e) {}
+        return { file: f, slug: slug, title: title, date: date, time: i > 0 ? f.slice(0, i) : '' };
       }).sort().reverse();
       return sendJSON(res, 200, { ok: true, items: items });
+    }
+    if (req.method === 'POST' && p === '/api/purge') {
+      const body = JSON.parse(await readBody(req));
+      const f = String(body.file || '');
+      if (!/^[\w.-]+\.md$/.test(f)) return sendJSON(res, 400, { ok: false, error: '文件名不合法' });
+      const target = path.join(TRASH, f);
+      if (!fs.existsSync(target)) return sendJSON(res, 404, { ok: false, error: '回收站里没有' });
+      fs.unlinkSync(target);
+      return sendJSON(res, 200, { ok: true });
     }
     if (req.method === 'POST' && p === '/api/restore') {
       const body = JSON.parse(await readBody(req));

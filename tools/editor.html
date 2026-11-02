@@ -108,6 +108,24 @@
     color:var(--ink-3);display:grid;place-items:center;font-size:.75rem;cursor:pointer;transition:.2s;padding:0}
   .icon-pick-btn:hover{border-color:var(--accent-soft);color:var(--accent)}
   .icon-pick-btn.is-on{border-color:var(--accent);color:var(--accent);background:var(--accent-wash)}
+  /* 图形化弹窗 */
+  .modal{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;padding:24px;overflow:auto;background:rgba(30,22,26,.32);
+    -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);opacity:0;transition:opacity .18s}
+  .modal.on{opacity:1}
+  .modal[hidden]{display:none}
+  .modal-card{width:min(560px,100%);max-height:calc(100vh - 48px);margin:auto;overflow:auto;padding:22px 22px 16px;
+    border-radius:18px;background:var(--card,#fff);border:1px solid var(--line);
+    box-shadow:0 30px 70px -30px rgba(40,20,30,.35);transform:translateY(8px) scale(.98);transition:transform .2s}
+  .modal.on .modal-card{transform:none}
+  .modal-card h3{margin:0 0 12px;font-size:1rem;font-weight:600}
+  .modal-card p{margin:0 0 14px;font-size:.875rem;color:var(--ink-2);line-height:1.7}
+  .modal-card input{width:100%;height:40px;border-radius:10px;border:1px solid var(--line);padding:0 12px;margin-bottom:14px}
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+  .trash-list{display:flex;flex-direction:column;gap:8px}
+  .trash-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px}
+  .trash-main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .trash-main b{font-size:.9rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .trash-main span{font-size:.75rem;color:var(--ink-3)}
   #toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,14px);background:var(--ink);color:var(--bg);
     padding:10px 20px;border-radius:var(--r-pill);font-size:.8125rem;opacity:0;pointer-events:none;
     transition:.25s;z-index:200}
@@ -124,6 +142,17 @@
 </style>
 </head>
 <body class="admin">
+<div class="modal" id="modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true">
+      <h3 id="modalTitle"></h3>
+      <div id="modalBody"></div>
+      <input id="modalInput" hidden>
+      <div class="modal-actions">
+        <button class="ghost" id="modalCancel">取消</button>
+        <button class="primary" id="modalOk">确定</button>
+      </div>
+    </div>
+  </div>
 
 <header class="adm-bar">
   <div class="adm-bar-in">
@@ -420,6 +449,90 @@
         '<button class="ghost sm del" data-del="' + i + '">×</button></div>';
     }).join('');
   }
+  /* 图形化弹窗：替代 confirm / prompt / alert */
+  function modal(opts) {
+    opts = opts || {};
+    return new Promise(function (resolve) {
+      var m = $('#modal'), ok = $('#modalOk'), cancel = $('#modalCancel'), inp = $('#modalInput');
+      $('#modalTitle').textContent = opts.title || '';
+      $('#modalBody').innerHTML = opts.html || '';
+      inp.hidden = !opts.input;
+      inp.value = opts.value || '';
+      inp.placeholder = opts.placeholder || '';
+      ok.textContent = opts.okText || '确定';
+      ok.className = opts.danger ? 'primary danger' : 'primary';
+      cancel.hidden = opts.hideCancel === true;
+      m.hidden = false;
+      setTimeout(function () { m.classList.add('on'); }, 10);
+
+      var done = false;
+      function close(v) {
+        if (done) return;
+        done = true;
+        m.classList.remove('on');
+        document.removeEventListener('keydown', onKey);
+        ok.onclick = null; cancel.onclick = null; m.onclick = null;
+        setTimeout(function () { m.hidden = true; }, 180);
+        resolve(v);
+      }
+      function onKey(e) {
+        if (e.key === 'Escape') close(null);
+        else if (e.key === 'Enter') close(opts.input ? inp.value : true);
+      }
+      document.addEventListener('keydown', onKey);
+      ok.onclick = function () { close(opts.input ? inp.value : true); };
+      cancel.onclick = function () { close(null); };
+      m.onclick = function (e) { if (e.target === m) close(null); };
+      if (opts.input) setTimeout(function () { inp.focus(); inp.select(); }, 60);
+    });
+  }
+  function confirmBox(title, text, okText, danger) {
+    return modal({ title: title, html: '<p>' + esc(text) + '</p>', okText: okText || '确定', danger: !!danger });
+  }
+
+  /* ---------- 回收站 ---------- */
+  var trashCache = [];
+  function openTrash() {
+    api('/api/trash').then(function (j) {
+      trashCache = j.items || [];
+      if (!trashCache.length) { toast('回收站是空的'); return; }
+      modal({
+        title: '回收站（' + trashCache.length + '）',
+        okText: '关闭',
+        hideCancel: true,
+        html: '<div class="trash-list">' + trashCache.map(function (x, i) {
+          return '<div class="trash-item"><div class="trash-main"><b>' + esc(x.title || x.slug) + '</b>' +
+            '<span>' + esc(x.slug) + (x.date ? ' · ' + esc(x.date) : '') + '</span></div>' +
+            '<button class="ghost sm" data-restore="' + i + '">恢复</button>' +
+            '<button class="ghost sm danger" data-purge="' + i + '">永久删除</button></div>';
+        }).join('') + '</div>'
+      });
+    }).catch(function (e) { toast(e.message, true); });
+  }
+  $('#modalBody').addEventListener('click', function (e) {
+    var r = e.target.closest('[data-restore]');
+    if (r) {
+      var item = trashCache[Number(r.getAttribute('data-restore'))];
+      post('/api/restore', { file: item.file }).then(function () {
+        toast('已恢复：' + (item.title || item.slug));
+        loadPosts();
+        setTimeout(openTrash, 260);
+      }).catch(function (err) { toast(err.message, true); });
+      return;
+    }
+    var p = e.target.closest('[data-purge]');
+    if (p) {
+      var it = trashCache[Number(p.getAttribute('data-purge'))];
+      confirmBox('永久删除', '「' + (it.title || it.slug) + '」会被彻底删掉，不能恢复。', '删除', true).then(function (yes) {
+        if (!yes) return;
+        post('/api/purge', { file: it.file }).then(function () {
+          toast('已永久删除');
+          setTimeout(openTrash, 220);
+        }).catch(function (err) { toast(err.message, true); });
+      });
+    }
+  });
+
   function upload(cb) {
     var inp = document.createElement('input');
     inp.type = 'file'; inp.accept = 'image/*';
@@ -512,20 +625,19 @@
     }).catch(function (e) { toast(e.message, true); });
   };
   $('#delPost').onclick = function () {
-    if (!state.current || !confirm('移到回收站？')) return;
+    if (!state.current) return;
+    confirmBox('删掉这篇？', '会先放进回收站，之后还能恢复。', '移到回收站', true).then(function (yes) {
+      if (!yes) return;
+      post('/api/delete', { slug: state.current }).then(function () {
+        state.current = null; toast('已删除'); loadPosts(); newPost();
+      }).catch(function (e) { toast(e.message, true); });
+    });
+    return;
     post('/api/delete', { slug: state.current }).then(function () {
       state.current = null; toast('已删除'); loadPosts(); newPost();
     }).catch(function (e) { toast(e.message, true); });
   };
-  $('#trashBtn').onclick = function () {
-    api('/api/trash').then(function (j) {
-      if (!j.items.length) return toast('回收站是空的');
-      var pick = prompt('恢复哪一篇？\n' + j.items.map(function (x, i) { return (i + 1) + '. ' + x.slug; }).join('\n'));
-      var i = parseInt(pick, 10) - 1;
-      if (!(i >= 0 && i < j.items.length)) return;
-      post('/api/restore', { file: j.items[i].file }).then(function () { toast('已恢复'); loadPosts(); });
-    });
-  };
+  $('#trashBtn').onclick = openTrash;
   $('#coverBtn').onclick = function () {
     upload(function (j) { $('#cover').value = j.path; toast('封面已上传'); });
   };
@@ -686,17 +798,19 @@
       upload(function (j) { $('#a-avatar').value = j.path; toast('头像已上传'); });
     }
     if (e.target.id === 'linkBody') {
-      var url = window.prompt('粘贴图片链接（https://...）', 'https://');
-      if (url && url.length > 8) insert('\n\n![](' + url.trim() + ')\n\n');
+      modal({ title: '插入图片链接', input: true, value: 'https://', placeholder: 'https://... 或 /assets/img/...', okText: '插入' }).then(function (url) {
+        if (url && url.length > 6) insert('\n\n![](' + url.trim() + ')\n\n');
+      });
     }
     if (e.target.id === 'addImageUrl') {
       var a = state.gallery.albums[state.albumIndex];
       if (!a) return;
-      var u2 = window.prompt('粘贴图片链接（https://...）或本地路径', 'https://');
-      if (!u2 || u2.length < 2) return;
-      a.images = a.images || [];
-      a.images.push({ src: u2.trim(), caption: '' });
-      renderAlbumImages();
+      modal({ title: '按链接添加照片', input: true, value: 'https://', placeholder: 'https://... 或 /assets/img/...', okText: '添加' }).then(function (u2) {
+        if (!u2 || u2.length < 2) return;
+        a.images = a.images || [];
+        a.images.push({ src: u2.trim(), caption: '' });
+        renderAlbumImages();
+      });
     }
   });
 
@@ -819,10 +933,12 @@
     });
   };
   $('#delAlbum').onclick = function () {
-    if (!confirm('删除这个相册？')) return;
-    state.gallery.albums.splice(state.albumIndex, 1);
+    confirmBox('删除相册', '相册和里面的照片记录会一起删除，图片文件还在。', '删除', true).then(function (yes) {
+      if (!yes) return;
+      state.gallery.albums.splice(state.albumIndex, 1);
     state.albumIndex = 0;
-    if (state.gallery.albums.length) selectAlbum(0); else { renderAlbums(); $('#albumForm').innerHTML = ''; $('#albumImages').innerHTML = ''; }
+      if (state.gallery.albums.length) selectAlbum(0); else { renderAlbums(); $('#albumForm').innerHTML = ''; $('#albumImages').innerHTML = ''; }
+    });
   };
   $('#saveGallery').onclick = function () {
     var a = state.gallery.albums[state.albumIndex];
@@ -987,19 +1103,21 @@
     post('/api/build', {}).then(function () { toast('已重新构建'); }).catch(function (e) { toast(e.message, true); });
   };
   $('#shutdownBtn').onclick = function () {
-    if (!confirm('停止本地服务？页面会在 3 秒后尝试关闭。')) return;
-    post('/api/shutdown', {}).catch(function () {}).finally(function () {
-      var n = 3;
-      document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:80vh;gap:8px;font-family:sans-serif"><b>写作台已停止</b><p id="bye">这个页面会在 3 秒后自动关闭…</p></div>';
-      var t = setInterval(function () {
-        n--;
-        if (n > 0) { $('#bye').textContent = '这个页面会在 ' + n + ' 秒后自动关闭…'; return; }
-        clearInterval(t);
-        window.close();
-        setTimeout(function () {
-          document.body.innerHTML = '<div style="padding:60px;text-align:center;font-family:sans-serif">写作台已停止，可以关掉这个页面了。</div>';
-        }, 500);
-      }, 1000);
+    confirmBox('停止写作台', '本地服务会关闭，页面 3 秒后尝试自动关上。', '停止', true).then(function (yes) {
+      if (!yes) return;
+      post('/api/shutdown', {}).catch(function () {}).finally(function () {
+        var n = 3;
+        document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:80vh;gap:8px;font-family:sans-serif"><b>写作台已停止</b><p id="bye">这个页面会在 3 秒后自动关闭…</p></div>';
+        var t = setInterval(function () {
+          n--;
+          if (n > 0) { document.getElementById('bye').textContent = '这个页面会在 ' + n + ' 秒后自动关闭…'; return; }
+          clearInterval(t);
+          window.close();
+          setTimeout(function () {
+            document.body.innerHTML = '<div style="padding:60px;text-align:center;font-family:sans-serif">写作台已停止，可以关掉这个页面了。</div>';
+          }, 500);
+        }, 1000);
+      });
     });
   };
   document.addEventListener('keydown', function (e) {
@@ -1020,5 +1138,6 @@
   else loadPosts();
 })();
 </script>
+</div>
 </body>
 </html>
