@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>归档 ｜ 洛月</title>
-<meta name="description" content="按时间排列的全部文章。">
-<meta name="theme-color" content="#FBF5F0">
+<meta name="description" content="一条竖着的时间线，从上往下，是这个站的全部过往。">
+<meta name="theme-color" content="#F5EDE6">
 <link rel="canonical" href="https://luoyezzz.github.io/archive/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="归档 ｜ 洛月">
-<meta property="og:description" content="按时间排列的全部文章。">
+<meta property="og:description" content="一条竖着的时间线，从上往下，是这个站的全部过往。">
 <meta property="og:url" content="https://luoyezzz.github.io/archive/">
 <link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
 <script>(function(){try{var q=new URLSearchParams(location.search).get("theme");if(q==="dark"||q==="light"){document.documentElement.setAttribute("data-theme",q);return;}if(localStorage.getItem("sb-theme")==="dark"){document.documentElement.setAttribute("data-theme","dark");}}catch(e){}})();</script>
@@ -19,6 +19,7 @@
 
 <a class="skip-link" href="#main">跳到正文</a>
 
+<div class="atmo" aria-hidden="true"><i></i><i></i><i></i><b></b></div>
 <div class="loader" id="loader" role="status" aria-live="polite">
   <div class="loader-grid" aria-hidden="true"></div>
   <div class="loader-inner">
@@ -26,64 +27,67 @@
     <p class="loader-word">洛月</p>
     <p class="loader-sub">らくげつ</p>
     <div class="loader-bar"><span id="loaderBar"></span></div>
-    <div class="loader-meta"><span id="loaderStatus">connecting</span><span class="loader-pct"><b id="loaderPct">0</b><i>%</i></span></div>
+    <div class="loader-meta"><span id="loaderStatus">connecting</span><span class="loader-pct"><b id="loaderPct">0</b>%</span></div>
   </div>
 </div>
-<header class="topbar">
-  <div class="topbar-inner">
-    <div class="topbar-left">
-      <a class="back-btn" href="/" aria-label="返回首页"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg><span>首页</span></a>
-      <a class="brand" href="/">
-        <img src="/assets/img/moon.svg" alt="" width="24" height="24">
-        <span class="brand-txt"><b>洛月</b><i>LUOYUE</i></span>
-      </a>
+<div class="wrap">
+<header class="nav">
+  <div class="nav-in">
+    <div class="brand">
+      <a class="brand-avatar-link" href="/about/" aria-label="关于我" title="关于我"><img class="brand-avatar" src="/assets/img/posts/白毛nb666.jpg" alt="头像"></a>
+      <a class="brand-name" href="/"><b>洛月</b><i>LUOYUE</i></a>
     </div>
-    <nav class="topnav" id="topnav"><a href="/">首页</a><a href="/posts/">文章</a><a href="/archive/" class="is-current" aria-current="page">归档</a><a href="/quotes/">台词</a><a href="/about/">关于</a></nav>
-    <div class="topbar-tools">
-      <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="切换夜间模式" title="切换夜间模式"><svg class="ic-sun" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.4 5.4l1.6 1.6M17 17l1.6 1.6M18.6 5.4L17 7M7 17l-1.6 1.6"/></svg><svg class="ic-moon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8.2 8.2 0 1 0 20 14.5z"/></svg></button>
-      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="topnav" aria-label="打开菜单"><span></span><span></span><span></span></button>
+    <nav class="menu" id="menu" aria-label="主导航"><a href="/">首页</a><a href="/posts/">文章</a><a href="/archive/" aria-current="page">归档</a><a href="/moments/">说说</a><a href="/gallery/">相册</a><a href="/quotes/">台词</a><a href="/friends/">友链</a><a href="/about/">关于</a></nav>
+    <div class="nav-tools">
+      <button class="tgl" type="button" data-theme-toggle aria-label="切换昼夜" title="切换昼夜"><svg class="ic-sun" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.5 5.5l1.5 1.5M17 17l1.5 1.5M18.5 5.5L17 7M7 17l-1.5 1.5"/></svg><svg class="ic-moon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.6A8 8 0 0 1 9.4 4 8.2 8.2 0 1 0 20 14.6z"/></svg></button>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-label="打开菜单"><span></span><span></span><span></span></button>
     </div>
   </div>
 </header>
 
 <main id="main">
-  <section class="page-head"><div class="wrap">
-    <p class="page-kicker">ねんぴょう <span class="sep">/</span> TIMELINE</p>
-    <h1 class="page-title">文章归档</h1>
-    <p class="page-lead">按时间倒序，一眼看完这个站写过什么。</p>
-  </div></section>
-  <div class="post-wrap"><div class="arch-wrap"><section class="arch-year"><h2 class="arch-year-title">2026<span class="arch-count">2 篇</span></h2><ul class="arch-list"><li><a class="arch-item" href="/posts/maintenance/"><time>2026.10.22</time><span class="arch-title">艰难的维护</span><span class="arch-tag">杂记</span></a></li><li><a class="arch-item" href="/posts/first/"><time>2026.10.21</time><span class="arch-title">开始用这个网站的理由</span><span class="arch-tag">公告</span><span class="arch-pin">置顶</span></a></li></ul></section></div></div>
+<section class="page-head"><div class="wrap">
+  <p class="kicker"><i></i><span>ねんぴょう / Timeline</span></p>
+  <h1 class="page-title">文章归档</h1>
+  <p class="page-lead">一条竖着的时间线，从上往下，是这个站的全部过往。</p>
+</div></section>
+<div class="timeline"><section class="tl-year"><span>2026</span></section><a class="tl-item" href="/posts/maintenance/"><div class="tl-card"><p class="tl-date">2026.10.22 · 杂记</p><p class="tl-title">艰难的维护</p><p class="tl-ex">维护网站实在艰难</p></div></a><a class="tl-item" href="/posts/first/"><div class="tl-card"><p class="tl-date">2026.10.21 · 公告</p><p class="tl-title">开始用这个网站的理由</p><p class="tl-ex">「想做个自己的网站」这句话我说了几年 以前一直套用别人的模板 今天终于用dsh实现了我自己的想法</p></div></a></div>
 
 </main>
-
 <footer class="site-foot">
-  <div class="foot-inner">
-    <div class="foot-brand">
-      <p class="foot-jp">洛月</p>
-      <p class="foot-note">把日常写成轻小说。<br>在句尾留一点空白。</p>
+  <div class="wrap">
+    <div class="foot-inner">
+      <div class="foot-brand">
+        <p class="jp">洛月</p>
+        <p class="note">把日常写成轻小说。<br>在句尾留一点空白。</p>
+      </div>
+      <nav class="foot-nav" aria-label="页脚导航"><a href="/">首页</a><a href="/posts/">文章</a><a href="/archive/">归档</a><a href="/moments/">说说</a><a href="/gallery/">相册</a><a href="/quotes/">台词</a><a href="/friends/">友链</a><a href="/about/">关于</a></nav>
+      <p class="foot-tag" aria-hidden="true">ドキドキ</p>
     </div>
-    <nav class="foot-nav" aria-label="页脚导航">
-      <a href="/">首页</a>
-      <a href="/posts/">文章</a>
-      <a href="/archive/">归档</a>
-      <a href="/quotes/">台词</a>
-      <a href="/about/">关于</a>
-    </nav>
-    <p class="foot-tag" aria-hidden="true">ドキドキ</p>
-  </div>
-  <div class="foot-copy">
-    <span>© <span data-year>2026</span> 洛叶 · 内容与图片版权归原作者所有</span>
-    <span>已运行 <b data-since="2026-09-12">0</b> 天 · 手写 HTML / CSS</span>
+    <div class="foot-copy">
+      <span>© <span data-year>2026</span> 洛叶 · 内容与图片版权归原作者所有</span>
+      <span>已运行 <b data-since="2026-09-12">0</b> 天 · 手写 HTML / CSS</span>
+    </div>
   </div>
 </footer>
-<div class="music-dock" id="music-dock">
-  <button type="button" class="music-fab" id="music-fab" aria-label="音乐播放器" aria-expanded="false"><span class="music-note" aria-hidden="true">♪</span></button>
-  <div class="music-panel" id="music-panel">
+</div>
+<div class="music-dock" id="music-dock" data-volume="0.3">
+  <button type="button" class="music-fab" id="music-fab" aria-label="音乐播放器" aria-expanded="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg></button>
+  <div class="music-panel">
     <p class="music-title">夜のプレイリスト</p>
-    <div class="music-list"><button type="button" class="music-item is-on" data-id="1809646618">月がきれい</button></div>
-    <iframe id="music-frame" title="音乐播放器" frameborder="no" border="0" marginwidth="0" marginheight="0" width="100%" height="86" src="https://music.163.com/outchain/player?type=2&id=1809646618&auto=0&height=66"></iframe>
+    <p class="music-now" id="music-now">月がきれい</p>
+    <div class="music-ctrl">
+      <button type="button" id="music-prev" aria-label="上一首">⏮</button>
+      <button type="button" class="play" id="music-play" aria-label="播放">▶</button>
+      <button type="button" id="music-next" aria-label="下一首">⏭</button>
+      <button type="button" class="music-list-toggle" id="music-list-toggle" aria-label="播放列表" style="margin-left:auto">≡</button>
+    </div>
+    <div class="music-vol"><input type="range" id="music-vol" min="0" max="100" value="30" aria-label="音量"><span id="music-vol-num">30%</span></div>
+    <div class="music-list" id="music-list"><button type="button" class="music-item is-on" data-id="1809646618" data-name="月がきれい">月がきれい</button></div>
+    <audio id="music-audio" preload="none"></audio>
   </div>
 </div>
+<a class="to-top" id="to-top" href="#main" aria-label="回到顶部" title="回到顶部"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></a>
 <div class="click-fx" id="click-fx" aria-hidden="true"></div>
 <script src="/assets/js/main.js" defer></script>
 </body>

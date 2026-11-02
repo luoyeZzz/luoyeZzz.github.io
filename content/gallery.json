@@ -1,0 +1,42 @@
+{
+  "albums": [
+    {
+      "slug": "night",
+      "title": "夜の記録",
+      "date": "2026-10-20",
+      "desc": "睡不着的时候拍下的。月亮、窗、还没关的灯。",
+      "cover": "/assets/img/hero-night.jpg",
+      "images": [
+        {
+          "src": "/assets/img/hero-night.jpg",
+          "caption": "流星划过的那一秒"
+        },
+        {
+          "src": "/assets/img/feature-cover.jpg",
+          "caption": "粉色的云海"
+        },
+        {
+          "src": "/assets/img/columbina-photo.jpg",
+          "caption": "月亮下面的人"
+        }
+      ]
+    },
+    {
+      "slug": "day",
+      "title": "昼の記録",
+      "date": "2026-10-18",
+      "desc": "白天的窗边，积雨云堆得很高。",
+      "cover": "/assets/img/hero-room.jpg",
+      "images": [
+        {
+          "src": "/assets/img/hero-room.jpg",
+          "caption": "下午三点的窗外"
+        },
+        {
+          "src": "/assets/img/taiga-photo.jpg",
+          "caption": "站在窗前的她"
+        }
+      ]
+    }
+  ]
+}

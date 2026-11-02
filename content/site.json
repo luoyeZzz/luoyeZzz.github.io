@@ -7,6 +7,7 @@
     "latin": "LUOYUE",
     "jp": "らくげつ"
   },
+  "avatar": "/assets/img/posts/白毛nb666.jpg",
   "title": "洛月 ｜ 把日常写成轻小说",
   "description": "洛月是一个日系轻小说风格的个人博客。记录清晨的便利店、雨后的天桥，以及那些没能说出口的独白。",
   "since": "2026-09-12",
@@ -27,9 +28,24 @@
       "href": "/archive/"
     },
     {
+      "key": "moments",
+      "label": "说说",
+      "href": "/moments/"
+    },
+    {
+      "key": "gallery",
+      "label": "相册",
+      "href": "/gallery/"
+    },
+    {
       "key": "quotes",
       "label": "台词",
       "href": "/quotes/"
+    },
+    {
+      "key": "friends",
+      "label": "友链",
+      "href": "/friends/"
     },
     {
       "key": "about",
@@ -50,33 +66,47 @@
       "label": "开始阅读",
       "href": "/posts/"
     },
-    "ghost": {
-      "label": "关于我",
-      "href": "/about/"
-    },
     "hint": "每两周一篇，慢慢写",
     "noteDay": "おはよう。今日もいい日だ。",
     "noteNight": "月がきれいですね。"
   },
   "features": {
     "loader": true,
-    "petals": true,
     "clickEffect": true,
     "music": true,
-    "search": true
+    "search": true,
+    "toTop": true
   },
   "shortcuts": [
     {
       "jp": "アーカイブ",
       "title": "文章归档",
-      "text": "按时间翻完这几篇，看看它是怎么开始的。",
+      "text": "一条时间线，看完这个站写过什么。",
       "href": "/archive/"
+    },
+    {
+      "jp": "つぶやき",
+      "title": "说说",
+      "text": "不写成文章的碎念，随手丢在这里。",
+      "href": "/moments/"
+    },
+    {
+      "jp": "アルバム",
+      "title": "相册",
+      "text": "按心情分组的照片，一张一张看。",
+      "href": "/gallery/"
     },
     {
       "jp": "ことば",
       "title": "台词收藏",
       "text": "从喜欢的作品里，抄下让人停下来的句子。",
       "href": "/quotes/"
+    },
+    {
+      "jp": "リンク",
+      "title": "友链",
+      "text": "一些我常去看的地方。",
+      "href": "/friends/"
     },
     {
       "jp": "プロフィール",
@@ -128,11 +158,49 @@
   },
   "music": {
     "title": "夜のプレイリスト",
+    "volume": 0.3,
     "songs": [
       {
         "id": "1809646618",
         "name": "月がきれい"
       }
     ]
+  },
+  "pages": {
+    "posts": {
+      "kicker": "アーカイブ",
+      "title": "全部文章",
+      "lead": "日常、读书、还有一些没寄出去的信。都不长，适合在睡前读。"
+    },
+    "archive": {
+      "kicker": "ねんぴょう",
+      "title": "文章归档",
+      "lead": "一条竖着的时间线，从上往下，是这个站的全部过往。"
+    },
+    "moments": {
+      "kicker": "つぶやき",
+      "title": "说说",
+      "lead": "不写成文章的碎念。今天的天气、刚看完的番、突然想起来的某句话。"
+    },
+    "gallery": {
+      "kicker": "アルバム",
+      "title": "相册",
+      "lead": "按心情分组的照片。点进去，一张一张慢慢看。"
+    },
+    "quotes": {
+      "kicker": "ことば",
+      "title": "台词收藏",
+      "lead": "从喜欢的作品里，抄下那些让人停下来的句子。标了「意译」的是凭记忆复述的。"
+    },
+    "friends": {
+      "kicker": "リンク",
+      "title": "友链",
+      "lead": "一些我常去逛的地方。都是很安静的站，适合睡前看。"
+    },
+    "about": {
+      "kicker": "プロフィール",
+      "title": "关于",
+      "lead": "写字的人，也是看月亮的人。这个站没有算法、没有推荐，只有我隔一段时间放进来的东西。"
+    }
   }
 }
