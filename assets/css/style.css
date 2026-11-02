@@ -779,3 +779,6 @@ body{font-size:1.0625rem;line-height:1.9;-webkit-font-smoothing:antialiased;-moz
   from{clip-path:circle(0 at var(--vt-x,50%) var(--vt-y,50%))}
   to{clip-path:circle(150% at var(--vt-x,50%) var(--vt-y,50%))}
 }
+
+/* 放不出来的曲目：标灰划线 */
+.music-item.is-bad{opacity:.5;text-decoration:line-through}

@@ -235,14 +235,40 @@ const server = http.createServer(async function (req, res) {
       if (!m) return sendJSON(res, 400, { ok: false, error: '链接里没找到歌曲 id' });
       const id = m[1];
       let name = '';
+      let fee = 0;
+      let artist = '';
       try {
         const r = await fetch('https://music.163.com/api/song/detail/?id=' + id + '&ids=[' + id + ']', {
           headers: { Referer: 'https://music.163.com/', 'User-Agent': 'Mozilla/5.0' }
         });
         const j = await r.json();
-        name = (j.songs && j.songs[0] && j.songs[0].name) || '';
+        const song = (j.songs && j.songs[0]) || {};
+        name = song.name || '';
+        fee = Number(song.fee || 0);
+        artist = (song.artists && song.artists[0] && song.artists[0].name) || (song.ar && song.ar[0] && song.ar[0].name) || '';
       } catch (e) {}
-      return sendJSON(res, 200, { ok: true, id: id, name: name || ('歌曲 ' + id) });
+      /* fee: 0 免费 / 1 VIP / 4 付费专辑 / 8 低音质免费 */
+      /* fee: 0 免费 / 1 VIP / 4 付费专辑 / 8 低音质免费 */
+      const vip = fee === 1 || fee === 4;
+      let playable = null;
+      try {
+        const rr = await fetch('https://music.163.com/song/media/outer/url?id=' + id + '.mp3', {
+          headers: { Range: 'bytes=0-1', Referer: 'https://music.163.com/', 'User-Agent': 'Mozilla/5.0' },
+          redirect: 'follow'
+        });
+        const ct = String(rr.headers.get('content-type') || '').toLowerCase();
+        playable = ct.indexOf('audio') === 0 || ct.indexOf('octet-stream') > -1;
+      } catch (e) {}
+      return sendJSON(res, 200, {
+        ok: true,
+        id: id,
+        name: name || ('歌曲 ' + id),
+        artist: artist,
+        fee: fee,
+        vip: vip,
+        playable: playable,
+        hint: playable === false ? '这首受会员/版权限制，放不出来' : (vip ? '疑似 VIP 曲目，可能只能试听' : '')
+      });
     }
 
     /* ---- 文章 ---- */

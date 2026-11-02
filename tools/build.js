@@ -321,7 +321,8 @@ function musicDock(site) {
   const m = site.music || {};
   if (!site.features || site.features.music === false || !m.songs || !m.songs.length) return '';
   const list = m.songs.map(function (song, i) {
-    return '<button type="button" class="music-item' + (i === 0 ? ' is-on' : '') + '" data-id="' + esc(song.id) + '" data-name="' + esc(song.name || song.id) + '">' + esc(song.name || song.id) + '</button>';
+    const bad = song && song.ok === false;
+    return '<button type="button" class="music-item' + (i === 0 ? ' is-on' : '') + '" data-id="' + esc(song.id) + '" data-name="' + esc(song.name || song.id) + '"' + (bad ? ' data-ok="0"' : '') + '>' + esc(song.name || song.id) + (bad ? ' ⚠' : '') + '</button>';
   }).join('');
   const vol = typeof m.volume === 'number' ? m.volume : 0.3;
   return '' +
@@ -718,7 +719,7 @@ function aboutPage(site) {
       '  </aside>\n' +
       '  <div class="about-body">\n' +
       '    <h2>' + esc(d.introTitle) + '</h2>' + intro +
-      '    <h2>喜欢的东西</h2><div class="fav-grid">' + favs + '</div>\n' +
+      '    <h2>' + esc(d.favoritesTitle || '心上人与心头好') + '</h2><div class="fav-grid">' + favs + '</div>\n' +
       '    <h2>写信给我</h2><p>站内不设评论区。想说点什么，下面任选一个入口。</p>\n' +
       '    <div class="hero-links">' + links + '</div>\n' +
       '  </div>\n' +

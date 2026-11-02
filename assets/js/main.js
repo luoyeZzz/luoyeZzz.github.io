@@ -309,8 +309,12 @@
     audio.addEventListener('pause', function () { setPlaying(false); save(); });
     audio.addEventListener('ended', function () { load((idx + 1) % items.length, true); });
     audio.addEventListener('error', function () {
-      if (nowEl) nowEl.textContent = items[idx].name + '（这首暂时放不了）';
+      items[idx].el.classList.add('is-bad');
+      if (nowEl) nowEl.textContent = items[idx].name + '（这首放不了，可能是 VIP）';
       setPlaying(false);
+      if (items.length > 1) {
+        setTimeout(function () { load((idx + 1) % items.length, true); }, 1600);
+      }
     });
 
     var lastSave = 0;

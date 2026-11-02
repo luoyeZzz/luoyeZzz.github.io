@@ -618,11 +618,14 @@
       '<label class="full">介绍标题<input id="a-introTitle" value="' + esc(d.introTitle || '') + '"></label>' +
       '<h4>档案（第三格是夜间显示的值，可留空）</h4><div class="rows" id="a-facts"></div>' +
       '<button class="ghost sm" id="addFact" style="justify-self:start">＋ 一行</button>' +
-      '<h4>喜欢的角色</h4><div class="rows" id="a-favs"></div>' +
+      '<h4>这一栏的标题</h4>' +
+      '<label class="full"><input id="a-favTitle" placeholder="心上人与心头好"></label>' +
+      '<div class="rows" id="a-favs"></div>' +
       '<button class="ghost sm" id="addFav" style="justify-self:start">＋ 一个</button>' +
       '<h4>联系方式</h4><div class="rows" id="a-links"></div>' +
       '<button class="ghost sm" id="addLink" style="justify-self:start">＋ 一个</button>';
 
+    if ($('#a-favTitle')) $('#a-favTitle').value = d.favoritesTitle || '心上人与心头好';
     $('#a-facts').innerHTML = rowsHTML(d.facts || [], ['k', 'v', 'vn'], { k: '项目', v: '内容', vn: '夜间内容' });
     $('#a-favs').innerHTML = rowsHTML(d.favorites || [], ['name', 'src'], { name: '角色', src: '出处' });
     $('#a-links').innerHTML = rowsHTML(d.links || [], ['label', 'url', 'icon'], { label: '名称', url: '链接', icon: '图标' });
@@ -823,7 +826,7 @@
     var host = $('#musicRows');
     host.innerHTML = (state.site.music.songs || []).map(function (s, i) {
       return '<div class="r music-row"><label>歌曲 id<input data-song="' + i + '" data-k="id" value="' + esc(s.id) + '"></label>' +
-        '<label>名称<input data-song="' + i + '" data-k="name" value="' + esc(s.name || '') + '"></label>' +
+        '<label>名称<input data-song="' + i + '" data-k="name" value="' + esc(s.name || '') + '">' + (s.ok === false ? '<span class="status">⚠ 放不出来</span>' : '') + '</label>' +
         '<button class="ghost sm del" data-songdel="' + i + '">×</button></div>';
     }).join('');
     host.onclick = function (e) {
@@ -843,10 +846,10 @@
     if (!url) return toast('先粘贴链接', true);
     post('/api/music/parse', { url: url }).then(function (j) {
       state.site.music.songs = state.site.music.songs || [];
-      state.site.music.songs.push({ id: j.id, name: j.name });
+      state.site.music.songs.push({ id: j.id, name: j.name, ok: j.playable !== false });
       $('#musicUrl').value = '';
       renderMusic();
-      toast('已添加：' + j.name);
+      toast(j.hint ? ('已添加：' + j.name + '（' + j.hint + '）') : ('已添加：' + j.name);
     }).catch(function (e) { toast(e.message, true); });
   };
   $('#saveMusic').onclick = function () {
