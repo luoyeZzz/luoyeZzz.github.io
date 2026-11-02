@@ -1572,3 +1572,126 @@ button.pill .pill-addr{ letter-spacing: .04em; }
   pointer-events: none; max-width: 90vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .copy-tip.is-on{ opacity: 1; transform: translate(-50%, 0); }
+
+/* =========================================================
+   v2 · 页面动效 / 置顶 / 归档 / 音乐 / 点击特效
+   ========================================================= */
+
+/* 进场：轻微上浮，避免生硬 */
+@keyframes page-enter{
+  from{ opacity: 0; transform: translateY(10px); }
+  to{ opacity: 1; transform: none; }
+}
+#main{ animation: page-enter .55s var(--ease) both; }
+@media (prefers-reduced-motion: reduce){ #main{ animation: none; } }
+
+/* 首字下沉：遇到引号开头的段落跳过（构建时加 .no-drop） */
+.prose > p.no-drop::first-letter{
+  float: none; font-size: inherit; line-height: inherit;
+  padding: 0; color: inherit; font-family: inherit; font-weight: inherit;
+}
+
+/* 置顶标识 */.card-pin, .pin-badge, .kicker-pin, .arch-pin{
+  display: inline-block; font-family: var(--ui); font-size: .58rem;
+  letter-spacing: .14em; text-transform: uppercase;
+  padding: .12rem .5rem; border-radius: 999px;
+  background: var(--sakura-3); color: var(--sakura-2);
+  vertical-align: middle;
+}
+.card-pin{ margin-left: .4rem; }
+.kicker-pin{ margin-left: .55rem; }
+.post-cover{ position: relative; }
+.pin-badge{ position: absolute; top: .7rem; left: .7rem; z-index: 2; background: rgba(255,255,255,.9); }
+
+/* 列表筛选隐藏 */
+.post-card.is-hidden{ display: none; }
+
+/* 归档页 */
+.arch-wrap{ max-width: 760px; margin: 0 auto; padding: 2.4rem 1.5rem 4rem; }
+.arch-year{ margin-bottom: 2.4rem; }
+.arch-year-title{
+  display: flex; align-items: baseline; gap: .7rem;
+  font-family: var(--serif); font-size: 1.5rem; margin: 0 0 1rem;
+  padding-bottom: .7rem; border-bottom: 1px dashed var(--line);
+}
+.arch-count{ font-family: var(--ui); font-size: .68rem; color: var(--ink-3); letter-spacing: .12em; }
+.arch-list{ list-style: none; margin: 0; padding: 0; }
+.arch-item{
+  display: flex; align-items: baseline; gap: .9rem;
+  padding: .62rem .2rem; text-decoration: none; color: var(--ink);
+  border-bottom: 1px solid var(--line-2);
+  transition: background .25s var(--ease), padding-left .25s var(--ease);
+}
+.arch-item:hover{ background: rgba(242,155,180,.07); padding-left: .7rem; }
+.arch-item time{ font-family: var(--mono); font-size: .68rem; color: var(--ink-3); flex: none; }
+.arch-title{ font-family: var(--serif); font-size: .98rem; flex: 1 1 auto; }
+.arch-tag{ font-family: var(--ui); font-size: .62rem; color: var(--ink-3); letter-spacing: .1em; flex: none; }
+.arch-pin{ flex: none; }
+
+/* 音乐播放器 */
+.music-dock{
+  position: fixed; right: 1.15rem; bottom: 1.15rem; z-index: 95;
+  display: flex; flex-direction: column; align-items: flex-end; gap: .6rem;
+}
+.music-fab{
+  width: 46px; height: 46px; border-radius: 50%; cursor: pointer;
+  border: 1px solid var(--line); background: var(--card); color: var(--sakura-2);
+  box-shadow: var(--shadow); display: grid; place-items: center; padding: 0;
+  transition: transform .3s var(--ease), border-color .3s var(--ease);
+}
+.music-fab:hover{ transform: translateY(-2px) rotate(-6deg); border-color: var(--sakura); }
+.music-note{ font-size: 1.15rem; line-height: 1; }
+.music-dock.is-open .music-note{ animation: note-spin 2.4s linear infinite; }
+@keyframes note-spin{ to{ transform: rotate(360deg); } }
+.music-panel{
+  display: none; width: 316px; max-width: calc(100vw - 2.3rem);
+  padding: .85rem .9rem 1rem; border-radius: 16px;
+  background: var(--card); border: 1px solid var(--line);
+  box-shadow: var(--shadow-lift);
+}
+.music-dock.is-open .music-panel{ display: block; animation: panel-pop .26s var(--ease) both; }
+@keyframes panel-pop{ from{ opacity: 0; transform: translateY(8px) scale(.98); } to{ opacity: 1; transform: none; } }
+.music-title{
+  margin: 0 0 .55rem; font-family: var(--ui); font-size: .62rem;
+  letter-spacing: .18em; color: var(--ink-3); text-transform: uppercase;
+}
+.music-list{ display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: .6rem; }
+.music-item{
+  font-family: var(--ui); font-size: .68rem; letter-spacing: .04em;
+  padding: .28rem .65rem; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: transparent; color: var(--ink-2);
+  transition: all .25s var(--ease);
+}
+.music-item:hover{ border-color: var(--sakura); color: var(--sakura-2); }
+.music-item.is-on{ background: var(--sakura-3); border-color: transparent; color: var(--sakura-2); }
+.music-panel iframe{ display: block; width: 100%; border: 0; border-radius: 10px; }
+
+/* 点击特效 */
+.click-fx{ position: fixed; inset: 0; pointer-events: none; z-index: 300; }
+.fx-ring{
+  position: fixed; width: 14px; height: 14px; margin: -7px 0 0 -7px;
+  border-radius: 50%; border: 1.4px solid var(--sakura-2);
+  animation: fx-ring .6s cubic-bezier(.2,.7,.3,1) forwards;
+}
+@keyframes fx-ring{ to{ transform: scale(3.4); opacity: 0; } }
+.fx-petal{
+  position: fixed; width: 7px; height: 9px; margin: -4px 0 0 -3px;
+  border-radius: 60% 40% 62% 38%;
+  background: linear-gradient(140deg, #f9b7c9, #f29bb4);
+  opacity: .9; animation: fx-petal .74s cubic-bezier(.2,.7,.3,1) forwards;
+}
+@keyframes fx-petal{
+  to{ transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; }
+}
+
+/* 窄屏微调 */
+@media (max-width: 1100px){
+  .topnav{ gap: 1.15rem; }
+}
+@media (max-width: 560px){
+  .music-dock{ right: .8rem; bottom: .8rem; }
+  .music-fab{ width: 42px; height: 42px; }
+  .arch-wrap{ padding: 1.8rem 1.2rem 3rem; }
+  .arch-item{ gap: .6rem; }
+  .arch-tag{ display: none; }
+}

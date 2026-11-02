@@ -1,0 +1,138 @@
+{
+  "url": "https://luoyezzz.github.io",
+  "base": "",
+  "lang": "zh-CN",
+  "brand": {
+    "name": "洛月",
+    "latin": "LUOYUE",
+    "jp": "らくげつ"
+  },
+  "title": "洛月 ｜ 把日常写成轻小说",
+  "description": "洛月是一个日系轻小说风格的个人博客。记录清晨的便利店、雨后的天桥，以及那些没能说出口的独白。",
+  "since": "2026-09-12",
+  "nav": [
+    {
+      "key": "home",
+      "label": "首页",
+      "href": "/"
+    },
+    {
+      "key": "posts",
+      "label": "文章",
+      "href": "/posts/"
+    },
+    {
+      "key": "archive",
+      "label": "归档",
+      "href": "/archive/"
+    },
+    {
+      "key": "quotes",
+      "label": "台词",
+      "href": "/quotes/"
+    },
+    {
+      "key": "about",
+      "label": "关于",
+      "href": "/about/"
+    }
+  ],
+  "hero": {
+    "eyebrow": [
+      "OPEN FOR READING",
+      "EST. 2026"
+    ],
+    "title1": "把日常，",
+    "title2": "写成轻小说。",
+    "lead1": "清晨的便利店、雨后的天桥、没能说出口的独白。",
+    "lead2": "这里收着它们，像收着一叠没寄出去的信。",
+    "primary": {
+      "label": "开始阅读",
+      "href": "/posts/"
+    },
+    "ghost": {
+      "label": "关于我",
+      "href": "/about/"
+    },
+    "hint": "每两周一篇，慢慢写",
+    "noteDay": "おはよう。今日もいい日だ。",
+    "noteNight": "月がきれいですね。"
+  },
+  "features": {
+    "loader": true,
+    "petals": true,
+    "clickEffect": true,
+    "music": true,
+    "search": true
+  },
+  "shortcuts": [
+    {
+      "jp": "アーカイブ",
+      "title": "文章归档",
+      "text": "按时间翻完这几篇，看看它是怎么开始的。",
+      "href": "/archive/"
+    },
+    {
+      "jp": "ことば",
+      "title": "台词收藏",
+      "text": "从喜欢的作品里，抄下让人停下来的句子。",
+      "href": "/quotes/"
+    },
+    {
+      "jp": "プロフィール",
+      "title": "关于我",
+      "text": "我是谁、为什么写、喜欢些什么。",
+      "href": "/about/"
+    }
+  ],
+  "teaser": {
+    "quoteJp": "「うまく書けなくても、書く。」",
+    "quoteCn": "写不好也没关系，先写下来。",
+    "quoteBy": "— 贴在书桌前的一句话",
+    "eyebrow": "すこしだけ",
+    "title": "写字的人，也是看云的人",
+    "p1": "白天是普通的学生，晚上把想到的句子写下来。喜欢樱花、便利店的热牛奶，还有雨天里没人走的台阶。",
+    "p2": "这个站没有算法，没有推荐，只有我隔一段时间放进来的东西。"
+  },
+  "characters": {
+    "day": {
+      "name": "逢坂大河",
+      "sub": "あいさか たいが",
+      "tag": "手乗りタイガー",
+      "role": "昼の看板娘",
+      "speechJp": "べ、別に<em>アンタ</em>を待ってたわけじゃないんだからね！",
+      "speechCn": "才、才没有在等你呢。……不过，来了就坐吧。",
+      "img": "/assets/img/taiga-photo.jpg",
+      "width": 1334,
+      "height": 1761
+    },
+    "night": {
+      "name": "哥伦比娅",
+      "sub": "コロンビーナ",
+      "tag": "愚人众・第三席「少女」",
+      "role": "夜の看板娘",
+      "speechJp": "夜明けまで、<em>あなた</em>のそばにいてあげる。",
+      "speechCn": "在黎明之前，就让我陪着你吧。",
+      "img": "/assets/img/columbina-photo.jpg",
+      "width": 3000,
+      "height": 4500
+    }
+  },
+  "footer": {
+    "jp": "洛月",
+    "note1": "把日常写成轻小说。",
+    "note2": "在句尾留一点空白。",
+    "tag": "ドキドキ",
+    "copyright": "内容与图片版权归原作者所有",
+    "meta": "手写 HTML / CSS"
+  },
+  "music": {
+    "title": "夜のプレイリスト",
+    "songs": [
+      {
+        "id": "1809646618",
+        "name": "月がきれい"
+      }
+    ]
+  }
+}
