@@ -744,3 +744,38 @@ body{font-size:1.0625rem;line-height:1.9;-webkit-font-smoothing:antialiased;-moz
   transition:max-height .32s var(--ease),opacity .24s var(--ease),margin .32s var(--ease),padding .32s var(--ease)}
 .music-dock.show-list .music-list{max-height:200px;overflow-y:auto;opacity:1;margin-top:12px;
   padding-top:12px;border-top:1px solid var(--line-soft)}
+
+/* ================= v3.2 ================= */
+
+/* 音乐：按钮固定，卡片从按钮上方弹出 */
+.music-dock{display:block}
+.music-panel{
+  position:absolute;right:0;bottom:64px;width:322px;max-width:calc(100vw - 2.4rem);
+  transform-origin:100% 100%;display:none;padding-top:24px;
+}
+.music-dock.is-open .music-panel{
+  display:block;
+  animation:panel-in .36s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes panel-in{
+  0%{opacity:0;transform:translateY(14px) scale(.84)}
+  60%{opacity:1}
+  100%{opacity:1;transform:translateY(0) scale(1)}
+}
+.music-close{
+  position:absolute;right:10px;top:9px;width:26px;height:26px;border-radius:50%;
+  border:1px solid var(--line);background:transparent;color:var(--ink-3);
+  cursor:pointer;font-size:15px;line-height:1;display:grid;place-items:center;transition:.2s;
+}
+.music-close:hover{color:var(--accent);border-color:var(--accent-soft);transform:rotate(90deg)}
+
+/* 浮动返回：和正文左边缘对齐，不再贴屏幕边 */
+.back-float{left:max(16px, calc((100vw - 1180px) / 2 + 28px))}
+
+/* 昼夜切换：从按钮扩散的圆形擦除 */
+::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+::view-transition-new(root){animation:vt-reveal .55s cubic-bezier(.4,0,.2,1)}
+@keyframes vt-reveal{
+  from{clip-path:circle(0 at var(--vt-x,50%) var(--vt-y,50%))}
+  to{clip-path:circle(150% at var(--vt-x,50%) var(--vt-y,50%))}
+}

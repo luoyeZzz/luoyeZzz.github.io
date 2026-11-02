@@ -335,8 +335,17 @@
     if (themeBtn) themeBtn.textContent = t === 'dark' ? '☾' : '☀';
   }
   applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
-  if (themeBtn) themeBtn.onclick = function () {
-    applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  function switchTheme(next, x, y) {
+    if (!document.startViewTransition) { applyTheme(next); return; }
+    document.documentElement.style.setProperty('--vt-x', x + 'px');
+    document.documentElement.style.setProperty('--vt-y', y + 'px');
+    document.startViewTransition(function () { applyTheme(next); });
+    setTimeout(function () { if (document.documentElement.getAttribute('data-theme') !== next) applyTheme(next); }, 600);
+  }
+  if (themeBtn) themeBtn.onclick = function (e) {
+    var r = themeBtn.getBoundingClientRect();
+    switchTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark',
+      e.clientX || r.left + r.width / 2, e.clientY || r.top + r.height / 2);
   };
 
   /* tab */

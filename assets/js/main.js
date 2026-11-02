@@ -24,9 +24,21 @@
     if (themeBtn) themeBtn.setAttribute('aria-label', t === 'dark' ? '切换到白天' : '切换到夜间');
   }
   applyTheme(root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light', false);
+  function switchTheme(next, x, y) {
+    if (!document.startViewTransition || reduce) { applyTheme(next); return; }
+    root.style.setProperty('--vt-x', x + 'px');
+    root.style.setProperty('--vt-y', y + 'px');
+    document.startViewTransition(function () { applyTheme(next); });
+    setTimeout(function () {
+      if (root.getAttribute('data-theme') !== next) applyTheme(next);
+    }, 600);
+  }
   if (themeBtn) {
-    themeBtn.addEventListener('click', function () {
-      applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    themeBtn.addEventListener('click', function (e) {
+      var r = themeBtn.getBoundingClientRect();
+      var x = e.clientX || r.left + r.width / 2;
+      var y = e.clientY || r.top + r.height / 2;
+      switchTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark', x, y);
     });
   }
 
@@ -200,7 +212,7 @@
     var playBtn = $('#music-play');
     var volEl = $('#music-vol');
     var volNum = $('#music-vol-num');
-    var userPaused = false;
+    var userPaused = !!(st && st.paused);
     var prevBtn = $('#music-prev');
     var nextBtn = $('#music-next');
     var listToggle = $('#music-list-toggle');
@@ -311,6 +323,14 @@
       var open = dock.classList.toggle('is-open');
       fab.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
+    var closeBtn = $('#music-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        dock.classList.remove('is-open');
+        fab.setAttribute('aria-expanded', 'false');
+      });
+    }
     if (listToggle) {
       listToggle.addEventListener('click', function () { dock.classList.toggle('show-list'); });
     }
@@ -427,16 +447,18 @@
   var inline = document.querySelector('.back-inline');
   var floater = document.querySelector('.back-float');
   if (inline && floater) {
-    var fromArchive = false;
-    try { fromArchive = new URLSearchParams(location.search).get('from') === 'archive'; } catch (e) {}
-    if (fromArchive) {
-      var href = inline.getAttribute('href') || '/posts/';
-      var archive = href.replace(/\/posts\/$/, '/archive/');
-      inline.setAttribute('href', archive);
-      floater.setAttribute('href', archive);
-      inline.textContent = '← 返回归档';
-      floater.textContent = '← 归档';
-    }
+    var from = '';
+    try { from = new URLSearchParams(location.search).get('from') || ''; } catch (e) {}
+    var targets = {
+      home: { href: '/', label: '返回首页' },
+      archive: { href: '/archive/', label: '返回归档' },
+      posts: { href: '/posts/', label: '返回文章列表' }
+    };
+    var target = targets[from] || targets.posts;
+    inline.setAttribute('href', target.href);
+    floater.setAttribute('href', target.href);
+    inline.textContent = '← ' + target.label;
+    floater.textContent = '← ' + target.label;
     if ('IntersectionObserver' in window) {
       var io = new IntersectionObserver(function (entries) {
         entries.forEach(function (en) {

@@ -327,7 +327,8 @@ function musicDock(site) {
   return '' +
     '<div class="music-dock" id="music-dock" data-volume="' + vol + '"' + (m.autoplay === false ? ' data-autoplay="0"' : ' data-autoplay="1"') + '>' +
     '<button type="button" class="music-fab" id="music-fab" aria-label="音乐播放器" aria-expanded="false">' + ICON.note + '</button>' +
-    '<div class="music-panel">' +
+    '<div class="music-panel" id="music-panel">' +
+    '<button type="button" class="music-close" id="music-close" aria-label="收起">×</button>' +
     '<p class="music-title">' + esc(m.title || 'Playlist') + '</p>' +
     '<p class="music-now" id="music-now">' + esc((m.songs[0] || {}).name || '') + '</p>' +
     '<div class="music-progress">' +
@@ -402,9 +403,9 @@ function coverBg(p) {
 }
 function tagChip(t) { return '<span class="tag-chip">' + esc(t) + '</span>'; }
 
-function rowHTML(site, p) {
+function rowHTML(site, p, from) {
   const day = String(p.date).slice(8, 10) || '';
-  return '<a class="row" href="' + postUrl(site, p) + '" data-tag="' + esc(p.tag) + '">' +
+  return '<a class="row" href="' + postUrl(site, p) + (from ? '?from=' + from : '') + '" data-tag="' + esc(p.tag) + '">' +
     '<span class="no">' + esc(day) + '</span>' +
     '<span><h3>' + esc(p.title) + (p.pinned ? '<span class="pin-mark">置顶</span>' : '') + '</h3>' +
     '<p>' + esc(p.excerpt) + '</p></span>' +
@@ -437,7 +438,7 @@ function homePage(site, posts) {
   const links = linkPills(about.links);
   const chars = posts.reduce(function (n, p) { return n + p.chars; }, 0);
   const tags = posts.map(function (p) { return p.tag; }).filter(function (t, i, a) { return a.indexOf(t) === i; }).length;
-  const rows = posts.slice(0, 5).map(function (p) { return rowHTML(site, p); }).join('');
+  const rows = posts.slice(0, 5).map(function (p) { return rowHTML(site, p, 'home'); }).join('');
 
   return layout(site, {
     title: site.title, desc: site.description, path: '/', current: 'home',
@@ -497,7 +498,7 @@ function postsPage(site, posts) {
       '</div></section>\n' +
       '<div class="post-wrap"><div class="post-grid" id="post-list">' +
       posts.map(function (p) {
-        return '<article class="post-item" data-tag="' + esc(p.tag) + '">' + rowHTML(site, p) + '</article>';
+        return '<article class="post-item" data-tag="' + esc(p.tag) + '">' + rowHTML(site, p, 'posts') + '</article>';
       }).join('') +
       '</div><p class="post-empty" id="post-empty">没有找到匹配的文章。</p></div>\n'
   });
@@ -520,7 +521,7 @@ function postPage(site, post, prev, next) {
     path: '/posts/' + post.slug + '/', current: 'posts', type: 'article',
     content: '' +
       '<article>\n' +
-      '  <div class="article-top"><a class="pill-btn back-inline" href="' + u(site, '/posts/') + '" data-back>← 返回列表</a></div>\n' +
+      '  <div class="article-top"><a class="pill-btn back-inline" href="' + u(site, '/posts/') + '" data-back>← 返回文章列表</a></div>\n' +
       '  <div class="cover">' + cover + '<span class="jp">' + esc(post.word) + '</span></div>\n' +
       '  <header class="article-head">\n' +
       '    <p class="kicker">' + tagChip(post.tag) + '<span>' + esc(dateLabel(post.date)) + '</span><span>' + mins + ' min</span>' +
@@ -539,7 +540,7 @@ function postPage(site, post, prev, next) {
       '<div class="progress" aria-hidden="true"><i id="read-bar"></i></div></div>\n' +
       '    </aside>\n' +
       '  </div>\n' +
-      '  <a class="pill-btn back-float" href="' + u(site, '/posts/') + '" data-back aria-label="返回">← 返回</a>\n' +
+      '  <a class="pill-btn back-float" href="' + u(site, '/posts/') + '" data-back aria-label="返回文章列表">← 返回文章列表</a>\n' +
       '  ' + pager + '\n' +
       '</article>\n'
   });
