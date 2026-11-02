@@ -1,14 +1,17 @@
 ﻿# 开发截图，不用上传
 preview/
 
-# 写作工具本体（本地用，不需要公开）
-tools/
-
 # 工具日志 / 临时文件
 tools/*.log
 tools/*.err
 tools/*.bak
 tools/_*
+
+# 每台机器自己的配置与手写笔记（不跟仓库走）
+tools/config.json
+tools/使用手册.md
+tools/moon.ico
+tools/moon-256.png
 
 # 系统
 Thumbs.db

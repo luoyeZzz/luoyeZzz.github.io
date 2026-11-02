@@ -42,12 +42,15 @@ assets/
   js/main.js       前台脚本（主题/搜索/目录/音乐/回顶/点击特效）
   img/             图片
 
-tools/             本地写作台（不上传）
+tools/             本地写作台（随仓库走，clone 下来就能用）
   build.js         生成器：content → 静态页
   server.js        本地服务 + 编辑接口
+  doctor.js        环境体检
+  deps.js          依赖发现（config → PATH → 注册表 → 标准目录）
   editor.html      写作台界面
-  start.bat       双击启动
-  使用手册.md       操作手册
+  start.bat / setup.bat / git-ssh-setup.bat
+  config.json      本机配置（不上传）
+  使用手册.md       操作手册（不上传）
 
 index.html  posts/  archive/  moments/  gallery/  quotes/  friends/  about/ 404.html
 sitemap.xml  robots.txt
@@ -116,6 +119,36 @@ node tools/server.js       # 本地预览 http://127.0.0.1:4173
 推送到 `main` 后由 GitHub Pages 发布。`sitemap.xml` 里都是干净地址。
 
 > 目录式 URL 要求经过服务访问，**不能双击 html 打开**。
+
+---
+
+## 换电脑 / 依赖检查
+
+工具代码现在跟着仓库走，换台电脑重新 clone 也能用：
+
+1. 装 **Node.js（LTS）**：https://nodejs.org
+2. 双击 `toolssetup.bat`：检查 Node → 跑依赖体检（缺什么自动打开下载页）→ 建桌面快捷方式 → 启动
+3. 需要推送到 GitHub 再装 Git；不想配 SSH 就填 HTTPS 地址 + 访问令牌
+
+随时体检：
+
+```bash
+node tools/doctor.js          # 终端里逐项报告
+node tools/doctor.js --open   # 缺依赖时顺手打开安装页
+```
+
+写作台的「环境」标签是同一套检查，缺什么直接给按钮。
+
+**不写死任何安装路径**，Git 的查找顺序：
+
+1. `tools/config.json` 里的 `gitPath`
+2. 环境变量 `GIT_BIN`
+3. 系统 PATH（Windows 用 `where`，其它用 `which`）
+4. Windows 注册表 `GitForWindowsInstallPath`
+5. 标准安装目录（Program Files / LOCALAPPDATA / /usr/bin …）
+6. 最后才试 `D:Git` 这类常见位置
+
+每个候选都会真的执行一次 `--version`，能跑才算数。
 
 ---
 

@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>洛月 · 写作台</title>
+<link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
+<script>(function(){try{var q=new URLSearchParams(location.search).get('theme');if(q==='dark')document.documentElement.setAttribute('data-theme','dark');else if(localStorage.getItem('sb-theme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<link rel="stylesheet" href="/assets/css/style.css">
+<style>
+  body.admin{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);min-height:100vh}
+  .adm-bar{position:sticky;top:12px;z-index:60;margin:12px auto 0;max-width:1560px;padding:0 14px}
+  .adm-bar-in{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;
+    padding:8px 12px;border-radius:var(--r-pill);background:var(--surface);border:1px solid var(--glass-edge);
+    -webkit-backdrop-filter:blur(22px) saturate(1.4);backdrop-filter:blur(22px) saturate(1.4);
+    box-shadow:var(--shadow-soft),inset 0 1px 0 rgba(255,255,255,.5)}
+  .adm-brand{display:flex;align-items:center;gap:9px;font-size:.9375rem;font-weight:600;letter-spacing:.2em}
+  .adm-brand img{width:30px;height:30px;border-radius:50%;object-fit:cover}
+  .adm-brand span{font-family:var(--mono);font-size:.625rem;letter-spacing:.18em;color:var(--ink-3);letter-spacing:.2em}
+  .adm-tabs{display:flex;gap:2px;justify-self:center;flex-wrap:wrap}
+  .adm-tabs button{border:0;background:transparent;color:var(--ink-2);font-size:.8125rem;
+    padding:7px 11px;border-radius:var(--r-pill);cursor:pointer;transition:.25s var(--ease);white-space:nowrap}
+  .adm-tabs button:hover{background:var(--accent-wash);color:var(--ink)}
+  .adm-tabs button.on{background:var(--accent-wash);color:var(--ink)}
+  .adm-tools{display:flex;gap:8px;justify-self:end;align-items:center}
+
+  .adm-main{max-width:1560px;margin:0 auto;padding:14px;position:relative;z-index:1}
+  .pane:not(.on){display:none !important}
+  .pane.on{display:block}
+  .pane.on.two{display:grid}
+  .two{display:grid;grid-template-columns:280px 1fr;gap:14px;align-items:start}
+  .card{background:var(--surface);border:1px solid var(--glass-edge);border-radius:var(--r-card);
+    -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);box-shadow:var(--glass-soft,var(--shadow-soft));
+    padding:16px}
+  .card h3{margin:0 0 12px;font-size:.9375rem;font-weight:600}
+
+  .list{position:sticky;top:78px;max-height:calc(100vh - 100px);overflow:auto;padding:10px}
+  .list-head{display:flex;gap:6px;margin-bottom:8px}
+  .list-item{display:block;width:100%;text-align:left;background:transparent;border:1px solid transparent;
+    border-radius:10px;padding:9px 10px;cursor:pointer;transition:.2s}
+  .list-item:hover{background:var(--accent-wash)}
+  .list-item.on{border-color:var(--accent-soft);background:var(--accent-wash)}
+  .li-t{display:block;font-size:.875rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .li-m{display:block;font-size:.6875rem;color:var(--ink-3);margin-top:2px}
+
+  .form{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .form .full{grid-column:1 / -1}
+  .form h4{grid-column:1/-1;margin:12px 0 0;font-size:.6875rem;letter-spacing:.18em;color:var(--accent);text-transform:uppercase}
+  label{display:block;font-size:.6875rem;color:var(--ink-3);letter-spacing:.08em}
+  label input,label select,label textarea{width:100%;margin-top:4px}
+  input,select,textarea{font-family:inherit;font-size:.875rem;color:var(--ink);background:var(--surface-solid);
+    border:1px solid var(--line);border-radius:10px;padding:9px 11px;outline:none;transition:border-color .2s}
+  input:focus,select:focus,textarea:focus{border-color:var(--accent-soft)}
+  textarea{resize:vertical;line-height:1.8}
+  .chk{display:flex;align-items:center;gap:7px;font-size:.8125rem;color:var(--ink-2);padding-top:18px}
+  .chk input{width:auto;margin:0}
+
+  button{border:0;cursor:pointer;font-family:inherit}
+  .primary{background:var(--ink);color:var(--bg);border-radius:var(--r-pill);padding:10px 20px;font-size:.8125rem;letter-spacing:.06em}
+  .primary:hover{opacity:.9}
+  .ghost{background:transparent;border:1px solid var(--line);border-radius:var(--r-pill);padding:8px 14px;
+    font-size:.75rem;color:var(--ink-2);transition:.25s}
+  .ghost:hover{border-color:var(--accent-soft);color:var(--accent)}
+  .danger{color:#B3305F;border-color:#E3A9BC}
+  .sm{padding:5px 10px;font-size:.6875rem;border-radius:8px}
+  .row-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center}
+
+  .ed-top{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+  .title-input{flex:1;font-size:1.125rem;font-weight:600;padding:10px 12px}
+  .meta2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
+  .meta3{display:grid;grid-template-columns:repeat(4,1fr) auto;gap:8px;margin-bottom:8px}
+  .body-wrap{display:grid;grid-template-columns:1fr;gap:10px}
+  .body-wrap.split{grid-template-columns:1fr 1fr}
+  #body{min-height:460px;font-family:var(--mono);font-size:.8125rem;line-height:1.9}
+  .preview{display:none;max-height:520px;overflow:auto;border:1px dashed var(--line);border-radius:12px;padding:4px 14px;background:var(--surface-solid)}
+  .body-wrap.split .preview{display:block}
+  .toolbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+  .toolbar button{border:1px solid var(--line);background:transparent;border-radius:var(--r-pill);
+    padding:5px 11px;font-size:.75rem;color:var(--ink-2)}
+  .toolbar button:hover{border-color:var(--accent-soft);color:var(--accent)}
+
+  .rows{grid-column:1/-1;display:flex;flex-direction:column;gap:8px}
+  .r{display:grid;gap:8px;align-items:end;padding:10px;border:1px solid var(--line-soft);border-radius:12px}
+  .r .del{align-self:end}
+  #albumImages{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+  .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:8px}
+  .thumb{position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+  .thumb img{width:100%;height:88px;object-fit:cover;display:block}
+  .thumb button{position:absolute;right:4px;top:4px;background:rgba(0,0,0,.55);color:#fff;border-radius:50%;
+    width:20px;height:20px;font-size:11px;line-height:1}
+  .thumb input{width:100%;border:0;border-radius:0;font-size:.6875rem;padding:5px 6px;background:var(--surface-solid)}
+
+  .music-row{display:grid;grid-template-columns:1fr 2fr auto;gap:8px;align-items:end}
+  .status{font-size:.75rem;color:var(--ink-3)}
+  .log{margin-top:12px;background:#241d26;color:#EAD9DF;border-radius:12px;padding:12px;
+    font-family:var(--mono);font-size:.75rem;line-height:1.8;min-height:110px;max-height:320px;overflow:auto;white-space:pre-wrap}
+  .env-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line-soft)}
+  .env-row:last-child{border-bottom:0}
+  .env-dot{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.75rem;flex:none;
+    background:var(--accent-wash);color:var(--accent)}
+  .env-row.bad .env-dot{background:#FBE3E8;color:#B3305F}
+  .env-row.ok .env-dot{background:#E6F3EA;color:#2F7D4F}
+  .env-main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .env-main b{font-size:.9375rem;font-weight:600}
+  .env-main span{font-size:.75rem;color:var(--ink-3);word-break:break-all}
+  #toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,14px);background:var(--ink);color:var(--bg);
+    padding:10px 20px;border-radius:var(--r-pill);font-size:.8125rem;opacity:0;pointer-events:none;
+    transition:.25s;z-index:200}
+  #toast.on{opacity:1;transform:translate(-50%,0)}
+  #toast.err{background:#B3305F;color:#fff}
+
+  @media (max-width:1100px){
+    .two{grid-template-columns:1fr}
+    .list{position:static;max-height:300px}
+    .form{grid-template-columns:1fr}
+    .meta3{grid-template-columns:1fr 1fr}
+    .body-wrap.split{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body class="admin">
+
+<header class="adm-bar">
+  <div class="adm-bar-in">
+    <div class="adm-brand"><img src="/assets/img/moon.svg" alt="">洛月<span>写作台</span></div>
+    <nav class="adm-tabs" id="tabs">
+      <button data-tab="posts" class="on">文章</button>
+      <button data-tab="site">站点</button>
+      <button data-tab="about">关于</button>
+      <button data-tab="moments">说说</button>
+      <button data-tab="gallery">相册</button>
+      <button data-tab="friends">友链</button>
+      <button data-tab="quotes">台词</button>
+      <button data-tab="music">音乐</button>
+      <button data-tab="env">环境</button>
+      <button data-tab="publish">发布</button>
+    </nav>
+    <div class="adm-tools">
+      <a class="ghost" href="/" target="_blank" style="text-decoration:none">查看站点</a>
+      <button class="ghost" id="themeBtn">☀</button>
+      <button class="ghost" id="buildBtn">重新构建</button>
+      <button class="ghost" id="shutdownBtn">退出</button>
+    </div>
+  </div>
+</header>
+
+<main class="adm-main">
+
+  <!-- 文章 -->
+  <section class="pane on two" id="pane-posts">
+    <aside class="card list">
+      <div class="list-head"><input id="postFilter" placeholder="搜索…" style="flex:1"><button class="primary sm" id="newPost">＋</button></div>
+      <div id="postList"></div>
+      <div class="row-actions"><button class="ghost sm" id="trashBtn">回收站</button></div>
+    </aside>
+    <div class="card">
+      <div class="ed-top">
+        <input id="title" class="title-input" placeholder="文章标题">
+        <span class="status" id="edStatus"></span>
+        <button class="ghost sm" id="previewBtn">预览</button>
+        <button class="ghost sm danger" id="delPost">删除</button>
+        <button class="primary sm" id="savePost">保存</button>
+      </div>
+      <div class="meta3">
+        <label>日期<input id="date" type="date"></label>
+        <label>分类<input id="tag" placeholder="杂记"></label>
+        <label>封面日文<input id="word" placeholder="ことば"></label>
+        <label>配色<select id="tone"><option value="1">1 星空</option><option value="2">2 淡蓝</option><option value="3">3 青绿</option><option value="4">4 淡紫</option></select></label>
+        <label class="chk"><input id="pinned" type="checkbox">置顶</label>
+      </div>
+      <div class="meta2">
+        <label>摘要<input id="excerpt" placeholder="列表页的一句话"></label>
+        <label>链接短名<input id="slug" placeholder="留空用日期"></label>
+      </div>
+      <div class="meta2">
+        <label>封面图<input id="cover" placeholder="/assets/img/..."></label>
+        <label>&nbsp;<span style="display:flex;gap:6px"><button class="ghost sm" id="coverBtn">上传封面</button><button class="ghost sm" id="coverClear">清除</button></span></label>
+      </div>
+      <div class="toolbar" id="toolbar">
+        <button data-ins="h2">小标题</button><button data-ins="dialogue">对白</button><button data-ins="note">便签</button>
+        <button data-ins="quote">引用</button><button data-ins="img">图片</button><button data-ins="hr">分割线</button>
+        <button id="uploadBody">＋ 上传图片</button>
+      </div>
+      <div class="body-wrap">
+        <textarea id="body" placeholder="用 Markdown 写正文…"></textarea>
+        <div class="preview prose" id="preview"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 站点 -->
+  <section class="pane" id="pane-site">
+    <div class="card"><div class="form" id="siteForm"></div>
+      <div class="row-actions"><button class="primary" id="saveSite">保存站点配置</button><span class="status" id="siteStatus"></span></div>
+    </div>
+  </section>
+
+  <!-- 关于 -->
+  <section class="pane" id="pane-about">
+    <div class="card"><div class="form" id="aboutForm"></div>
+      <div class="row-actions"><button class="primary" id="saveAbout">保存关于页</button></div>
+    </div>
+  </section>
+
+  <!-- 说说 -->
+  <section class="pane" id="pane-moments">
+    <div class="card">
+      <h3>说说</h3>
+      <div class="form"><div class="rows" id="momentRows"></div></div>
+      <div class="row-actions"><button class="ghost" id="addMoment">＋ 一条说说</button><button class="primary" id="saveMoments">保存</button></div>
+    </div>
+  </section>
+
+  <!-- 相册 -->
+  <section class="pane two" id="pane-gallery">
+    <aside class="card list">
+      <div class="list-head"><button class="primary sm" id="addAlbum">＋ 新相册</button></div>
+      <div id="albumList"></div>
+    </aside>
+    <div class="card">
+      <div class="form" id="albumForm"></div>
+      <div class="rows" id="albumImages" style="margin-top:12px"></div>
+      <div class="row-actions">
+        <button class="ghost" id="addImage">＋ 上传照片</button>
+        <button class="ghost danger" id="delAlbum">删除相册</button>
+        <button class="primary" id="saveGallery">保存相册</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 友链 -->
+  <section class="pane" id="pane-friends">
+    <div class="card">
+      <div class="form" id="friendsForm"></div>
+      <div class="rows" id="friendsRows" style="margin-top:12px"></div>
+      <div class="row-actions"><button class="ghost" id="addFriend">＋ 一条友链</button><button class="primary" id="saveFriends">保存友链</button></div>
+    </div>
+  </section>
+
+  <!-- 台词 -->
+  <section class="pane" id="pane-quotes">
+    <div class="card">
+      <div class="rows" id="quoteRows"></div>
+      <div class="row-actions"><button class="ghost" id="addQuote">＋ 一条台词</button><button class="primary" id="saveQuotes">保存台词</button></div>
+    </div>
+  </section>
+
+  <!-- 音乐 -->
+  <section class="pane" id="pane-music">
+    <div class="card">
+      <div class="form">
+        <label class="full">歌单标题<input id="musicTitle"></label>
+        <label class="full">粘贴网易云歌曲链接，自动解析
+          <span style="display:flex;gap:8px;margin-top:4px">
+            <input id="musicUrl" placeholder="https://music.163.com/song?id=1809646618" style="flex:1">
+            <button class="ghost" id="parseMusic">解析并添加</button>
+          </span>
+        </label>
+      </div>
+      <div class="rows" id="musicRows" style="margin-top:12px"></div>
+      <div class="row-actions"><button class="ghost" id="addMusic">＋ 手动加一首</button><button class="primary" id="saveMusic">保存歌单</button></div>
+    </div>
+  </section>
+
+  <!-- 环境 -->
+  <section class="pane" id="pane-env">
+    <div class="card">
+      <h3>环境检查</h3>
+      <div id="envList"></div>
+      <div class="row-actions">
+        <button class="ghost" id="recheckEnv">重新检查</button>
+        <span class="status" id="envStatus"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 发布 -->
+  <section class="pane" id="pane-publish">
+    <div class="card">
+      <div class="status" id="pubStatus">读取中…</div>
+      <div class="form" style="margin-top:12px">
+        <label class="full">仓库地址<input id="gitRemote" placeholder="git@github.com:用户名/用户名.github.io.git"></label>
+        <label class="full">访问令牌（HTTPS 推送用，SSH 可留空）<input id="gitToken" type="password" placeholder="ghp_xxxx"></label>
+      </div>
+      <p class="status" style="margin-top:10px">提交 = 把改动存进本地 git；推送 = 把本地提交传到 GitHub。发布一般点「提交并推送」。</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+        <input id="commitMsg" placeholder="提交说明" style="flex:1 1 240px">
+        <button class="ghost" id="btnCommit">只提交</button>
+        <button class="ghost" id="btnPush">推送</button>
+        <button class="primary" id="btnSync">提交并推送</button>
+        <button class="ghost" id="btnPull">拉取</button>
+      </div>
+      <div class="log" id="pubLog">日志会出现在这里。</div>
+    </div>
+  </section>
+</main>
+
+<div id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (s, c) { return (c || document).querySelector(s); };
+  var $$ = function (s, c) { return [].slice.call((c || document).querySelectorAll(s)); };
+  var state = { posts: [], current: null, site: null, about: null, moments: null, gallery: null, friends: null, quotes: null, albumIndex: 0 };
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function toast(msg, err) {
+    var t = $('#toast');
+    t.textContent = msg;
+    t.className = 'on' + (err ? ' err' : '');
+    clearTimeout(t._t);
+    t._t = setTimeout(function () { t.className = ''; }, 2200);
+  }
+  function api(p, o) {
+    return fetch(p, o || {}).then(function (r) { return r.json(); }).then(function (j) {
+      if (j && j.ok === false) throw new Error(j.error || '操作失败');
+      return j;
+    });
+  }
+  function post(p, b) {
+    return api(p, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) });
+  }
+
+  /* 主题 */
+  var themeBtn = $('#themeBtn');
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    try { localStorage.setItem('sb-theme', t); } catch (e) {}
+    if (themeBtn) themeBtn.textContent = t === 'dark' ? '☾' : '☀';
+  }
+  applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+  if (themeBtn) themeBtn.onclick = function () {
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  };
+
+  /* tab */
+  var loaders = {
+    posts: loadPosts, site: loadSite, about: loadAbout, moments: loadMoments,
+    gallery: loadGallery, friends: loadFriends, quotes: loadQuotes, music: loadMusic, env: loadEnv, publish: loadStatus
+  };
+  $('#tabs').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-tab]');
+    if (!b) return;
+    var name = b.getAttribute('data-tab');
+    $$('#tabs button').forEach(function (x) { x.classList.toggle('on', x === b); });
+    $$('.pane').forEach(function (p) { p.classList.toggle('on', p.id === 'pane-' + name); });
+    if (loaders[name]) loaders[name]();
+  });
+
+  /* 通用行编辑 */
+  function rowsHTML(arr, cols, labels) {
+    return arr.map(function (row, i) {
+      return '<div class="r" style="grid-template-columns:' + cols.map(function () { return '1fr'; }).join(' ') + ' auto">' +
+        cols.map(function (c) {
+          return '<label>' + esc(labels[c]) + '<input data-i="' + i + '" data-k="' + c + '" value="' + esc(row[c] || '') + '"></label>';
+        }).join('') + '<button class="ghost sm del" data-del="' + i + '">×</button></div>';
+    }).join('');
+  }
+  function readRows(host, arr, cols) {
+    $$('input[data-i]', host).forEach(function (inp) {
+      var i = Number(inp.getAttribute('data-i'));
+      arr[i] = arr[i] || {};
+      arr[i][inp.getAttribute('data-k')] = inp.value;
+    });
+    return arr;
+  }
+  function bindDelete(host, arr, rerender) {
+    host.onclick = function (e) {
+      var b = e.target.closest('[data-del]');
+      if (!b) return;
+      arr.splice(Number(b.getAttribute('data-del')), 1);
+      rerender();
+    };
+  }
+  function upload(cb) {
+    var inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/*';
+    inp.onchange = function () {
+      var f = inp.files[0]; if (!f) return;
+      var r = new FileReader();
+      r.onload = function () {
+        post('/api/upload', { name: f.name, data: r.result }).then(cb).catch(function (e) { toast(e.message, true); });
+      };
+      r.readAsDataURL(f);
+    };
+    inp.click();
+  }
+
+  /* ================= 文章 ================= */
+  function loadPosts() {
+    api('/api/posts').then(function (j) {
+      state.posts = j.posts || [];
+      renderPosts();
+      if (!state.current && state.posts.length) openPost(state.posts[0].slug);
+      if (!state.posts.length) newPost();
+    }).catch(function (e) { toast(e.message, true); });
+  }
+  function renderPosts() {
+    var q = ($('#postFilter').value || '').toLowerCase();
+    $('#postList').innerHTML = state.posts.filter(function (p) {
+      return !q || (p.title + p.tag).toLowerCase().indexOf(q) > -1;
+    }).map(function (p) {
+      return '<button class="list-item' + (state.current === p.slug ? ' on' : '') + '" data-slug="' + esc(p.slug) + '">' +
+        '<span class="li-t">' + (p.pinned ? '📌 ' : '') + esc(p.title) + '</span>' +
+        '<span class="li-m">' + esc(p.date) + ' · ' + esc(p.tag) + '</span></button>';
+    }).join('') || '<p class="status">还没有文章。</p>';
+  }
+  $('#postFilter').addEventListener('input', renderPosts);
+  $('#postList').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-slug]');
+    if (b) openPost(b.getAttribute('data-slug'));
+  });
+  function fillPost(m, body) {
+    $('#title').value = m.title || '';
+    $('#date').value = m.date || new Date().toISOString().slice(0, 10);
+    $('#tag').value = m.tag || '杂记';
+    $('#word').value = m.word || '';
+    $('#tone').value = String(m.tone || 2);
+    $('#pinned').checked = m.pinned === true;
+    $('#excerpt').value = m.excerpt || '';
+    $('#cover').value = m.cover || '';
+    $('#slug').value = state.current || '';
+    $('#body').value = body || '';
+  }
+  function openPost(slug) {
+    api('/api/post?slug=' + encodeURIComponent(slug)).then(function (j) {
+      state.current = slug;
+      fillPost(j.meta, j.body);
+      $('#edStatus').textContent = '/posts/' + slug + '/';
+      renderPosts();
+    }).catch(function (e) { toast(e.message, true); });
+  }
+  function newPost() {
+    state.current = null;
+    fillPost({ date: new Date().toISOString().slice(0, 10), tone: 2, tag: '杂记' }, '');
+    $('#edStatus').textContent = '新文章';
+    renderPosts();
+    $('#title').focus();
+  }
+  $('#newPost').onclick = newPost;
+  $('#savePost').onclick = function () {
+    var payload = {
+      slug: $('#slug').value.trim() || state.current,
+      oldSlug: state.current,
+      meta: {
+        title: $('#title').value.trim(),
+        date: $('#date').value,
+        tag: $('#tag').value.trim() || '杂记',
+        word: $('#word').value.trim(),
+        tone: Number($('#tone').value) || 2,
+        pinned: $('#pinned').checked,
+        excerpt: $('#excerpt').value.trim(),
+        cover: $('#cover').value.trim()
+      },
+      body: $('#body').value
+    };
+    if (!payload.meta.title) return toast('标题不能为空', true);
+    post('/api/post', payload).then(function (j) {
+      state.current = j.slug;
+      $('#slug').value = j.slug;
+      $('#edStatus').textContent = '已保存 · 共 ' + j.total + ' 篇';
+      toast('已保存并重建');
+      loadPosts();
+    }).catch(function (e) { toast(e.message, true); });
+  };
+  $('#delPost').onclick = function () {
+    if (!state.current || !confirm('移到回收站？')) return;
+    post('/api/delete', { slug: state.current }).then(function () {
+      state.current = null; toast('已删除'); loadPosts(); newPost();
+    }).catch(function (e) { toast(e.message, true); });
+  };
+  $('#trashBtn').onclick = function () {
+    api('/api/trash').then(function (j) {
+      if (!j.items.length) return toast('回收站是空的');
+      var pick = prompt('恢复哪一篇？\n' + j.items.map(function (x, i) { return (i + 1) + '. ' + x.slug; }).join('\n'));
+      var i = parseInt(pick, 10) - 1;
+      if (!(i >= 0 && i < j.items.length)) return;
+      post('/api/restore', { file: j.items[i].file }).then(function () { toast('已恢复'); loadPosts(); });
+    });
+  };
+  $('#coverBtn').onclick = function () {
+    upload(function (j) { $('#cover').value = j.path; toast('封面已上传'); });
+  };
+  $('#coverClear').onclick = function () { $('#cover').value = ''; };
+  $('#uploadBody').onclick = function () {
+    upload(function (j) { insert('\n\n![](' + j.path + ')\n\n'); });
+  };
+  var SNIP = {
+    h2: '\n\n## 小标题\n\n',
+    dialogue: '\n\n:::dialogue\n「第一句」\n「第二句」\n:::\n\n',
+    note: '\n\n:::note\n注：\n:::\n\n',
+    quote: '\n\n> 引用\n\n',
+    img: '\n\n![说明](/assets/img/posts/xxx.jpg)\n\n',
+    hr: '\n\n---\n\n'
+  };
+  function insert(text) {
+    var ta = $('#body'), s = ta.selectionStart, e = ta.selectionEnd;
+    ta.value = ta.value.slice(0, s) + text + ta.value.slice(e);
+    ta.focus();
+    ta.selectionStart = ta.selectionEnd = s + text.length;
+  }
+  $('#toolbar').onclick = function (e) {
+    var b = e.target.closest('button[data-ins]');
+    if (b) insert(SNIP[b.getAttribute('data-ins')] || '');
+  };
+  $('#previewBtn').onclick = function () {
+    var wrap = $('.body-wrap');
+    var on = !wrap.classList.contains('split');
+    wrap.classList.toggle('split', on);
+    if (on) {
+      post('/api/preview', { body: $('#body').value }).then(function (j) { $('#preview').innerHTML = j.html; });
+    }
+  };
+
+  /* ================= 站点 ================= */
+  var SITE_SCHEMA = [
+    { h: '品牌' },
+    { p: 'brand.name', l: '站名' }, { p: 'brand.latin', l: '英文名' }, { p: 'brand.jp', l: '假名' },
+    { p: 'avatar', l: '头像路径', full: true },
+    { p: 'title', l: '浏览器标题', full: true },
+    { p: 'description', l: '站点描述', type: 'area', full: true },
+    { p: 'url', l: '站点地址' }, { p: 'since', l: '开站日期', type: 'date' },
+
+    { h: '首屏' },
+    { p: 'hero.title1', l: '大标题第一行' }, { p: 'hero.title2', l: '大标题第二行（粉色）' },
+    { p: 'hero.lead1', l: '副标题第一行' }, { p: 'hero.lead2', l: '副标题第二行' },
+    { p: 'hero.hint', l: '假名下的小字' },
+    { p: 'hero.primary.label', l: '主按钮文字' }, { p: 'hero.primary.href', l: '主按钮链接' },
+    { p: 'hero.noteDay', l: '白天便签', full: true }, { p: 'hero.noteNight', l: '夜间便签', full: true },
+
+    { h: '看板娘（昼夜）' },
+    { p: 'characters.day.name', l: '白天名字' }, { p: 'characters.night.name', l: '夜间名字' },
+    { p: 'characters.day.img', l: '白天立绘' }, { p: 'characters.night.img', l: '夜间立绘' },
+    { p: 'characters.day.role', l: '白天身份' }, { p: 'characters.night.role', l: '夜间身份' },
+
+    { h: '页脚' },
+    { p: 'footer.note1', l: '第一行' }, { p: 'footer.note2', l: '第二行' },
+    { p: 'footer.tag', l: '日文小字' }, { p: 'footer.copyright', l: '版权后缀' },
+    { p: 'footer.meta', l: '运行天数后的话', full: true },
+
+    { h: '功能开关' },
+    { p: 'features.loader', l: '加载动画', type: 'check' },
+    { p: 'features.clickEffect', l: '点击特效', type: 'check' },
+    { p: 'features.music', l: '音乐播放器', type: 'check' },
+    { p: 'features.toTop', l: '回到顶部', type: 'check' },
+
+    { h: '各页文案' },
+    { p: 'pages.moments.lead', l: '说说页导语', type: 'area', full: true },
+    { p: 'pages.gallery.lead', l: '相册页导语', type: 'area', full: true },
+    { p: 'pages.friends.lead', l: '友链页导语', type: 'area', full: true },
+    { p: 'pages.archive.lead', l: '归档页导语', type: 'area', full: true }
+  ];
+  function get(o, path) { return path.split('.').reduce(function (a, k) { return a == null ? undefined : a[k]; }, o); }
+  function set(o, path, v) {
+    var ks = path.split('.'), cur = o;
+    for (var i = 0; i < ks.length - 1; i++) {
+      if (cur[ks[i]] == null) cur[ks[i]] = {};
+      cur = cur[ks[i]];
+    }
+    cur[ks[ks.length - 1]] = v;
+  }
+  function renderSchema(host, schema, data) {
+    host.innerHTML = schema.map(function (f, i) {
+      if (f.h) return '<h4>' + esc(f.h) + '</h4>';
+      var v = get(data, f.p);
+      var val = v == null ? '' : v;
+      var input = f.type === 'area'
+        ? '<textarea data-i="' + i + '" rows="2">' + esc(val) + '</textarea>'
+        : f.type === 'check'
+          ? '<input type="checkbox" data-i="' + i + '"' + (val ? ' checked' : '') + '>'
+          : '<input data-i="' + i + '" type="' + (f.type === 'date' ? 'date' : 'text') + '" value="' + esc(val) + '">';
+      return '<label class="' + (f.type === 'check' ? 'chk' : '') + (f.full ? ' full' : '') + '">' + esc(f.l) + input + '</label>';
+    }).join('');
+  }
+  function readSchema(host, schema, data) {
+    $$('[data-i]', host).forEach(function (el) {
+      var f = schema[Number(el.getAttribute('data-i'))];
+      if (!f || !f.p) return;
+      set(data, f.p, f.type === 'check' ? el.checked : el.value);
+    });
+    return data;
+  }
+  function loadSite() {
+    api('/api/site').then(function (j) { state.site = j.data; renderSchema($('#siteForm'), SITE_SCHEMA, state.site); });
+  }
+  $('#saveSite').onclick = function () {
+    readSchema($('#siteForm'), SITE_SCHEMA, state.site);
+    post('/api/site', { data: state.site }).then(function () { toast('站点配置已保存'); $('#siteStatus').textContent = '已重建'; })
+      .catch(function (e) { toast(e.message, true); });
+  };
+
+  /* ================= 关于 ================= */
+  function loadAbout() {
+    api('/api/about').then(function (j) { state.about = j.data; renderAbout(); });
+  }
+  function renderAbout() {
+    var d = state.about;
+    $('#aboutForm').innerHTML =
+      '<h4>基本</h4>' +
+      '<label>名字<input id="a-name" value="' + esc(d.name) + '"></label>' +
+      '<label>副标题<input id="a-handle" value="' + esc(d.handle) + '"></label>' +
+      '<label class="full">头像路径<input id="a-avatar" value="' + esc(d.avatar || '') + '"></label>' +
+      '<label class="full">介绍标题<input id="a-introTitle" value="' + esc(d.introTitle || '') + '"></label>' +
+      '<h4>档案（第三格是夜间显示的值，可留空）</h4><div class="rows" id="a-facts"></div>' +
+      '<button class="ghost sm" id="addFact" style="justify-self:start">＋ 一行</button>' +
+      '<h4>喜欢的角色</h4><div class="rows" id="a-favs"></div>' +
+      '<button class="ghost sm" id="addFav" style="justify-self:start">＋ 一个</button>' +
+      '<h4>联系方式</h4><div class="rows" id="a-links"></div>' +
+      '<button class="ghost sm" id="addLink" style="justify-self:start">＋ 一个</button>';
+
+    $('#a-facts').innerHTML = rowsHTML(d.facts || [], ['k', 'v', 'vn'], { k: '项目', v: '内容', vn: '夜间内容' });
+    $('#a-favs').innerHTML = rowsHTML(d.favorites || [], ['name', 'src'], { name: '角色', src: '出处' });
+    $('#a-links').innerHTML = rowsHTML(d.links || [], ['label', 'url', 'icon'], { label: '名称', url: '链接', icon: '图标' });
+
+    $('#addFact').onclick = function () { d.facts = d.facts || []; d.facts.push({ k: '', v: '', vn: '' }); renderAbout(); };
+    $('#addFav').onclick = function () { d.favorites = d.favorites || []; d.favorites.push({ name: '', src: '' }); renderAbout(); };
+    $('#addLink').onclick = function () { d.links = d.links || []; d.links.push({ label: '', url: '', icon: '' }); renderAbout(); };
+  }
+  $('#saveAbout').onclick = function () {
+    var d = state.about;
+    d.name = $('#a-name').value; d.handle = $('#a-handle').value;
+    d.avatar = $('#a-avatar').value; d.introTitle = $('#a-introTitle').value;
+    d.facts = readRows($('#a-facts'), d.facts || [], []);
+    d.favorites = readRows($('#a-favs'), d.favorites || [], []);
+    d.links = readRows($('#a-links'), d.links || [], []);
+    post('/api/about', { data: d }).then(function () { toast('关于页已保存'); }).catch(function (e) { toast(e.message, true); });
+  };
+
+  /* ================= 说说 ================= */
+  function loadMoments() {
+    api('/api/moments').then(function (j) {
+      state.moments = j.data || { items: [] };
+      state.moments.items = state.moments.items || [];
+      renderMoments();
+    });
+  }
+  function renderMoments() {
+    var host = $('#momentRows');
+    host.innerHTML = state.moments.items.map(function (m, i) {
+      return '<div class="r" style="grid-template-columns:120px 1fr auto">' +
+        '<label>日期<input data-mi="' + i + '" data-k="date" value="' + esc(m.date) + '"></label>' +
+        '<label>内容<textarea data-mi="' + i + '" data-k="text" rows="2">' + esc(m.text) + '</textarea></label>' +
+        '<button class="ghost sm del" data-md="' + i + '">×</button>' +
+        '<label class="full" style="grid-column:1/-1">图片（每行一个路径）<textarea data-mi="' + i + '" data-k="images" rows="2">' + esc((m.images || []).join('\n')) + '</textarea></label>' +
+        '</div>';
+    }).join('');
+    host.onclick = function (e) {
+      var b = e.target.closest('[data-md]');
+      if (!b) return;
+      state.moments.items.splice(Number(b.getAttribute('data-md')), 1);
+      renderMoments();
+    };
+  }
+  $('#addMoment').onclick = function () {
+    state.moments.items.unshift({ date: new Date().toISOString().slice(0, 10), text: '', images: [] });
+    renderMoments();
+  };
+  $('#saveMoments').onclick = function () {
+    $$('#momentRows [data-mi]').forEach(function (el) {
+      var i = Number(el.getAttribute('data-mi')), k = el.getAttribute('data-k');
+      var v = el.value;
+      if (k === 'images') v = v.split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
+      state.moments.items[i][k] = v;
+    });
+    post('/api/moments', { data: state.moments }).then(function () { toast('说说已保存'); }).catch(function (e) { toast(e.message, true); });
+  };
+
+  /* ================= 相册 ================= */
+  function loadGallery() {
+    api('/api/gallery').then(function (j) {
+      state.gallery = j.data || { albums: [] };
+      state.gallery.albums = state.gallery.albums || [];
+      renderAlbums();
+      if (state.gallery.albums.length) selectAlbum(0);
+    });
+  }
+  function renderAlbums() {
+    $('#albumList').innerHTML = state.gallery.albums.map(function (a, i) {
+      return '<button class="list-item' + (state.albumIndex === i ? ' on' : '') + '" data-ai="' + i + '">' +
+        '<span class="li-t">' + esc(a.title) + '</span><span class="li-m">' + (a.images || []).length + ' 张</span></button>';
+    }).join('') || '<p class="status">还没有相册。</p>';
+  }
+  $('#albumList').onclick = function (e) {
+    var b = e.target.closest('[data-ai]');
+    if (b) selectAlbum(Number(b.getAttribute('data-ai')));
+  };
+  function selectAlbum(i) {
+    state.albumIndex = i;
+    var a = state.gallery.albums[i];
+    $('#albumForm').innerHTML =
+      '<label>标题<input id="al-title" value="' + esc(a.title) + '"></label>' +
+      '<label>短名<input id="al-slug" value="' + esc(a.slug) + '"></label>' +
+      '<label>日期<input id="al-date" value="' + esc(a.date) + '"></label>' +
+      '<label>封面<input id="al-cover" value="' + esc(a.cover || '') + '"></label>' +
+      '<label class="full">简介<textarea id="al-desc" rows="2">' + esc(a.desc || '') + '</textarea></label>';
+    renderAlbumImages();
+    renderAlbums();
+  }
+  function renderAlbumImages() {
+    var a = state.gallery.albums[state.albumIndex];
+    if (!a) { $('#albumImages').innerHTML = ''; return; }
+    a.images = a.images || [];
+    $('#albumImages').innerHTML = a.images.map(function (im, i) {
+      var src = typeof im === 'string' ? im : im.src;
+      var cap = typeof im === 'string' ? '' : (im.caption || '');
+      return '<div class="thumb" data-th="' + i + '"><img src="' + esc(src) + '" alt="">' +
+        '<button data-delimg="' + i + '">×</button>' +
+        '<input data-cap="' + i + '" value="' + esc(cap) + '" placeholder="说明"></div>';
+    }).join('');
+    $('#albumImages').onclick = function (e) {
+      var b = e.target.closest('[data-delimg]');
+      if (!b) return;
+      a.images.splice(Number(b.getAttribute('data-delimg')), 1);
+      renderAlbumImages();
+    };
+  }
+  $('#addAlbum').onclick = function () {
+    state.gallery.albums.push({ slug: 'album-' + Date.now().toString(36), title: '新相册', date: new Date().toISOString().slice(0, 10), desc: '', cover: '', images: [] });
+    selectAlbum(state.gallery.albums.length - 1);
+  };
+  $('#addImage').onclick = function () {
+    var a = state.gallery.albums[state.albumIndex];
+    if (!a) return toast('先建一个相册', true);
+    upload(function (j) {
+      a.images = a.images || [];
+      a.images.push({ src: j.path, caption: '' });
+      renderAlbumImages();
+    });
+  };
+  $('#delAlbum').onclick = function () {
+    if (!confirm('删除这个相册？')) return;
+    state.gallery.albums.splice(state.albumIndex, 1);
+    state.albumIndex = 0;
+    if (state.gallery.albums.length) selectAlbum(0); else { renderAlbums(); $('#albumForm').innerHTML = ''; $('#albumImages').innerHTML = ''; }
+  };
+  $('#saveGallery').onclick = function () {
+    var a = state.gallery.albums[state.albumIndex];
+    if (!a) return toast('没有相册', true);
+    a.title = $('#al-title').value; a.slug = $('#al-slug').value; a.date = $('#al-date').value;
+    a.cover = $('#al-cover').value; a.desc = $('#al-desc').value;
+    $$('#albumImages [data-cap]').forEach(function (inp) {
+      var i = Number(inp.getAttribute('data-cap'));
+      if (a.images[i] && typeof a.images[i] === 'object') a.images[i].caption = inp.value;
+      else if (a.images[i]) a.images[i] = { src: a.images[i], caption: inp.value };
+    });
+    post('/api/gallery', { data: state.gallery }).then(function () { toast('相册已保存'); renderAlbums(); })
+      .catch(function (e) { toast(e.message, true); });
+  };
+
+  /* ================= 友链 ================= */
+  function loadFriends() {
+    api('/api/friends').then(function (j) {
+      state.friends = j.data || { list: [] };
+      state.friends.list = state.friends.list || [];
+      $('#friendsForm').innerHTML =
+        '<label class="full">页面导语<textarea id="fr-intro" rows="2">' + esc(state.friends.intro || '') + '</textarea></label>' +
+        '<label class="full">没有友链时的文字<input id="fr-empty" value="' + esc(state.friends.emptyText || '') + '"></label>' +
+        '<label class="full">底部说明<input id="fr-apply" value="' + esc(state.friends.applyText || '') + '"></label>';
+      renderFriends();
+    });
+  }
+  function renderFriends() {
+    var host = $('#friendsRows');
+    host.innerHTML = rowsHTML(state.friends.list, ['name', 'avatar', 'url', 'desc'], { name: '站名', avatar: '头像', url: '链接', desc: '简介' });
+    bindDelete(host, state.friends.list, renderFriends);
+  }
+  $('#addFriend').onclick = function () {
+    state.friends.list.push({ name: '', avatar: '', url: '', desc: '' });
+    renderFriends();
+  };
+  $('#saveFriends').onclick = function () {
+    state.friends.intro = $('#fr-intro').value;
+    state.friends.emptyText = $('#fr-empty').value;
+    state.friends.applyText = $('#fr-apply').value;
+    readRows($('#friendsRows'), state.friends.list, []);
+    post('/api/friends', { data: state.friends }).then(function () { toast('友链已保存'); }).catch(function (e) { toast(e.message, true); });
+  };
+
+  /* ================= 台词 ================= */
+  function loadQuotes() {
+    api('/api/quotes').then(function (j) {
+      state.quotes = (j.data && j.data.quotes) || [];
+      renderQuotes();
+    });
+  }
+  function renderQuotes() {
+    var host = $('#quoteRows');
+    host.innerHTML = rowsHTML(state.quotes, ['text', 'from'], { text: '台词', from: '出处' });
+    bindDelete(host, state.quotes, renderQuotes);
+  }
+  $('#addQuote').onclick = function () { state.quotes.push({ text: '', from: '' }); renderQuotes(); };
+  $('#saveQuotes').onclick = function () {
+    readRows($('#quoteRows'), state.quotes, []);
+    post('/api/quotes', { data: { quotes: state.quotes } }).then(function () { toast('台词已保存'); }).catch(function (e) { toast(e.message, true); });
+  };
+
+  /* ================= 音乐 ================= */
+  function loadMusic() {
+    api('/api/site').then(function (j) {
+      state.site = j.data;
+      state.site.music = state.site.music || { songs: [] };
+      $('#musicTitle').value = state.site.music.title || '';
+      renderMusic();
+    });
+  }
+  function renderMusic() {
+    var host = $('#musicRows');
+    host.innerHTML = (state.site.music.songs || []).map(function (s, i) {
+      return '<div class="r music-row"><label>歌曲 id<input data-song="' + i + '" data-k="id" value="' + esc(s.id) + '"></label>' +
+        '<label>名称<input data-song="' + i + '" data-k="name" value="' + esc(s.name || '') + '"></label>' +
+        '<button class="ghost sm del" data-songdel="' + i + '">×</button></div>';
+    }).join('');
+    host.onclick = function (e) {
+      var b = e.target.closest('[data-songdel]');
+      if (!b) return;
+      state.site.music.songs.splice(Number(b.getAttribute('data-songdel')), 1);
+      renderMusic();
+    };
+  }
+  $('#addMusic').onclick = function () {
+    state.site.music.songs = state.site.music.songs || [];
+    state.site.music.songs.push({ id: '', name: '' });
+    renderMusic();
+  };
+  $('#parseMusic').onclick = function () {
+    var url = $('#musicUrl').value.trim();
+    if (!url) return toast('先粘贴链接', true);
+    post('/api/music/parse', { url: url }).then(function (j) {
+      state.site.music.songs = state.site.music.songs || [];
+      state.site.music.songs.push({ id: j.id, name: j.name });
+      $('#musicUrl').value = '';
+      renderMusic();
+      toast('已添加：' + j.name);
+    }).catch(function (e) { toast(e.message, true); });
+  };
+  $('#saveMusic').onclick = function () {
+    $$('#musicRows [data-song]').forEach(function (inp) {
+      var i = Number(inp.getAttribute('data-song'));
+      state.site.music.songs[i][inp.getAttribute('data-k')] = inp.value;
+    });
+    state.site.music.title = $('#musicTitle').value;
+    post('/api/site', { data: state.site }).then(function () { toast('歌单已保存'); }).catch(function (e) { toast(e.message, true); });
+  };
+
+  /* ================= 环境 ================= */
+  function loadEnv() {
+    $('#envStatus').textContent = '检查中…';
+    api('/api/env').then(function (j) {
+      $('#envStatus').textContent = j.ok ? '必需项都齐了' : '有必需项没满足';
+      $('#envList').innerHTML = j.items.map(function (i) {
+        var dot = i.level === 'info' ? '·' : (i.ok ? '✓' : '✗');
+        var fix = (!i.ok && i.fix && i.fix.url)
+          ? '<a class="ghost sm" href="' + i.fix.url + '" target="_blank" rel="noopener">' + esc(i.fix.text || '去安装') + '</a>'
+          : '';
+        return '<div class="env-row ' + (i.ok ? 'ok' : 'bad') + '">' +
+          '<span class="env-dot">' + dot + '</span>' +
+          '<span class="env-main"><b>' + esc(i.label) + '</b><span>' + esc(i.detail) + '</span></span>' +
+          fix + '</div>';
+      }).join('');
+    }).catch(function (e) {
+      $('#envStatus').textContent = e.message;
+    });
+  }
+  document.addEventListener('click', function (e) {
+    if (e.target.closest && e.target.closest('#recheckEnv')) loadEnv();
+  });
+
+  /* ================= 发布 ================= */
+  function loadStatus() {
+    api('/api/status').then(function (j) {
+      $('#pubStatus').textContent = '分支 ' + (j.branch || '-') + ' · 待提交 ' + j.changes.length + ' 个文件 · 文章 ' + j.posts + ' 篇';
+      if (j.remote && $('#gitRemote') && !$('#gitRemote').value) $('#gitRemote').value = j.remote;
+    });
+  }
+  function gitAction(action) {
+    var el = $('#pubLog');
+    el.textContent = '执行中…';
+    post('/api/git', { action: action, message: $('#commitMsg').value.trim(), remote: $('#gitRemote') ? $('#gitRemote').value.trim() : '', token: $('#gitToken') ? $('#gitToken').value.trim() : '' }).then(function (j) {
+      el.textContent = (j.log || []).join('\n') + (j.hint ? '\n\n' + j.hint : '');
+      toast(j.ok ? '完成' : (j.hint || '失败'), !j.ok);
+      loadStatus();
+    }).catch(function (e) { el.textContent = e.message; toast(e.message, true); });
+  }
+  $('#btnCommit').onclick = function () { gitAction('commit'); };
+  $('#btnPush').onclick = function () { gitAction('push'); };
+  $('#btnSync').onclick = function () { gitAction('sync'); };
+  $('#btnPull').onclick = function () { gitAction('pull'); };
+
+  $('#buildBtn').onclick = function () {
+    post('/api/build', {}).then(function () { toast('已重新构建'); }).catch(function (e) { toast(e.message, true); });
+  };
+  $('#shutdownBtn').onclick = function () {
+    if (!confirm('停止本地服务？页面会在 3 秒后尝试关闭。')) return;
+    post('/api/shutdown', {}).catch(function () {}).finally(function () {
+      var n = 3;
+      document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:80vh;gap:8px;font-family:sans-serif"><b>写作台已停止</b><p id="bye">这个页面会在 3 秒后自动关闭…</p></div>';
+      var t = setInterval(function () {
+        n--;
+        if (n > 0) { $('#bye').textContent = '这个页面会在 ' + n + ' 秒后自动关闭…'; return; }
+        clearInterval(t);
+        window.close();
+        setTimeout(function () {
+          document.body.innerHTML = '<div style="padding:60px;text-align:center;font-family:sans-serif">写作台已停止，可以关掉这个页面了。</div>';
+        }, 500);
+      }, 1000);
+    });
+  };
+  document.addEventListener('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      var active = $('.pane.on');
+      if (!active) return;
+      var map = { 'pane-posts': '#savePost', 'pane-site': '#saveSite', 'pane-about': '#saveAbout', 'pane-moments': '#saveMoments', 'pane-gallery': '#saveGallery', 'pane-friends': '#saveFriends', 'pane-quotes': '#saveQuotes', 'pane-music': '#saveMusic' };
+      var target = map[active.id];
+      if (target && $(target)) $(target).click();
+    }
+  });
+
+  /* 启动 */
+  var startTab = '';
+  try { startTab = new URLSearchParams(location.search).get('tab') || ''; } catch (e) {}
+  if (startTab && $('[data-tab="' + startTab + '"]')) $('[data-tab="' + startTab + '"]').click();
+  else loadPosts();
+})();
+</script>
+</body>
+</html>
