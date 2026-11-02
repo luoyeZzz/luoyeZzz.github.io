@@ -396,3 +396,53 @@
     if (e.key === 'Escape') box.classList.remove('on');
   });
 })();
+
+/* =========================================================
+   音乐：播放进度 + 音量弹层
+   ========================================================= */
+(function () {
+  'use strict';
+  var audio = document.getElementById('music-audio');
+  if (!audio) return;
+  var seek = document.getElementById('music-seek');
+  var cur = document.getElementById('music-cur');
+  var dur = document.getElementById('music-dur');
+  var wrap = document.getElementById('music-vol-wrap');
+  var volBtn = document.getElementById('music-vol-btn');
+  if (!seek || !cur || !dur) return;
+
+  function fmt(t) {
+    if (!isFinite(t) || t < 0) t = 0;
+    var m = Math.floor(t / 60);
+    var sec = Math.floor(t % 60);
+    return m + ':' + (sec < 10 ? '0' + sec : sec);
+  }
+
+  var dragging = false;
+  audio.addEventListener('loadedmetadata', function () { dur.textContent = fmt(audio.duration); });
+  audio.addEventListener('timeupdate', function () {
+    if (!dragging) {
+      seek.value = audio.duration ? Math.round((audio.currentTime / audio.duration) * 1000) : 0;
+    }
+    cur.textContent = fmt(audio.currentTime);
+  });
+  audio.addEventListener('ended', function () { cur.textContent = fmt(audio.duration); seek.value = 1000; });
+  seek.addEventListener('input', function () {
+    dragging = true;
+    cur.textContent = fmt(audio.duration * (Number(seek.value) / 1000));
+  });
+  seek.addEventListener('change', function () {
+    if (audio.duration) audio.currentTime = audio.duration * (Number(seek.value) / 1000);
+    dragging = false;
+  });
+
+  if (wrap && volBtn) {
+    volBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      wrap.classList.toggle('open');
+    });
+    document.addEventListener('click', function (e) {
+      if (!wrap.contains(e.target)) wrap.classList.remove('open');
+    });
+  }
+})();

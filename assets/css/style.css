@@ -708,3 +708,18 @@ body{font-size:1.0625rem;line-height:1.9;-webkit-font-smoothing:antialiased;-moz
   z-index:600;padding:24px;cursor:zoom-out;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .lightbox.on{display:grid}
 .lightbox img{max-width:min(92vw,1100px);max-height:88vh;border-radius:14px;box-shadow:0 30px 80px -30px rgba(0,0,0,.8)}
+
+/* 音乐：进度条 + 音量弹层 */
+.music-progress{display:flex;align-items:center;gap:8px;margin-top:12px}
+.music-progress input[type=range]{flex:1;min-width:0;accent-color:var(--accent);height:16px}
+.music-progress span{font-family:var(--mono);font-size:.6875rem;color:var(--ink-3);min-width:2.6em;text-align:center}
+
+.music-vol-wrap{position:relative}
+.music-vol-pop{
+  position:absolute;right:0;bottom:calc(100% + 10px);z-index:5;
+  padding:12px 14px;border-radius:14px;display:none;
+  background:var(--glass-grad);border:1px solid var(--glass-edge);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:var(--shadow-soft);
+}
+.music-vol-wrap.open .music-vol-pop{display:block;animation:pop .18s var(--ease) both}
+.music-vol-pop input[type=range]{width:128px;accent-color:var(--accent);height:16px}

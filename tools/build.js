@@ -184,6 +184,7 @@ const ICON = {
   bilibili: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7.5" width="18" height="12" rx="3"/><path d="M7.5 4l2.5 3M16.5 4L14 7"/></svg>',
   email: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="3"/><path d="M4 7.5l8 5.5 8-5.5"/></svg>',
   link: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a4 4 0 0 0 5.7 0l2.6-2.6a4 4 0 0 0-5.7-5.7L11 6.3"/><path d="M14 11a4 4 0 0 0-5.7 0l-2.6 2.6a4 4 0 0 0 5.7 5.7L13 17.7"/></svg>',
+  volume: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.2L12 18V6L7.2 9.5H4z"/><path d="M15.5 9a4 4 0 0 1 0 6"/></svg>',
   up: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg>'
 };
 
@@ -319,27 +320,34 @@ function loader(site) {
 function musicDock(site) {
   const m = site.music || {};
   if (!site.features || site.features.music === false || !m.songs || !m.songs.length) return '';
-  const list = m.songs.map(function (s, i) {
-    return '<button type="button" class="music-item' + (i === 0 ? ' is-on' : '') +
-      '" data-id="' + esc(s.id) + '" data-name="' + esc(s.name || s.id) + '">' + esc(s.name || s.id) + '</button>';
+  const list = m.songs.map(function (song, i) {
+    return '<button type="button" class="music-item' + (i === 0 ? ' is-on' : '') + '" data-id="' + esc(song.id) + '" data-name="' + esc(song.name || song.id) + '">' + esc(song.name || song.id) + '</button>';
   }).join('');
   const vol = typeof m.volume === 'number' ? m.volume : 0.3;
   return '' +
-    '<div class="music-dock" id="music-dock" data-volume="' + vol + '">\n' +
-    '  <button type="button" class="music-fab" id="music-fab" aria-label="音乐播放器" aria-expanded="false">' + ICON.note + '</button>\n' +
-    '  <div class="music-panel">\n' +
-    '    <p class="music-title">' + esc(m.title || 'Playlist') + '</p>\n' +
-    '    <p class="music-now" id="music-now">' + esc((m.songs[0] || {}).name || '') + '</p>\n' +
-    '    <div class="music-ctrl">\n' +
-    '      <button type="button" id="music-prev" aria-label="上一首">⏮</button>\n' +
-    '      <button type="button" class="play" id="music-play" aria-label="播放">▶</button>\n' +
-    '      <button type="button" id="music-next" aria-label="下一首">⏭</button>\n' +
-    '      <button type="button" class="music-list-toggle" id="music-list-toggle" aria-label="播放列表" style="margin-left:auto">≡</button>\n' +
-    '    </div>\n' +
-    '    <div class="music-vol"><input type="range" id="music-vol" min="0" max="100" value="' + Math.round(vol * 100) + '" aria-label="音量"><span id="music-vol-num">' + Math.round(vol * 100) + '%</span></div>\n' +
-    '    <div class="music-list" id="music-list">' + list + '</div>\n' +
-    '    <audio id="music-audio" preload="none"></audio>\n' +
-    '  </div>\n</div>\n';
+    '<div class="music-dock" id="music-dock" data-volume="' + vol + '">' +
+    '<button type="button" class="music-fab" id="music-fab" aria-label="音乐播放器" aria-expanded="false">' + ICON.note + '</button>' +
+    '<div class="music-panel">' +
+    '<p class="music-title">' + esc(m.title || 'Playlist') + '</p>' +
+    '<p class="music-now" id="music-now">' + esc((m.songs[0] || {}).name || '') + '</p>' +
+    '<div class="music-progress">' +
+    '<span id="music-cur">0:00</span>' +
+    '<input type="range" id="music-seek" min="0" max="1000" value="0" aria-label="播放进度">' +
+    '<span id="music-dur">0:00</span>' +
+    '</div>' +
+    '<div class="music-ctrl">' +
+    '<button type="button" id="music-prev" aria-label="上一首">⏮</button>' +
+    '<button type="button" class="play" id="music-play" aria-label="播放">▶</button>' +
+    '<button type="button" id="music-next" aria-label="下一首">⏭</button>' +
+    '<div class="music-vol-wrap" id="music-vol-wrap">' +
+    '<button type="button" id="music-vol-btn" aria-label="音量" title="音量">' + ICON.volume + '</button>' +
+    '<div class="music-vol-pop"><input type="range" id="music-vol" min="0" max="100" value="' + Math.round(vol * 100) + '" aria-label="音量"></div>' +
+    '</div>' +
+    '<button type="button" class="music-list-toggle" id="music-list-toggle" aria-label="播放列表">≡</button>' +
+    '</div>' +
+    '<div class="music-list" id="music-list">' + list + '</div>' +
+    '<audio id="music-audio" preload="none"></audio>' +
+    '</div></div>';
 }
 
 function toTop(site) {
