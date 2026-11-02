@@ -249,7 +249,11 @@ function readMinutes(n) { return Math.max(1, Math.round(n / 400)); }
 
 /* ============================ 公共片段 ============================ */
 
-function u(site, p) { return site.base + p; }
+function u(site, p) {
+  const v = String(p || '');
+  if (v.indexOf('http://') === 0 || v.indexOf('https://') === 0 || v.indexOf('//') === 0 || v.indexOf('data:') === 0) return v;
+  return (site.base || '') + v;
+}
 
 function themeBoot() {
   return '<script>(function(){try{var q=new URLSearchParams(location.search).get("theme");' +

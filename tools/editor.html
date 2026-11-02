@@ -178,13 +178,14 @@
         <label>链接短名<input id="slug" placeholder="留空用日期"></label>
       </div>
       <div class="meta2">
-        <label>封面图<input id="cover" placeholder="/assets/img/..."></label>
+        <label>封面图（路径或链接）<input id="cover" placeholder="/assets/img/... 或 https://..."></label>
         <label>&nbsp;<span style="display:flex;gap:6px"><button class="ghost sm" id="coverBtn">上传封面</button><button class="ghost sm" id="coverClear">清除</button></span></label>
       </div>
       <div class="toolbar" id="toolbar">
         <button data-ins="h2">小标题</button><button data-ins="dialogue">对白</button><button data-ins="note">便签</button>
         <button data-ins="quote">引用</button><button data-ins="img">图片</button><button data-ins="hr">分割线</button>
         <button id="uploadBody">＋ 上传图片</button>
+        <button id="linkBody">＋ 图片链接</button>
       </div>
       <div class="body-wrap">
         <textarea id="body" placeholder="用 Markdown 写正文…"></textarea>
@@ -227,6 +228,7 @@
       <div class="rows" id="albumImages" style="margin-top:12px"></div>
       <div class="row-actions">
         <button class="ghost" id="addImage">＋ 上传照片</button>
+        <button class="ghost" id="addImageUrl">＋ 链接照片</button>
         <button class="ghost danger" id="delAlbum">删除相册</button>
         <button class="primary" id="saveGallery">保存相册</button>
       </div>
@@ -562,7 +564,7 @@
   var SITE_SCHEMA = [
     { h: '品牌' },
     { p: 'brand.name', l: '站名' }, { p: 'brand.latin', l: '英文名' }, { p: 'brand.jp', l: '假名' },
-    { p: 'avatar', l: '头像路径', full: true },
+    { p: 'avatar', l: '头像（路径或链接）', full: true },
     { p: 'title', l: '浏览器标题', full: true },
     { p: 'description', l: '站点描述', type: 'area', full: true },
     { p: 'url', l: '站点地址' }, { p: 'since', l: '开站日期', type: 'date' },
@@ -645,7 +647,8 @@
       '<h4>基本</h4>' +
       '<label>名字<input id="a-name" value="' + esc(d.name) + '"></label>' +
       '<label>副标题<input id="a-handle" value="' + esc(d.handle) + '"></label>' +
-      '<label class="full">头像路径<input id="a-avatar" value="' + esc(d.avatar || '') + '"></label>' +
+      '<label class="full">头像（路径或链接）<input id="a-avatar" value="' + esc(d.avatar || '') + '"></label>' +
+      '<button class="ghost sm" id="a-avatarUp" style="justify-self:start">上传头像</button>' +
       '<label class="full">介绍标题<input id="a-introTitle" value="' + esc(d.introTitle || '') + '"></label>' +
       '<h4>档案（第三格是夜间显示的值，可留空）</h4><div class="rows" id="a-facts"></div>' +
       '<button class="ghost sm" id="addFact" style="justify-self:start">＋ 一行</button>' +
@@ -678,6 +681,25 @@
     $('#addFav').onclick = function () { d.favorites = d.favorites || []; d.favorites.push({ name: '', src: '' }); renderAbout(); };
     $('#addLink').onclick = function () { d.links = d.links || []; d.links.push({ label: '', url: '', icon: '' }); renderAbout(); };
   }
+  document.addEventListener('click', function (e) {
+    if (e.target.id === 'a-avatarUp') {
+      upload(function (j) { $('#a-avatar').value = j.path; toast('头像已上传'); });
+    }
+    if (e.target.id === 'linkBody') {
+      var url = window.prompt('粘贴图片链接（https://...）', 'https://');
+      if (url && url.length > 8) insert('\n\n![](' + url.trim() + ')\n\n');
+    }
+    if (e.target.id === 'addImageUrl') {
+      var a = state.gallery.albums[state.albumIndex];
+      if (!a) return;
+      var u2 = window.prompt('粘贴图片链接（https://...）或本地路径', 'https://');
+      if (!u2 || u2.length < 2) return;
+      a.images = a.images || [];
+      a.images.push({ src: u2.trim(), caption: '' });
+      renderAlbumImages();
+    }
+  });
+
   $('#saveAbout').onclick = function () {
     var d = state.about;
     d.name = $('#a-name').value; d.handle = $('#a-handle').value;
@@ -703,7 +725,7 @@
         '<label>日期<input data-mi="' + i + '" data-k="date" value="' + esc(m.date) + '"></label>' +
         '<label>内容<textarea data-mi="' + i + '" data-k="text" rows="2">' + esc(m.text) + '</textarea></label>' +
         '<button class="ghost sm del" data-md="' + i + '">×</button>' +
-        '<label class="full" style="grid-column:1/-1">图片（每行一个路径）<textarea data-mi="' + i + '" data-k="images" rows="2">' + esc((m.images || []).join('\n')) + '</textarea></label>' +
+        '<label class="full" style="grid-column:1/-1">图片（每行一个：本地路径或 https 链接）<textarea data-mi="' + i + '" data-k="images" rows="2">' + esc((m.images || []).join('\n')) + '</textarea></label>' +
         '</div>';
     }).join('');
     host.onclick = function (e) {
@@ -760,7 +782,7 @@
       '<label>标题<input id="al-title" value="' + esc(a.title) + '"></label>' +
       '<label>短名<input id="al-slug" value="' + esc(a.slug) + '"></label>' +
       '<label>日期<input id="al-date" value="' + esc(a.date) + '"></label>' +
-      '<label>封面<input id="al-cover" value="' + esc(a.cover || '') + '"></label>' +
+      '<label>封面（路径或链接）<input id="al-cover" value="' + esc(a.cover || '') + '"></label>' +
       '<label class="full">简介<textarea id="al-desc" rows="2">' + esc(a.desc || '') + '</textarea></label>';
     renderAlbumImages();
     renderAlbums();
