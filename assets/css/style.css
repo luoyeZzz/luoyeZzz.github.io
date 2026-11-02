@@ -1585,6 +1585,11 @@ button.pill .pill-addr{ letter-spacing: .04em; }
 #main{ animation: page-enter .55s var(--ease) both; }
 @media (prefers-reduced-motion: reduce){ #main{ animation: none; } }
 
+/* 昼夜可切换的档案项（如「看板娘」） */
+.fact-night{ display: none; }
+[data-theme="dark"] .fact-night{ display: inline; }
+[data-theme="dark"] .fact-day{ display: none; }
+
 /* 首字下沉：遇到引号开头的段落跳过（构建时加 .no-drop） */
 .prose > p.no-drop::first-letter{
   float: none; font-size: inherit; line-height: inherit;
