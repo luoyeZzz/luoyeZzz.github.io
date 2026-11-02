@@ -199,7 +199,6 @@
     var nowEl = $('#music-now');
     var playBtn = $('#music-play');
     var volEl = $('#music-vol');
-    var volNum = $('#music-vol-num');
     var prevBtn = $('#music-prev');
     var nextBtn = $('#music-next');
     var listToggle = $('#music-list-toggle');
@@ -209,33 +208,101 @@
       return { id: b.getAttribute('data-id'), name: b.getAttribute('data-name') || b.textContent, el: b };
     });
     if (!items.length) return;
+
+    var autoplay = dock.getAttribute('data-autoplay') !== '0';
     var idx = 0;
 
+    /* 音量：上次的值 > 配置值 */
     var saved = null;
     try { saved = parseFloat(localStorage.getItem('luoyue.volume')); } catch (e) {}
     var vol = isNaN(saved) ? parseFloat(dock.getAttribute('data-volume') || '0.3') : saved;
     vol = Math.min(1, Math.max(0, vol));
     audio.volume = vol;
     if (volEl) volEl.value = Math.round(vol * 100);
-    if (volNum) volNum.textContent = Math.round(vol * 100) + '%';
 
+    /* 这次会话上次听到哪 */
+    var st = null;
+    try { st = JSON.parse(sessionStorage.getItem('luoyue.music') || 'null'); } catch (e) {}
+    if (st && st.id) {
+      var hit = -1;
+      items.forEach(function (it, i) { if (it.id === String(st.id)) hit = i; });
+      if (hit > -1) idx = hit;
+    }
+
+    function src(i) {
+      return 'https://music.163.com/song/media/outer/url?id=' + encodeURIComponent(items[i].id) + '.mp3';
+    }
     function mark() {
       items.forEach(function (it, i) { it.el.classList.toggle('is-on', i === idx); });
       if (nowEl) nowEl.textContent = items[idx].name;
     }
-    function src(i) { return 'https://music.163.com/song/media/outer/url?id=' + encodeURIComponent(items[i].id) + '.mp3'; }
     function setPlaying(on) {
       if (playBtn) {
         playBtn.textContent = on ? '❚❚' : '▶';
         playBtn.setAttribute('aria-label', on ? '暂停' : '播放');
       }
+      fab.classList.toggle('is-playing', on);
     }
-    function load(i, autoplay) {
+    function save() {
+      try {
+        sessionStorage.setItem('luoyue.music', JSON.stringify({
+          id: items[idx].id, time: audio.currentTime || 0, playing: !audio.paused
+        }));
+      } catch (e) {}
+    }
+
+    /* 浏览器不让自动响：等第一次点击/按键再放 */
+    var armed = false;
+    function armGesture() {
+      if (armed) return;
+      armed = true;
+      fab.classList.add('is-armed');
+      var kick = function () {
+        armed = false;
+        fab.classList.remove('is-armed');
+        document.removeEventListener('pointerdown', kick);
+        document.removeEventListener('keydown', kick);
+        if (audio.paused) play();
+      };
+      document.addEventListener('pointerdown', kick, { once: true });
+      document.addEventListener('keydown', kick, { once: true });
+    }
+
+    function play() {
+      audio.play().then(function () {
+        setPlaying(true);
+      }).catch(function () {
+        setPlaying(false);
+        armGesture();
+      });
+    }
+
+    function load(i, autoplayNow) {
       idx = i;
       mark();
       audio.src = src(i);
-      if (autoplay) audio.play().catch(function () { setPlaying(false); });
+      if (autoplayNow) play();
     }
+
+    audio.addEventListener('loadedmetadata', function () {
+      if (st && st.id && String(st.id) === items[idx].id && st.time > 1) {
+        try { audio.currentTime = st.time; } catch (e) {}
+      }
+    });
+    audio.addEventListener('play', function () { setPlaying(true); save(); });
+    audio.addEventListener('pause', function () { setPlaying(false); save(); });
+    audio.addEventListener('ended', function () { load((idx + 1) % items.length, true); });
+    audio.addEventListener('error', function () {
+      if (nowEl) nowEl.textContent = items[idx].name + '（这首暂时放不了）';
+      setPlaying(false);
+    });
+
+    var lastSave = 0;
+    audio.addEventListener('timeupdate', function () {
+      var t = Date.now();
+      if (t - lastSave > 2000) { lastSave = t; save(); }
+    });
+    window.addEventListener('pagehide', save);
 
     fab.addEventListener('click', function () {
       var open = dock.classList.toggle('is-open');
@@ -253,29 +320,29 @@
     if (playBtn) {
       playBtn.addEventListener('click', function () {
         if (!audio.src) { load(idx, true); return; }
-        if (audio.paused) audio.play().then(function () { setPlaying(true); }).catch(function () { setPlaying(false); });
+        if (audio.paused) play();
         else { audio.pause(); setPlaying(false); }
       });
     }
     if (prevBtn) prevBtn.addEventListener('click', function () { load((idx - 1 + items.length) % items.length, true); });
     if (nextBtn) nextBtn.addEventListener('click', function () { load((idx + 1) % items.length, true); });
-    audio.addEventListener('play', function () { setPlaying(true); });
-    audio.addEventListener('pause', function () { setPlaying(false); });
-    audio.addEventListener('ended', function () { load((idx + 1) % items.length, true); });
-    audio.addEventListener('error', function () {
-      if (nowEl) nowEl.textContent = items[idx].name + '（这首暂时放不了）';
-      setPlaying(false);
-    });
     if (volEl) {
       volEl.addEventListener('input', function () {
         vol = Number(this.value) / 100;
         audio.volume = vol;
-        if (volNum) volNum.textContent = Math.round(vol * 100) + '%';
         try { localStorage.setItem('luoyue.volume', String(vol)); } catch (e) {}
       });
     }
+
     mark();
     setPlaying(false);
+
+    /* 进站自动播放：上次在播就续上，否则看配置 */
+    var resumePlaying = !!(st && st.playing);
+    if (autoplay || resumePlaying) {
+      load(idx, false);
+      play();
+    }
   })();
 
   /* ---------------- 复制 ---------------- */

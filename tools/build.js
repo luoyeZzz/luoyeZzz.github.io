@@ -325,7 +325,7 @@ function musicDock(site) {
   }).join('');
   const vol = typeof m.volume === 'number' ? m.volume : 0.3;
   return '' +
-    '<div class="music-dock" id="music-dock" data-volume="' + vol + '">' +
+    '<div class="music-dock" id="music-dock" data-volume="' + vol + '"' + (m.autoplay === false ? ' data-autoplay="0"' : ' data-autoplay="1"') + '>' +
     '<button type="button" class="music-fab" id="music-fab" aria-label="音乐播放器" aria-expanded="false">' + ICON.note + '</button>' +
     '<div class="music-panel">' +
     '<p class="music-title">' + esc(m.title || 'Playlist') + '</p>' +

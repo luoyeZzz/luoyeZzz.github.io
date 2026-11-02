@@ -723,3 +723,8 @@ body{font-size:1.0625rem;line-height:1.9;-webkit-font-smoothing:antialiased;-moz
 }
 .music-vol-wrap.open .music-vol-pop{display:block;animation:pop .18s var(--ease) both}
 .music-vol-pop input[type=range]{width:128px;accent-color:var(--accent);height:16px}
+
+/* 自动播放被浏览器拦截时，让音符按钮轻轻呼吸，提示点一下 */
+.music-fab.is-armed{animation:fab-pulse 2.2s var(--ease) infinite}
+.music-fab.is-playing{color:var(--accent)}
+@keyframes fab-pulse{0%,100%{box-shadow:var(--glass-shadow)}50%{box-shadow:0 0 0 6px var(--accent-wash),var(--glass-shadow)}}

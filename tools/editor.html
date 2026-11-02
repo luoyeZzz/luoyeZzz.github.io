@@ -250,6 +250,7 @@
     <div class="card">
       <div class="form">
         <label class="full">歌单标题<input id="musicTitle"></label>
+        <label class="chk full"><input type="checkbox" id="musicAutoplay"> 进站自动播放（浏览器首次可能要求点一下）</label>
         <label class="full">粘贴网易云歌曲链接，自动解析
           <span style="display:flex;gap:8px;margin-top:4px">
             <input id="musicUrl" placeholder="https://music.163.com/song?id=1809646618" style="flex:1">
@@ -805,6 +806,7 @@
       state.site = j.data;
       state.site.music = state.site.music || { songs: [] };
       $('#musicTitle').value = state.site.music.title || '';
+      if ($('#musicAutoplay')) $('#musicAutoplay').checked = state.site.music.autoplay !== false;
       renderMusic();
     });
   }
@@ -844,6 +846,7 @@
       state.site.music.songs[i][inp.getAttribute('data-k')] = inp.value;
     });
     state.site.music.title = $('#musicTitle').value;
+    if ($('#musicAutoplay')) state.site.music.autoplay = $('#musicAutoplay').checked;
     post('/api/site', { data: state.site }).then(function () { toast('歌单已保存'); }).catch(function (e) { toast(e.message, true); });
   };
 
