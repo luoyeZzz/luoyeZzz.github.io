@@ -416,9 +416,18 @@ function rowHTML(site, p, from) {
 
 /* ============================ 页面 ============================ */
 
+function inferIcon(l) {
+  const k = String(l.icon || '').toLowerCase();
+  if (k) return k;
+  const url = String(l.url || '').toLowerCase();
+  if (url.indexOf('github.com') > -1) return 'github';
+  if (url.indexOf('bilibili.com') > -1 || url.indexOf('b23.tv') > -1) return 'bilibili';
+  if (url.indexOf('mailto:') === 0 || url.indexOf('@') > -1 && url.indexOf('http') < 0) return 'email';
+  return 'link';
+}
 function linkPills(list) {
   return (list || []).map(function (l) {
-    const k = String(l.icon || '').toLowerCase();
+    const k = inferIcon(l);
     if (k === 'email') {
       const addr = String(l.url || '').replace(/^mailto:/i, '');
       return '<button type="button" class="pill" data-copy="' + esc(addr) + '">' + ICON.email + '<span>' + esc(addr) + '</span></button>';
