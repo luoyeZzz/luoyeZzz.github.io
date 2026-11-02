@@ -728,3 +728,19 @@ body{font-size:1.0625rem;line-height:1.9;-webkit-font-smoothing:antialiased;-moz
 .music-fab.is-armed{animation:fab-pulse 2.2s var(--ease) infinite}
 .music-fab.is-playing{color:var(--accent)}
 @keyframes fab-pulse{0%,100%{box-shadow:var(--glass-shadow)}50%{box-shadow:0 0 0 6px var(--accent-wash),var(--glass-shadow)}}
+
+/* 音量：卡片内的展开行（不再浮在内容上） */
+.music-vol-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:transparent;
+  color:var(--ink);cursor:pointer;display:grid;place-items:center;transition:.25s}
+.music-vol-btn:hover{border-color:var(--accent-soft);color:var(--accent)}
+.music-vol-row{display:flex;align-items:center;gap:10px;max-height:0;opacity:0;overflow:hidden;
+  transition:max-height .3s var(--ease),opacity .22s var(--ease),margin .3s var(--ease)}
+.music-panel.vol-open .music-vol-row{max-height:56px;opacity:1;margin-top:10px}
+.music-vol-row input[type=range]{flex:1;min-width:0;accent-color:var(--accent);height:16px}
+.music-vol-row span{font-family:var(--mono);font-size:.6875rem;color:var(--ink-3);min-width:3em;text-align:right}
+
+/* 歌单：展开动画 */
+.music-list{display:block;max-height:0;overflow:hidden;opacity:0;margin-top:0;padding-top:0;border-top:0;
+  transition:max-height .32s var(--ease),opacity .24s var(--ease),margin .32s var(--ease),padding .32s var(--ease)}
+.music-dock.show-list .music-list{max-height:200px;overflow-y:auto;opacity:1;margin-top:12px;
+  padding-top:12px;border-top:1px solid var(--line-soft)}

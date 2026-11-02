@@ -199,6 +199,8 @@
     var nowEl = $('#music-now');
     var playBtn = $('#music-play');
     var volEl = $('#music-vol');
+    var volNum = $('#music-vol-num');
+    var userPaused = false;
     var prevBtn = $('#music-prev');
     var nextBtn = $('#music-next');
     var listToggle = $('#music-list-toggle');
@@ -246,7 +248,7 @@
     function save() {
       try {
         sessionStorage.setItem('luoyue.music', JSON.stringify({
-          id: items[idx].id, time: audio.currentTime || 0, playing: !audio.paused
+          id: items[idx].id, time: audio.currentTime || 0, playing: !audio.paused, paused: userPaused
         }));
       } catch (e) {}
     }
@@ -269,6 +271,7 @@
     }
 
     function play() {
+      userPaused = false;
       audio.play().then(function () {
         setPlaying(true);
       }).catch(function () {
@@ -321,7 +324,7 @@
       playBtn.addEventListener('click', function () {
         if (!audio.src) { load(idx, true); return; }
         if (audio.paused) play();
-        else { audio.pause(); setPlaying(false); }
+        else { userPaused = true; audio.pause(); setPlaying(false); save(); }
       });
     }
     if (prevBtn) prevBtn.addEventListener('click', function () { load((idx - 1 + items.length) % items.length, true); });
@@ -330,6 +333,7 @@
       volEl.addEventListener('input', function () {
         vol = Number(this.value) / 100;
         audio.volume = vol;
+        if (volNum) volNum.textContent = Math.round(vol * 100) + '%';
         try { localStorage.setItem('luoyue.volume', String(vol)); } catch (e) {}
       });
     }
@@ -339,7 +343,8 @@
 
     /* 进站自动播放：上次在播就续上，否则看配置 */
     var resumePlaying = !!(st && st.playing);
-    if (autoplay || resumePlaying) {
+    var respectPause = !!(st && st.paused);
+    if (!respectPause && (autoplay || resumePlaying)) {
       load(idx, false);
       play();
     }
@@ -474,7 +479,7 @@
   var seek = document.getElementById('music-seek');
   var cur = document.getElementById('music-cur');
   var dur = document.getElementById('music-dur');
-  var wrap = document.getElementById('music-vol-wrap');
+  var panel = document.querySelector('.music-panel');
   var volBtn = document.getElementById('music-vol-btn');
   if (!seek || !cur || !dur) return;
 
@@ -503,13 +508,13 @@
     dragging = false;
   });
 
-  if (wrap && volBtn) {
+  if (panel && volBtn) {
     volBtn.addEventListener('click', function (e) {
       e.stopPropagation();
-      wrap.classList.toggle('open');
+      panel.classList.toggle('vol-open');
     });
     document.addEventListener('click', function (e) {
-      if (!wrap.contains(e.target)) wrap.classList.remove('open');
+      if (!panel.contains(e.target)) panel.classList.remove('vol-open');
     });
   }
 })();

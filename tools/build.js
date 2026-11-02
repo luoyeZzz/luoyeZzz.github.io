@@ -339,11 +339,12 @@ function musicDock(site) {
     '<button type="button" id="music-prev" aria-label="上一首">⏮</button>' +
     '<button type="button" class="play" id="music-play" aria-label="播放">▶</button>' +
     '<button type="button" id="music-next" aria-label="下一首">⏭</button>' +
-    '<div class="music-vol-wrap" id="music-vol-wrap">' +
-    '<button type="button" id="music-vol-btn" aria-label="音量" title="音量">' + ICON.volume + '</button>' +
-    '<div class="music-vol-pop"><input type="range" id="music-vol" min="0" max="100" value="' + Math.round(vol * 100) + '" aria-label="音量"></div>' +
-    '</div>' +
+    '<button type="button" class="music-vol-btn" id="music-vol-btn" aria-label="音量" title="音量">' + ICON.volume + '</button>' +
     '<button type="button" class="music-list-toggle" id="music-list-toggle" aria-label="播放列表">≡</button>' +
+    '</div>' +
+    '<div class="music-vol-row" id="music-vol-row">' +
+    '<input type="range" id="music-vol" min="0" max="100" value="' + Math.round(vol * 100) + '" aria-label="音量">' +
+    '<span id="music-vol-num">' + Math.round(vol * 100) + '%' + '</span>' +
     '</div>' +
     '<div class="music-list" id="music-list">' + list + '</div>' +
     '<audio id="music-audio" preload="none"></audio>' +
