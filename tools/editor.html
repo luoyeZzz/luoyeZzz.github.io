@@ -849,7 +849,7 @@
       state.site.music.songs.push({ id: j.id, name: j.name, ok: j.playable !== false });
       $('#musicUrl').value = '';
       renderMusic();
-      toast(j.hint ? ('已添加：' + j.name + '（' + j.hint + '）') : ('已添加：' + j.name);
+      toast(j.hint ? ('已添加：' + j.name + '（' + j.hint + '）') : ('已添加：' + j.name));
     }).catch(function (e) { toast(e.message, true); });
   };
   $('#saveMusic').onclick = function () {
