@@ -212,7 +212,6 @@
     var playBtn = $('#music-play');
     var volEl = $('#music-vol');
     var volNum = $('#music-vol-num');
-    var userPaused = !!(st && st.paused);
     var prevBtn = $('#music-prev');
     var nextBtn = $('#music-next');
     var listToggle = $('#music-list-toggle');
@@ -242,6 +241,8 @@
       items.forEach(function (it, i) { if (it.id === String(st.id)) hit = i; });
       if (hit > -1) idx = hit;
     }
+    /* 必须在读到 st 之后再判断，否则永远是 false */
+    var userPaused = !!(st && st.paused);
 
     function src(i) {
       return 'https://music.163.com/song/media/outer/url?id=' + encodeURIComponent(items[i].id) + '.mp3';
