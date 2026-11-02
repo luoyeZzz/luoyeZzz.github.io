@@ -3,7 +3,9 @@
     {
       "date": "2026-11-02",
       "text": "把整站拆了重写：内容改成 markdown，网址去掉了 .html，还加了说说、相册和友链。折腾到后半夜，但比之前顺手多了。",
-      "images": []
+      "images": [
+        "/assets/img/hero-night.jpg"
+      ]
     },
     {
       "date": "2026-10-22",

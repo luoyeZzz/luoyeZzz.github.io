@@ -344,3 +344,55 @@
     }, { passive: true });
   })();
 })();
+
+/* =========================================================
+   文章返回按钮 / 图片放大（独立于上面的作用域）
+   ========================================================= */
+(function () {
+  'use strict';
+
+  /* 返回按钮：滚动出视口后在左上角浮出 */
+  var inline = document.querySelector('.back-inline');
+  var floater = document.querySelector('.back-float');
+  if (inline && floater) {
+    var fromArchive = false;
+    try { fromArchive = new URLSearchParams(location.search).get('from') === 'archive'; } catch (e) {}
+    if (fromArchive) {
+      var href = inline.getAttribute('href') || '/posts/';
+      var archive = href.replace(/\/posts\/$/, '/archive/');
+      inline.setAttribute('href', archive);
+      floater.setAttribute('href', archive);
+      inline.textContent = '← 返回归档';
+      floater.textContent = '← 归档';
+    }
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          floater.classList.toggle('is-on', !en.isIntersecting);
+        });
+      }, { threshold: 0 });
+      io.observe(inline);
+    } else {
+      floater.classList.add('is-on');
+    }
+  }
+
+  /* 图片放大 */
+  var box = document.createElement('div');
+  box.className = 'lightbox';
+  box.innerHTML = '<img alt="">';
+  document.body.appendChild(box);
+  var big = box.querySelector('img');
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest ? e.target.closest('[data-zoom]') : null;
+    if (t) {
+      big.src = t.getAttribute('src');
+      box.classList.add('on');
+      return;
+    }
+    if (e.target === box || e.target === big) box.classList.remove('on');
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') box.classList.remove('on');
+  });
+})();

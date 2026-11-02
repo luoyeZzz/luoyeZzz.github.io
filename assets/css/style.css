@@ -648,3 +648,63 @@ body.nav-open .nav-toggle span:nth-child(3){transform:translateY(-5.5px) rotate(
 .rail .toc #toc a{display:block;text-decoration:none;color:var(--ink-2);font-size:.875rem;padding:6px 0;opacity:.62;
   transition:opacity .25s,color .25s,transform .25s}
 .rail .toc #toc a:hover{opacity:1;color:var(--accent);transform:translateX(3px)}
+
+/* ================= v3.1 修正 ================= */
+
+/* 顶栏：导航真正居中 */
+.nav-in{grid-template-columns:1fr auto 1fr}
+.brand{justify-self:start}
+.menu{justify-self:center}
+.nav-tools{justify-self:end}
+@media (max-width:900px){
+  .nav-in{display:flex;justify-content:space-between;position:relative;align-items:center}
+}
+
+/* 页脚：品牌 / 导航 / 日文，三段对齐 */
+.foot-inner{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:24px}
+.foot-nav{justify-self:center}
+.foot-tag{justify-self:end;text-align:right}
+@media (max-width:900px){
+  .foot-inner{grid-template-columns:1fr;gap:14px}
+  .foot-nav,.foot-tag{justify-self:start;text-align:left}
+}
+
+/* 字体：更清晰、略大一点 */
+:root{
+  --sans:"Microsoft YaHei UI","Microsoft YaHei","MiSans","Mi Sans","PingFang SC","Noto Sans SC",system-ui,sans-serif;
+  --fs-meta:.8125rem;
+}
+body{font-size:1.0625rem;line-height:1.9;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+.kicker span,.sec-head .n,.sec-head a,.row .no,.row .meta,.entry .n,.entry .go,.rail dt,
+.music-title,.music-vol span,.tl-date,.tl-year span,.foot-copy,.hero-hint,.page-kicker{font-size:.8125rem}
+.rail dt,.music-title,.tl-date,.foot-copy{font-size:.75rem}
+.tag-chip{font-size:.8125rem}
+.rail dd{font-size:1rem}
+.menu a{font-size:.875rem}
+.pager span{font-size:.8125rem}
+
+/* 文章页：左上返回 */
+.article-top{padding:24px 0 0}
+.article-top .pill-btn{font-size:.8125rem}
+.back-float{
+  position:fixed;left:20px;top:84px;z-index:60;
+  opacity:0;pointer-events:none;transform:translateY(-6px);
+  transition:opacity .25s,transform .25s;
+}
+.back-float.is-on{opacity:1;pointer-events:auto;transform:none}
+
+/* 说说：头像 */
+.moment{grid-template-columns:40px 88px minmax(0,1fr);align-items:start}
+.moment .ava{width:40px;height:40px;border-radius:50%;object-fit:cover;border:1px solid var(--glass-edge)}
+[data-theme="dark"] .moment .ava{border-color:rgba(255,255,255,.2)}
+@media (max-width:900px){
+  .moment{grid-template-columns:40px 1fr;gap:10px 12px}
+  .moment time{grid-column:2;padding-top:0}
+}
+
+/* 图片放大 */
+[data-zoom]{cursor:zoom-in}
+.lightbox{position:fixed;inset:0;background:rgba(14,10,17,.88);display:none;place-items:center;
+  z-index:600;padding:24px;cursor:zoom-out;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.lightbox.on{display:grid}
+.lightbox img{max-width:min(92vw,1100px);max-height:88vh;border-radius:14px;box-shadow:0 30px 80px -30px rgba(0,0,0,.8)}
