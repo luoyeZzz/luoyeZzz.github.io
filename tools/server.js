@@ -132,18 +132,45 @@ const MIME = {
   '.ico': 'image/x-icon', '.xml': 'application/xml; charset=utf-8', '.txt': 'text/plain; charset=utf-8'
 };
 
-function serveFile(res, file) {
-  fs.readFile(file, function (err, buf) {
-    if (err) {
+function serveFile(res, file, req) {
+  fs.stat(file, function (err, st) {
+    if (err || !st.isFile()) {
       res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
       const nf = path.join(ROOT, '404.html');
       return res.end(fs.existsSync(nf) ? fs.readFileSync(nf) : 'Not found');
     }
+    const type = MIME[path.extname(file).toLowerCase()] || 'application/octet-stream';
+    const range = req && req.headers && req.headers.range;
+
+    if (range) {
+      const m = /bytes=(\d*)-(\d*)/.exec(range);
+      if (m) {
+        let start = m[1] ? parseInt(m[1], 10) : 0;
+        let end = m[2] ? parseInt(m[2], 10) : st.size - 1;
+        if (isNaN(start)) start = 0;
+        if (isNaN(end) || end >= st.size) end = st.size - 1;
+        if (start > end) {
+          res.writeHead(416, { 'Content-Range': 'bytes */' + st.size });
+          return res.end();
+        }
+        res.writeHead(206, {
+          'Content-Type': type,
+          'Content-Length': end - start + 1,
+          'Content-Range': 'bytes ' + start + '-' + end + '/' + st.size,
+          'Accept-Ranges': 'bytes',
+          'Cache-Control': 'no-store'
+        });
+        return fs.createReadStream(file, { start: start, end: end }).pipe(res);
+      }
+    }
+
     res.writeHead(200, {
-      'Content-Type': MIME[path.extname(file).toLowerCase()] || 'application/octet-stream',
+      'Content-Type': type,
+      'Content-Length': st.size,
+      'Accept-Ranges': 'bytes',
       'Cache-Control': 'no-store'
     });
-    res.end(buf);
+    fs.createReadStream(file).pipe(res);
   });
 }
 
@@ -167,7 +194,7 @@ const server = http.createServer(async function (req, res) {
   try {
     /* ---- 写作台页面 ---- */
     if (req.method === 'GET' && (p === '/admin' || p === '/admin/' || p === '/tools/editor.html')) {
-      return serveFile(res, path.join(__dirname, 'editor.html'));
+      return serveFile(res, path.join(__dirname, 'editor.html'), req);
     }
 
     /* ---- 站点配置 ---- */
@@ -558,7 +585,7 @@ const server = http.createServer(async function (req, res) {
     /* ---- 静态 ---- */
     if (req.method === 'GET') {
       const file = resolveStatic(p);
-      if (file && fs.existsSync(file) && fs.statSync(file).isFile()) return serveFile(res, file);
+      if (file && fs.existsSync(file) && fs.statSync(file).isFile()) return serveFile(res, file, req);
     }
 
     res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });

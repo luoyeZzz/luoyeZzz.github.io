@@ -238,7 +238,9 @@
     try { st = JSON.parse(sessionStorage.getItem('luoyue.music') || 'null'); } catch (e) {}
     if (st && st.id) {
       var hit = -1;
-      items.forEach(function (it, i) { if (it.id === String(st.id)) hit = i; });
+      items.forEach(function (it, i) {
+        if (String(it.id) === String(st.id) || (it.src && it.src === st.id)) hit = i;
+      });
       if (hit > -1) idx = hit;
     }
     /* 必须在读到 st 之后再判断，否则永远是 false */
@@ -261,8 +263,11 @@
     }
     function save() {
       try {
+        var t = audio.currentTime || 0;
+        /* 刚加载还没跳到位时，保留原来的续播点，别被 0 覆盖 */
+        if (t < 1 && resumeAt > 1) t = resumeAt;
         sessionStorage.setItem('luoyue.music', JSON.stringify({
-          id: items[idx].id, time: audio.currentTime || 0, playing: !audio.paused, paused: userPaused
+          id: items[idx].id || items[idx].src, time: t, playing: !audio.paused, paused: userPaused
         }));
       } catch (e) {}
     }
@@ -288,24 +293,36 @@
       userPaused = false;
       audio.play().then(function () {
         setPlaying(true);
+        seekToResume();
       }).catch(function () {
         setPlaying(false);
         armGesture();
       });
     }
 
+    var usedResume = false;
     function load(i, autoplayNow) {
       idx = i;
       mark();
       audio.src = src(i);
+      resumeAt = (!usedResume && st && st.time) ? st.time : 0;
+      usedResume = true;
       if (autoplayNow) play();
     }
 
-    audio.addEventListener('loadedmetadata', function () {
-      if (st && st.id && String(st.id) === items[idx].id && st.time > 1) {
-        try { audio.currentTime = st.time; } catch (e) {}
-      }
-    });
+    /* 续播位置：元数据加载后、以及真正开始播放后各跳一次
+       （浏览器拦截自动播放时，用户点一下才开始，此时元数据早已加载完） */
+    var resumeAt = (st && st.time) ? st.time : 0;
+    function seekToResume() {
+      if (!resumeAt || resumeAt < 1) return;
+      var dur = audio.duration;
+      if (!isFinite(dur) || dur < 1) return;
+      if (Math.abs(audio.currentTime - resumeAt) < 1.5) return;
+      try { audio.currentTime = Math.min(resumeAt, dur - 1); } catch (e) {}
+    }
+    audio.addEventListener('loadedmetadata', seekToResume);
+    audio.addEventListener('canplay', seekToResume);
+    audio.addEventListener('playing', seekToResume);
     audio.addEventListener('play', function () { setPlaying(true); save(); });
     audio.addEventListener('pause', function () { setPlaying(false); save(); });
     audio.addEventListener('ended', function () { load((idx + 1) % items.length, true); });
@@ -324,6 +341,7 @@
       if (t - lastSave > 2000) { lastSave = t; save(); }
     });
     window.addEventListener('pagehide', save);
+    document.addEventListener('visibilitychange', function () { if (document.hidden) save(); });
 
     fab.addEventListener('click', function () {
       var open = dock.classList.toggle('is-open');
