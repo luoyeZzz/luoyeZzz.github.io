@@ -161,6 +161,10 @@
     "volume": 0.3,
     "songs": [
       {
+        "src": "/assets/audio/橋本由香利 - Lost my pieces.mp3",
+        "name": "Lost my pieces"
+      },
+      {
         "id": "2756019215",
         "name": "新月的摇篮曲（其一）",
         "ok": true

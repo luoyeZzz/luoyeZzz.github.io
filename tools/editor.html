@@ -402,6 +402,12 @@
       <div class="form">
         <label class="full">歌单标题<input id="musicTitle"></label>
         <label class="chk full"><input type="checkbox" id="musicAutoplay"> 进站自动播放（浏览器首次可能要求点一下）</label>
+        <label class="full">进站初始音量（只影响第一次访问，之后跟随访客自己调的）
+          <span style="display:flex;gap:10px;align-items:center;margin-top:6px">
+            <input type="range" id="musicVolume" min="0" max="100" step="1" style="flex:1">
+            <b id="musicVolumeNum" style="min-width:3.2em;text-align:right;font-size:.8125rem">30%</b>
+          </span>
+        </label>
         <label class="full">粘贴网易云歌曲链接，自动解析
           <span style="display:flex;gap:8px;margin-top:4px">
             <input id="musicUrl" placeholder="https://music.163.com/song?id=1809646618" style="flex:1">
@@ -1271,6 +1277,11 @@
       state.site.music = state.site.music || { songs: [] };
       $('#musicTitle').value = state.site.music.title || '';
       if ($('#musicAutoplay')) $('#musicAutoplay').checked = state.site.music.autoplay !== false;
+      var vol0 = typeof state.site.music.volume === 'number' ? state.site.music.volume : 0.3;
+      if ($('#musicVolume')) {
+        $('#musicVolume').value = Math.round(vol0 * 100);
+        $('#musicVolumeNum').textContent = Math.round(vol0 * 100) + '%';
+      }
       renderMusic();
     });
   }
@@ -1393,12 +1404,18 @@
       toast(j.hint ? ('已添加：' + j.name + '（' + j.hint + '）') : ('已添加：' + j.name));
     }).catch(function (e) { toast(e.message, true); });
   };
+  if ($('#musicVolume')) {
+    $('#musicVolume').addEventListener('input', function () {
+      $('#musicVolumeNum').textContent = this.value + '%';
+    });
+  }
   $('#saveMusic').onclick = function () {
     $$('#musicRows [data-song]').forEach(function (inp) {
       var i = Number(inp.getAttribute('data-song'));
       state.site.music.songs[i][inp.getAttribute('data-k')] = inp.value;
     });
     state.site.music.title = $('#musicTitle').value;
+    if ($('#musicVolume')) state.site.music.volume = Number($('#musicVolume').value) / 100;
     if ($('#musicAutoplay')) state.site.music.autoplay = $('#musicAutoplay').checked;
     post('/api/site', { data: state.site }).then(function () { toast('歌单已保存'); }).catch(function (e) { toast(e.message, true); });
   };
