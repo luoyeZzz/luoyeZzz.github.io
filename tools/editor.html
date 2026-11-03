@@ -1095,6 +1095,12 @@
   });
   if ($('#mFilter')) $('#mFilter').addEventListener('input', renderMomentList);
 
+  $('#addMoment').onclick = function () {
+    state.moments.items.unshift({ date: new Date().toISOString().slice(0, 10), text: '', images: [] });
+    state.momentIndex = 0;
+    renderMoments();
+    setTimeout(function () { var t = document.getElementById('mText'); if (t) t.focus(); }, 30);
+  };
   $('#saveMoments').onclick = function () {
     readMomentForm();
     post('/api/moments', { data: state.moments }).then(function () {

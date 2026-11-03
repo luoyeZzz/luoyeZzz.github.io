@@ -95,6 +95,12 @@
     doc.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') doc.body.classList.remove('nav-open');
     });
+    doc.addEventListener('click', function (e) {
+      if (!doc.body.classList.contains('nav-open')) return;
+      if (menu.contains(e.target) || navToggle.contains(e.target)) return;
+      doc.body.classList.remove('nav-open');
+      navToggle.setAttribute('aria-expanded', 'false');
+    });
   }
 
   /* ---------------- 运行天数 / 年份 ---------------- */

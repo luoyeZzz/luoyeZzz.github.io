@@ -809,3 +809,26 @@ body{font-size:1.0625rem;line-height:1.9;-webkit-font-smoothing:antialiased;-moz
   .row .arw{display:none}
   .row:hover{padding-left:0}
 }
+
+/* 手机端导航：玻璃下拉菜单（更模糊、更高对比） */
+@media (max-width:900px){
+  .menu{
+    position:fixed;top:84px;left:50%;right:auto;grid-column:auto;
+    width:min(calc(100vw - 32px), 480px);transform:translateX(-50%);
+    gap:4px;padding:8px;
+    border-radius:18px;border:1px solid var(--glass-edge);
+    background:var(--surface-solid);
+    -webkit-backdrop-filter:blur(30px) saturate(1.7);
+    backdrop-filter:blur(30px) saturate(1.7);
+    box-shadow:0 26px 60px -26px rgba(30,18,26,.5),inset 0 1px 0 rgba(255,255,255,.5);
+    max-height:min(70vh,520px);overflow:auto;overscroll-behavior:contain;
+    transform-origin:top center;
+  }
+  body.nav-open .menu{display:flex;animation:menu-fade .18s var(--ease) both}
+  .menu a{padding:12px 14px;font-size:.9375rem;border-radius:12px;font-weight:500;color:var(--ink)}
+  .menu a:hover,.menu a:active{background:var(--accent-wash);color:var(--accent)}
+  .nav-toggle[aria-expanded="true"] span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+  .nav-toggle[aria-expanded="true"] span:nth-child(2){opacity:0}
+  .nav-toggle[aria-expanded="true"] span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+}
+@keyframes menu-fade{from{opacity:0}to{opacity:1}}
