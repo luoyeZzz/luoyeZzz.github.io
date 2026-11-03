@@ -218,7 +218,7 @@
     if (!audio || !fab) return;
 
     var items = $$('.music-item', dock).map(function (b) {
-      return { id: b.getAttribute('data-id'), name: b.getAttribute('data-name') || b.textContent, el: b };
+      return { id: b.getAttribute('data-id'), src: b.getAttribute('data-src') || '', name: b.getAttribute('data-name') || b.textContent, el: b };
     });
     if (!items.length) return;
 
@@ -245,6 +245,7 @@
     var userPaused = !!(st && st.paused);
 
     function src(i) {
+      if (items[i].src) return items[i].src;
       return 'https://music.163.com/song/media/outer/url?id=' + encodeURIComponent(items[i].id) + '.mp3';
     }
     function mark() {

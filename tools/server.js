@@ -366,14 +366,15 @@ const server = http.createServer(async function (req, res) {
       name = name.replace(/^\.+/, '') || 'image-' + Date.now() + '.jpg';
       const data = String(body.data || '').replace(/^data:[^;]+;base64,/, '');
       if (!data) return sendJSON(res, 400, { ok: false, error: '缺少文件数据' });
-      const dir = path.join(ROOT, 'assets', 'img', 'posts');
+      const isAudio = String(body.type || '') === 'audio' || /.(mp3|m4a|ogg|wav|flac|aac)$/i.test(name);
+      const dir = isAudio ? path.join(ROOT, 'assets', 'audio') : path.join(ROOT, 'assets', 'img', 'posts');
       ensureDir(dir);
       const ext = path.extname(name);
       const base = path.basename(name, ext) || 'image';
       let finalName = name, n = 1;
       while (fs.existsSync(path.join(dir, finalName))) finalName = base + '-' + (n++) + ext;
       fs.writeFileSync(path.join(dir, finalName), Buffer.from(data, 'base64'));
-      return sendJSON(res, 200, { ok: true, path: '/assets/img/posts/' + finalName, name: finalName });
+      return sendJSON(res, 200, { ok: true, path: (isAudio ? '/assets/audio/' : '/assets/img/posts/') + finalName, name: finalName });
     }
 
     /* ---- 构建 ---- */

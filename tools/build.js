@@ -341,7 +341,7 @@ function musicDock(site) {
   if (!site.features || site.features.music === false || !m.songs || !m.songs.length) return '';
   const list = m.songs.map(function (song, i) {
     const bad = song && song.ok === false;
-    return '<button type="button" class="music-item' + (i === 0 ? ' is-on' : '') + '" data-id="' + esc(song.id) + '" data-name="' + esc(song.name || song.id) + '"' + (bad ? ' data-ok="0"' : '') + '>' + esc(song.name || song.id) + (bad ? ' ⚠' : '') + '</button>';
+    return '<button type="button" class="music-item' + (i === 0 ? ' is-on' : '') + '" data-id="' + esc(song.id || '') + '" data-name="' + esc(song.name || song.id || '本地音乐') + '"' + (song.src ? ' data-src="' + esc(song.src) + '"' : '') + (bad ? ' data-ok="0"' : '') + '>' + (i + 1) + '. ' + esc(song.name || song.id || '本地音乐') + (bad ? ' ⚠' : '') + '</button>';
   }).join('');
   const vol = typeof m.volume === 'number' ? m.volume : 0.3;
   return '' +
