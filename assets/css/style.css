@@ -785,3 +785,12 @@ body{font-size:1.0625rem;line-height:1.9;-webkit-font-smoothing:antialiased;-moz
 
 /* 联系方式 emoji 图标 */
 .pill-emoji{font-size:15px;line-height:1;display:inline-block;transform:translateY(-.5px)}
+
+/* 联系方式：平台图标 / 文字徽标 */
+.pill-letter{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 4px;
+  border-radius:6px;border:1px solid currentColor;font-size:.6875rem;font-weight:600;line-height:1}
+.pill-emoji{font-size:15px;line-height:1;display:inline-block;transform:translateY(-.5px)}
+
+/* 关于页长文里的配图 */
+.about-img{display:block;max-width:min(100%,520px);height:auto;border-radius:14px;margin:14px 0;
+  border:1px solid var(--line);box-shadow:var(--shadow-soft)}

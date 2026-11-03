@@ -120,17 +120,17 @@
     display:grid;place-items:center;cursor:pointer;color:var(--ink);font-size:1.05rem;line-height:1}
   .icon-trigger:hover{border-color:var(--accent)}
   .icon-pop{position:absolute;right:0;top:calc(100% + 6px);z-index:20;display:none;
-    grid-template-columns:repeat(6,36px);gap:4px;padding:10px;border-radius:14px;
+    grid-template-columns:repeat(5,40px);gap:5px;padding:10px;border-radius:14px;
     background:var(--surface-solid);border:1px solid var(--line);box-shadow:0 18px 40px -20px rgba(40,20,30,.4)}
   .icon-pick.open .icon-pop{display:grid}
-  .icon-opt{width:36px;height:36px;border-radius:10px;border:1px solid transparent;background:transparent;
+  .icon-opt{width:40px;height:40px;border-radius:10px;border:1px solid transparent;background:transparent;
     display:grid;place-items:center;cursor:pointer;color:var(--ink);font-size:1.1rem;line-height:1;padding:0}
   .icon-opt:hover{border-color:var(--line);background:var(--bg-2)}
   .icon-opt.is-on{border-color:var(--accent);background:var(--accent-wash)}
   .icon-opt.emo{font-size:1.15rem}
-  .icon-pop .icon-opt:first-child{grid-column:span 2;width:auto;padding:0 10px;font-size:.8125rem}
+  .icon-pop .icon-opt.auto{grid-column:span 1;width:auto;padding:0 6px;font-size:.75rem}
   .icon-auto{font-size:.75rem;color:var(--ink-3)}
-  .icon-emoji{font-size:1.1rem;line-height:1}
+  .pill-letter{font-size:.75rem;font-weight:600;letter-spacing:.02em}
 
   /* 图形化弹窗 */
   .modal{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;padding:24px;overflow:auto;background:rgba(30,22,26,.32);
@@ -451,26 +451,41 @@
   }
 
   /* 联系方式图标选择器 */
-  var LINK_ICONS = {
-    '': '自动',
-    github: '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.73.5.5 5.73.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.05c-3.2.7-3.88-1.4-3.88-1.4-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.23-1.28-5.23-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.43-2.69 5.41-5.25 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.68.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/></svg>',
-    bilibili: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7.5" width="18" height="12" rx="3"/><path d="M7.5 4l2.5 3M16.5 4L14 7"/></svg>',
-    email: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="3"/><path d="M4 7.5l8 5.5 8-5.5"/></svg>',
-    link: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a4 4 0 0 0 5.7 0l2.6-2.6a4 4 0 0 0-5.7-5.7L11 6.3"/><path d="M14 11a4 4 0 0 0-5.7 0l-2.6 2.6a4 4 0 0 0 5.7 5.7L13 17.7"/></svg>'
+  var ICON_MAP = {
+    github: { label: 'GitHub', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.73.5.5 5.73.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.05c-3.2.7-3.88-1.4-3.88-1.4-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.23-1.28-5.23-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.43-2.69 5.41-5.25 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.68.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/></svg>' },
+    bilibili: { label: '哔哩哔哩', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7.5" width="18" height="12" rx="3"/><path d="M7.5 4l2.5 3M16.5 4L14 7"/></svg>' },
+    wechat: { label: '微信', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.3 4.6C5.7 4.6 3 6.9 3 9.6c0 1.5.8 2.9 2.2 3.8L4.7 16l2.7-1.3c.6.15 1.2.23 1.9.23"/><path d="M21 13.4c0-2.5-2.3-4.5-5.2-4.5s-5.2 2-5.2 4.5 2.3 4.5 5.2 4.5c.6 0 1.2-.08 1.7-.23L20 19l-.4-2.2c.9-.8 1.4-2 1.4-3.4z"/><circle cx="7.3" cy="9.3" r=".8" fill="currentColor" stroke="none"/><circle cx="11.2" cy="9.3" r=".8" fill="currentColor" stroke="none"/></svg>' },
+    qq: { label: 'QQ', text: 'QQ' },
+    x: { label: 'X / Twitter', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M5 4.5l14 15M19 4.5l-14 15"/></svg>' },
+    telegram: { label: 'Telegram', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 4.5L2.8 11.6l6.1 2.1L15 8.4l-4.3 6.3 2.3 5.6L21 4.5z"/></svg>' },
+    youtube: { label: 'YouTube', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="2.8" y="6" width="18.4" height="12" rx="4.2"/><path d="M10.4 9.6l4.8 2.4-4.8 2.4z" fill="currentColor" stroke="none"/></svg>' },
+    instagram: { label: 'Instagram', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.9" r="1" fill="currentColor" stroke="none"/></svg>' },
+    douyin: { label: '抖音', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4v9.6a3.6 3.6 0 1 1-3.6-3.6"/><path d="M14 5.4c.8 1.9 2.4 3.1 4.4 3.3"/></svg>' },
+    weibo: { label: '微博', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="11" cy="13.5" rx="7" ry="5"/><path d="M10 11.5c2.2-.4 4 .6 4.3 2.3.3 1.7-1.1 3.2-3.1 3.4-2 .2-3.8-.8-4-2.3"/><path d="M16.5 5.6c2.6-.5 4.7 1.2 4.7 3.6"/></svg>' },
+    zhihu: { label: '知乎', text: '知' },
+    xiaohongshu: { label: '小红书', text: '红' },
+    pixiv: { label: 'Pixiv', text: 'P' },
+    steam: { label: 'Steam', text: 'S' },
+    discord: { label: 'Discord', text: 'D' },
+    netease: { label: '网易云音乐', text: '网' },
+    rss: { label: 'RSS', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M5 19h.01"/><path d="M5 12.5a6.5 6.5 0 0 1 6.5 6.5"/><path d="M5 6a13 13 0 0 1 13 13"/></svg>' },
+    email: { label: '邮箱', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="3"/><path d="M4 7.5l8 5.5 8-5.5"/></svg>' },
+    link: { label: '普通链接', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a4 4 0 0 0 5.7 0l2.6-2.6a4 4 0 0 0-5.7-5.7L11 6.3"/><path d="M14 11a4 4 0 0 0-5.7 0l-2.6 2.6a4 4 0 0 0 5.7 5.7L13 17.7"/></svg>' }
   };
-  var EMOJI = ['🌙','⭐️','🐦','🐱','🐇','🍥','🎮','📚','🎧','🎵','📷','🎨','🌊','🍀','🕯️','✉️','💬','🖋️','🫧','🌸'];
+  function iconMark(k) {
+    var it = ICON_MAP[k];
+    if (!it) return '<span class="pill-letter">' + esc(k) + '</span>';
+    return it.svg || '<span class="pill-letter">' + esc(it.text) + '</span>';
+  }
+  var EMOJI = [];
   function linkRowsHTML(arr) {
     return arr.map(function (row, i) {
       var cur = String(row.icon || '');
-      var trigger = cur === ''
-        ? '<span class="icon-auto">自动</span>'
-        : (LINK_ICONS[cur] ? LINK_ICONS[cur] : '<span class="icon-emoji">' + esc(cur) + '</span>');
-      var opts = '<button type="button" class="icon-opt' + (cur === '' ? ' is-on' : '') + '" data-icon="" data-pick="' + i + '" title="按链接自动识别">自动</button>' +
-        Object.keys(LINK_ICONS).filter(function (k) { return k; }).map(function (k) {
-          return '<button type="button" class="icon-opt' + (cur === k ? ' is-on' : '') + '" data-icon="' + k + '" data-pick="' + i + '" title="' + k + '">' + LINK_ICONS[k] + '</button>';
-        }).join('') +
-        EMOJI.map(function (e) {
-          return '<button type="button" class="icon-opt emo' + (cur === e ? ' is-on' : '') + '" data-icon="' + e + '" data-pick="' + i + '">' + e + '</button>';
+      var trigger = cur === '' ? '<span class="icon-auto">自动</span>' : iconMark(cur);
+      var keys = Object.keys(ICON_MAP);
+      var opts = '<button type="button" class="icon-opt auto' + (cur === '' ? ' is-on' : '') + '" data-icon="" data-pick="' + i + '" title="按链接自动识别">自动</button>' +
+        keys.map(function (k) {
+          return '<button type="button" class="icon-opt' + (cur === k ? ' is-on' : '') + '" data-icon="' + k + '" data-pick="' + i + '" title="' + esc(ICON_MAP[k].label) + '">' + iconMark(k) + '</button>';
         }).join('');
       return '<div class="r" style="grid-template-columns:1fr 1.3fr auto auto">' +
         '<label>名称<input data-i="' + i + '" data-k="label" value="' + esc(row.label || '') + '"></label>' +
@@ -481,118 +496,6 @@
         '<button class="ghost sm del" data-del="' + i + '">×</button></div>';
     }).join('');
   }
-  /* 图形化弹窗：替代 confirm / prompt / alert */
-  function modal(opts) {
-    opts = opts || {};
-    return new Promise(function (resolve) {
-      var m = $('#modal'), ok = $('#modalOk'), cancel = $('#modalCancel'), inp = $('#modalInput');
-      $('#modalTitle').textContent = opts.title || '';
-      $('#modalBody').innerHTML = opts.html || '';
-      inp.hidden = !opts.input;
-      inp.value = opts.value || '';
-      inp.placeholder = opts.placeholder || '';
-      ok.textContent = opts.okText || '确定';
-      ok.className = opts.danger ? 'primary danger' : 'primary';
-      cancel.hidden = opts.hideCancel === true;
-      m.hidden = false;
-      setTimeout(function () { m.classList.add('on'); }, 10);
-
-      var done = false;
-      function close(v) {
-        if (done) return;
-        done = true;
-        m.classList.remove('on');
-        document.removeEventListener('keydown', onKey);
-        ok.onclick = null; cancel.onclick = null; m.onclick = null;
-        setTimeout(function () { m.hidden = true; }, 180);
-        resolve(v);
-      }
-      function onKey(e) {
-        if (e.key === 'Escape') close(null);
-        else if (e.key === 'Enter') close(opts.input ? inp.value : true);
-      }
-      document.addEventListener('keydown', onKey);
-      ok.onclick = function () { close(opts.input ? inp.value : true); };
-      cancel.onclick = function () { close(null); };
-      m.onclick = function (e) { if (e.target === m) close(null); };
-      if (opts.input) setTimeout(function () { inp.focus(); inp.select(); }, 60);
-    });
-  }
-  function confirmBox(title, text, okText, danger) {
-    return modal({ title: title, html: '<p>' + esc(text) + '</p>', okText: okText || '确定', danger: !!danger });
-  }
-
-  /* ---------- 回收站 ---------- */
-  var trashCache = [];
-  function openTrash() {
-    api('/api/trash').then(function (j) {
-      trashCache = j.items || [];
-      if (!trashCache.length) { toast('回收站是空的'); return; }
-      modal({
-        title: '回收站（' + trashCache.length + '）',
-        okText: '关闭',
-        hideCancel: true,
-        html: '<div class="trash-list">' + trashCache.map(function (x, i) {
-          return '<div class="trash-item"><div class="trash-main"><b>' + esc(x.title || x.slug) + '</b>' +
-            '<span>' + esc(x.slug) + (x.date ? ' · ' + esc(x.date) : '') + '</span></div>' +
-            '<button class="ghost sm" data-restore="' + i + '">恢复</button>' +
-            '<button class="ghost sm danger" data-purge="' + i + '">永久删除</button></div>';
-        }).join('') + '</div>'
-      });
-    }).catch(function (e) { toast(e.message, true); });
-  }
-  /* 图标选择器（委托，避免每次渲染重复绑定） */
-  document.addEventListener('click', function (e) {
-    var t = e.target.closest('[data-icon-toggle]');
-    if (t) {
-      var host = t.parentNode;
-      $('.icon-pick', document).forEach(function (x) { if (x !== host) x.classList.remove('open'); });
-      host.classList.toggle('open');
-      e.preventDefault();
-      return;
-    }
-    var b = e.target.closest('[data-icon]');
-    if (!b) return;
-    var i = Number(b.getAttribute('data-pick'));
-    var links = (state.about && state.about.links) || [];
-    links[i] = links[i] || {};
-    links[i].icon = b.getAttribute('data-icon');
-    var pick = b.closest('.icon-pick');
-    if (pick) {
-      pick.classList.remove('open');
-      var trig = pick.querySelector('.icon-trigger');
-      var v = links[i].icon;
-      if (trig) {
-        trig.innerHTML = v === '' ? '<span class="icon-auto">自动</span>'
-          : (LINK_ICONS[v] ? LINK_ICONS[v] : '<span class="icon-emoji">' + v + '</span>');
-      }
-    }
-  });
-
-  $('#modalBody').addEventListener('click', function (e) {
-    var r = e.target.closest('[data-restore]');
-    if (r) {
-      var item = trashCache[Number(r.getAttribute('data-restore'))];
-      post('/api/restore', { file: item.file }).then(function () {
-        toast('已恢复：' + (item.title || item.slug));
-        loadPosts();
-        setTimeout(openTrash, 260);
-      }).catch(function (err) { toast(err.message, true); });
-      return;
-    }
-    var p = e.target.closest('[data-purge]');
-    if (p) {
-      var it = trashCache[Number(p.getAttribute('data-purge'))];
-      confirmBox('永久删除', '「' + (it.title || it.slug) + '」会被彻底删掉，不能恢复。', '删除', true).then(function (yes) {
-        if (!yes) return;
-        post('/api/purge', { file: it.file }).then(function () {
-          toast('已永久删除');
-          setTimeout(openTrash, 220);
-        }).catch(function (err) { toast(err.message, true); });
-      });
-    }
-  });
-
   function upload(cb) {
     var inp = document.createElement('input');
     inp.type = 'file'; inp.accept = 'image/*';
@@ -822,10 +725,10 @@
       '<label class="full">头像（路径或链接）<input id="a-avatar" value="' + esc(d.avatar || '') + '"></label>' +
       '<button class="ghost sm" id="a-avatarUp" style="justify-self:start">上传头像</button>' +
       '<label class="full">介绍标题<input id="a-introTitle" value="' + esc(d.introTitle || '') + '"></label>' +
-      '<label class="full">介绍正文（每行一段）<textarea id="a-intro" rows="3">' + esc((d.intro || []).join('\n')) + '</textarea></label>' +
-      '<h4>站点介绍（单独一块，可留空）</h4>' +
-      '<label class="full">这一块的标题<input id="a-storyTitle" value="' + esc(d.storyTitle || '关于这个站') + '"></label>' +
-      '<label class="full">内容（每行一段）<textarea id="a-story" rows="5" placeholder="这个站是 2026 年 10 月开的。名字从「洛叶书斋」改到「洛叶日和我」……"></textarea></label>' +
+      '<label class="full">介绍正文（每行一段，可贴图 / 加小表情）<textarea id="a-intro" rows="3">' + esc((d.intro || []).join('\n')) + '</textarea></label>' +
+      '<h4>关于我（单独一块，可留空）</h4>' +
+      '<label class="full">这一块的标题<input id="a-storyTitle" value="' + esc(d.bioTitle || '关于我') + '"></label>' +
+      '<label class="full">内容（每行一段，可贴图 / 加小表情）<textarea id="a-story" rows="6" placeholder="我喜欢在夜里写字，也喜欢月亮。\n配图直接写 ![](/assets/img/xxx.jpg)，表情直接打 🙂"></textarea></label>' +
       '<h4>档案（第三格是夜间显示的值，可留空）</h4><div class="rows" id="a-facts"></div>' +
       '<button class="ghost sm" id="addFact" style="justify-self:start">＋ 一行</button>' +
       '<h4>这一栏的标题</h4>' +
@@ -836,8 +739,8 @@
       '<button class="ghost sm" id="addLink" style="justify-self:start">＋ 一个</button>';
 
     if ($('#a-favTitle')) $('#a-favTitle').value = d.favoritesTitle || '心上人与心头好';
-    if ($('#a-story')) $('#a-story').value = (d.story || []).join('\n');
-    if ($('#a-storyTitle')) $('#a-storyTitle').value = d.storyTitle || '关于这个站';
+    if ($('#a-story')) $('#a-story').value = (d.bio || []).join('\n');
+    if ($('#a-storyTitle')) $('#a-storyTitle').value = d.bioTitle || '关于我';
     $('#a-facts').innerHTML = rowsHTML(d.facts || [], ['k', 'v', 'vn'], { k: '项目', v: '内容', vn: '夜间内容' });
     $('#a-favs').innerHTML = rowsHTML(d.favorites || [], ['name', 'src'], { name: '角色', src: '出处' });
     $('#a-links').innerHTML = linkRowsHTML(d.links || []);
@@ -854,8 +757,8 @@
     d.avatar = $('#a-avatar').value; d.introTitle = $('#a-introTitle').value;
     d.favoritesTitle = $('#a-favTitle') ? $('#a-favTitle').value : d.favoritesTitle;
     d.intro = $('#a-intro').value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
-    d.storyTitle = $('#a-storyTitle') ? $('#a-storyTitle').value : (d.storyTitle || '关于这个站');
-    d.story = $('#a-story').value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
+    d.bioTitle = $('#a-storyTitle') ? $('#a-storyTitle').value : (d.bioTitle || '关于我');
+    d.bio = $('#a-story').value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
     d.facts = readRows($('#a-facts'), d.facts || [], []);
     d.favorites = readRows($('#a-favs'), d.favorites || [], []);
     d.links = readRows($('#a-links'), d.links || [], []);

@@ -177,6 +177,15 @@ function renderBody(md) {
 /* ============================ 图标 ============================ */
 
 const ICON = {
+  wechat: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.3 4.6C5.7 4.6 3 6.9 3 9.6c0 1.5.8 2.9 2.2 3.8L4.7 16l2.7-1.3c.6.15 1.2.23 1.9.23"/><path d="M21 13.4c0-2.5-2.3-4.5-5.2-4.5s-5.2 2-5.2 4.5 2.3 4.5 5.2 4.5c.6 0 1.2-.08 1.7-.23L20 19l-.4-2.2c.9-.8 1.4-2 1.4-3.4z"/><circle cx="7.3" cy="9.3" r=".8" fill="currentColor" stroke="none"/><circle cx="11.2" cy="9.3" r=".8" fill="currentColor" stroke="none"/></svg>',
+  x: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M5 4.5l14 15M19 4.5l-14 15"/></svg>',
+  telegram: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 4.5L2.8 11.6l6.1 2.1L15 8.4l-4.3 6.3 2.3 5.6L21 4.5z"/></svg>',
+  youtube: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="2.8" y="6" width="18.4" height="12" rx="4.2"/><path d="M10.4 9.6l4.8 2.4-4.8 2.4z" fill="currentColor" stroke="none"/></svg>',
+  instagram: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.9" r="1" fill="currentColor" stroke="none"/></svg>',
+  douyin: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4v9.6a3.6 3.6 0 1 1-3.6-3.6"/><path d="M14 5.4c.8 1.9 2.4 3.1 4.4 3.3"/></svg>',
+  weibo: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="11" cy="13.5" rx="7" ry="5"/><path d="M10 11.5c2.2-.4 4 .6 4.3 2.3.3 1.7-1.1 3.2-3.1 3.4-2 .2-3.8-.8-4-2.3"/><path d="M16.5 5.6c2.6-.5 4.7 1.2 4.7 3.6"/></svg>',
+  rss: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M5 19h.01"/><path d="M5 12.5a6.5 6.5 0 0 1 6.5 6.5"/><path d="M5 6a13 13 0 0 1 13 13"/></svg>',
+
   sun: '<svg class="ic-sun" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.5 5.5l1.5 1.5M17 17l1.5 1.5M18.5 5.5L17 7M7 17l-1.5 1.5"/></svg>',
   moon: '<svg class="ic-moon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.6A8 8 0 0 1 9.4 4 8.2 8.2 0 1 0 20 14.6z"/></svg>',
   note: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>',
@@ -426,12 +435,32 @@ function inferIcon(l) {
   if (k === 'github' || k === 'bilibili' || k === 'email' || k === 'link') return k;
   if (raw) return raw;
   const url = String(l.url || '').toLowerCase();
-  if (url.indexOf('github.com') > -1) return 'github';
-  if (url.indexOf('bilibili.com') > -1 || url.indexOf('b23.tv') > -1) return 'bilibili';
-  if (url.indexOf('mailto:') === 0 || url.indexOf('@') > -1 && url.indexOf('http') < 0) return 'email';
+  const map = [
+    ['github.com', 'github'], ['bilibili.com', 'bilibili'], ['b23.tv', 'bilibili'],
+    ['weixin.qq.com', 'wechat'], ['wechat', 'wechat'], ['qq.com', 'qq'],
+    ['x.com', 'x'], ['twitter.com', 'x'], ['t.me', 'telegram'], ['telegram', 'telegram'],
+    ['youtube.com', 'youtube'], ['youtu.be', 'youtube'], ['instagram.com', 'instagram'],
+    ['douyin.com', 'douyin'], ['weibo.com', 'weibo'], ['zhihu.com', 'zhihu'],
+    ['xiaohongshu.com', 'xiaohongshu'], ['xhslink.com', 'xiaohongshu'],
+    ['pixiv.net', 'pixiv'], ['steamcommunity.com', 'steam'], ['discord', 'discord'],
+    ['music.163.com', 'netease']
+  ];
+  for (const it of map) { if (url.indexOf(it[0]) > -1) return it[1]; }
+  if (url.indexOf('mailto:') === 0 || (url.indexOf('@') > -1 && url.indexOf('http') < 0)) return 'email';
   return '';
 }
-const PILL_ICONS = { github: ICON.github, bilibili: ICON.bilibili, email: ICON.email, link: ICON.link };
+function letterIcon(t) {
+  return '<span class="pill-letter">' + esc(t) + '</span>';
+}
+
+const PILL_ICONS = {
+  github: ICON.github, bilibili: ICON.bilibili, email: ICON.email, link: ICON.link,
+  wechat: ICON.wechat, x: ICON.x, telegram: ICON.telegram, youtube: ICON.youtube,
+  instagram: ICON.instagram, douyin: ICON.douyin, weibo: ICON.weibo, rss: ICON.rss,
+  qq: letterIcon('QQ'), zhihu: letterIcon('知'), xiaohongshu: letterIcon('红'),
+  pixiv: letterIcon('P'), steam: letterIcon('S'), discord: letterIcon('D'),
+  netease: letterIcon('网'), bilibili2: letterIcon('B')
+};
 
 function linkPills(list) {
   return (list || []).map(function (l) {
@@ -704,6 +733,15 @@ function friendsPage(site) {
   });
 }
 
+function richText(site, s) {
+  return esc(s)
+    .replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, function (m, alt, src) {
+      return '<img class="about-img" src="' + u(site, src) + '" alt="' + alt + '" loading="lazy">';
+    })
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+}
+
 function aboutPage(site) {
   const pg = (site.pages || {}).about || {};
   const d = readJSON(path.join(CONTENT, 'about.json'), {});
@@ -713,8 +751,8 @@ function aboutPage(site) {
       : esc(x.v);
     return '<li><b>' + esc(x.k) + '</b>' + v + '</li>';
   }).join('');
-  const intro = (d.intro || []).map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('');
-  const story = (d.story || []).map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('');
+  const intro = (d.intro || []).map(function (p) { return '<p>' + richText(site, p) + '</p>'; }).join('');
+  const bio = (d.bio || []).map(function (p) { return '<p>' + richText(site, p) + '</p>'; }).join('');
   const favs = (d.favorites || []).map(function (x) {
     return '<div class="fav"><b>' + esc(x.name) + '</b><span>' + esc(x.src) + '</span></div>';
   }).join('');
@@ -738,7 +776,7 @@ function aboutPage(site) {
       '  </aside>\n' +
       '  <div class="about-body">\n' +
       '    <h2>' + esc(d.introTitle) + '</h2>' + intro +
-      (story ? '    <h2>' + esc(d.storyTitle || '关于这个站') + '</h2>' + story + '\n' : '') +
+      (bio ? '    <h2>' + esc(d.bioTitle || '关于我') + '</h2>' + bio + '\n' : '') +
       '    <h2>' + esc(d.favoritesTitle || '心上人与心头好') + '</h2><div class="fav-grid">' + favs + '</div>\n' +
       '    <h2>写信给我</h2><p>站内不设评论区。想说点什么，下面任选一个入口。</p>\n' +
       '    <div class="hero-links">' + links + '</div>\n' +
