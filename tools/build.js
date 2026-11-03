@@ -421,23 +421,28 @@ function rowHTML(site, p, from) {
 /* ============================ 页面 ============================ */
 
 function inferIcon(l) {
-  const k = String(l.icon || '').toLowerCase();
-  if (k) return k;
+  const raw = String(l.icon || '').trim();
+  const k = raw.toLowerCase();
+  if (k === 'github' || k === 'bilibili' || k === 'email' || k === 'link') return k;
+  if (raw) return raw;
   const url = String(l.url || '').toLowerCase();
   if (url.indexOf('github.com') > -1) return 'github';
   if (url.indexOf('bilibili.com') > -1 || url.indexOf('b23.tv') > -1) return 'bilibili';
   if (url.indexOf('mailto:') === 0 || url.indexOf('@') > -1 && url.indexOf('http') < 0) return 'email';
-  return 'link';
+  return '';
 }
+const PILL_ICONS = { github: ICON.github, bilibili: ICON.bilibili, email: ICON.email, link: ICON.link };
+
 function linkPills(list) {
   return (list || []).map(function (l) {
     const k = inferIcon(l);
+    const glyph = PILL_ICONS[k] || (k ? null : ICON.link);
     if (k === 'email') {
       const addr = String(l.url || '').replace(/^mailto:/i, '');
       return '<button type="button" class="pill" data-copy="' + esc(addr) + '">' + ICON.email + '<span>' + esc(addr) + '</span></button>';
     }
-    const name = k === 'github' ? 'github' : k === 'bilibili' ? 'bilibili' : 'link';
-    return '<a class="pill" href="' + esc(l.url) + '">' + ICON[name] + '<span>' + esc(l.label) + '</span></a>';
+    const mark = glyph || ('<span class="pill-emoji">' + esc(k) + '</span>');
+    return '<a class="pill" href="' + esc(l.url) + '">' + mark + '<span>' + esc(l.label) + '</span></a>';
   }).join('');
 }
 
@@ -709,6 +714,7 @@ function aboutPage(site) {
     return '<li><b>' + esc(x.k) + '</b>' + v + '</li>';
   }).join('');
   const intro = (d.intro || []).map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('');
+  const story = (d.story || []).map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('');
   const favs = (d.favorites || []).map(function (x) {
     return '<div class="fav"><b>' + esc(x.name) + '</b><span>' + esc(x.src) + '</span></div>';
   }).join('');
@@ -732,6 +738,7 @@ function aboutPage(site) {
       '  </aside>\n' +
       '  <div class="about-body">\n' +
       '    <h2>' + esc(d.introTitle) + '</h2>' + intro +
+      (story ? '    <h2>' + esc(d.storyTitle || '关于这个站') + '</h2>' + story + '\n' : '') +
       '    <h2>' + esc(d.favoritesTitle || '心上人与心头好') + '</h2><div class="fav-grid">' + favs + '</div>\n' +
       '    <h2>写信给我</h2><p>站内不设评论区。想说点什么，下面任选一个入口。</p>\n' +
       '    <div class="hero-links">' + links + '</div>\n' +

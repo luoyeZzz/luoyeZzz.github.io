@@ -782,3 +782,6 @@ body{font-size:1.0625rem;line-height:1.9;-webkit-font-smoothing:antialiased;-moz
 
 /* 放不出来的曲目：标灰划线 */
 .music-item.is-bad{opacity:.5;text-decoration:line-through}
+
+/* 联系方式 emoji 图标 */
+.pill-emoji{font-size:15px;line-height:1;display:inline-block;transform:translateY(-.5px)}
