@@ -422,6 +422,7 @@
       <div id="envList"></div>
       <div class="row-actions">
         <button class="ghost" id="recheckEnv">重新检查</button>
+        <button class="ghost" id="cleanupFiles">清理未用的上传文件</button>
         <span class="status" id="envStatus"></span>
       </div>
     </div>
@@ -1294,8 +1295,27 @@
       var b = e.target.closest('[data-songdel]');
       if (b) {
         syncSongs();
-        songs.splice(Number(b.getAttribute('data-songdel')), 1);
-        renderMusic();
+        var idx = Number(b.getAttribute('data-songdel'));
+        var song = songs[idx];
+        var finish = function () {
+          songs.splice(idx, 1);
+          renderMusic();
+        };
+        if (song && song.src) {
+          confirmBox('删除这首歌', '会同时删掉 assets/audio 里的音频文件（保存后才会真正清理）。', '删除并清理文件', true).then(function (yes) {
+            if (!yes) return;
+            finish();
+            post('/api/site', { data: state.site }).then(function () {
+              post('/api/file/delete', { path: song.src }).then(function () {
+                toast('已删除并清理音频文件');
+              }).catch(function (err) {
+                toast('歌单已移除，但文件没删：' + err.message, true);
+              });
+            }).catch(function (err) { toast(err.message, true); });
+          });
+        } else {
+          finish();
+        }
         return;
       }
       var mv = e.target.closest('[data-move]');
@@ -1404,6 +1424,14 @@
   }
   document.addEventListener('click', function (e) {
     if (e.target.closest && e.target.closest('#recheckEnv')) loadEnv();
+    if (e.target.closest && e.target.closest('#cleanupFiles')) {
+      confirmBox('清理未使用的文件', '会删除 assets/audio 和 assets/img/posts 里没有被任何文章/说说/相册引用的文件。确定？', '开始清理', true).then(function (yes) {
+        if (!yes) return;
+        post('/api/cleanup', {}).then(function (j) {
+          toast(j.removed ? ('清理了 ' + j.removed + ' 个文件') : '没有需要清理的文件');
+        }).catch(function (err) { toast(err.message, true); });
+      });
+    }
   });
 
   /* ================= 发布 ================= */

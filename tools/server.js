@@ -12,6 +12,7 @@
 
 const http = require('http');
 const fs = require('fs');
+const crypto = require('crypto');
 const path = require('path');
 const { execFile, exec, execFileSync } = require('child_process');
 const deps = require('./deps');
@@ -369,12 +370,102 @@ const server = http.createServer(async function (req, res) {
       const isAudio = String(body.type || '') === 'audio' || /.(mp3|m4a|ogg|wav|flac|aac)$/i.test(name);
       const dir = isAudio ? path.join(ROOT, 'assets', 'audio') : path.join(ROOT, 'assets', 'img', 'posts');
       ensureDir(dir);
+      const buf = Buffer.from(data, 'base64');
+      const hash = crypto.createHash('sha1').update(buf).digest('hex');
+
+      /* 同一个文件已经存在就复用，避免 -1 -2 */
+      try {
+        for (const f of fs.readdirSync(dir)) {
+          const full = path.join(dir, f);
+          const st = fs.statSync(full);
+          if (!st.isFile() || st.size !== buf.length) continue;
+          const h = crypto.createHash('sha1').update(fs.readFileSync(full)).digest('hex');
+          if (h === hash) {
+            return sendJSON(res, 200, {
+              ok: true, path: (isAudio ? '/assets/audio/' : '/assets/img/posts/') + f, name: f, deduped: true
+            });
+          }
+        }
+      } catch (e) {}
+
       const ext = path.extname(name);
       const base = path.basename(name, ext) || 'image';
       let finalName = name, n = 1;
       while (fs.existsSync(path.join(dir, finalName))) finalName = base + '-' + (n++) + ext;
-      fs.writeFileSync(path.join(dir, finalName), Buffer.from(data, 'base64'));
-      return sendJSON(res, 200, { ok: true, path: (isAudio ? '/assets/audio/' : '/assets/img/posts/') + finalName, name: finalName });
+      fs.writeFileSync(path.join(dir, finalName), buf);
+      return sendJSON(res, 200, { ok: true, path: (isAudio ? '/assets/audio/' : '/assets/img/posts/') + finalName, name: finalName, deduped: false });
+    }
+
+    /* ---- 删除单个资源文件 ---- */
+    if (req.method === 'POST' && p === '/api/file/delete') {
+      const body = JSON.parse(await readBody(req));
+      const rel = String(body.path || '').trim();
+      const allowed = ['/assets/audio/', '/assets/img/posts/'];
+      if (!allowed.some(function (pre) { return rel.indexOf(pre) === 0; })) {
+        return sendJSON(res, 400, { ok: false, error: '只能删除上传目录里的文件' });
+      }
+      const full = path.join(ROOT, rel.replace(/^\/+/, ''));
+      if (!fs.existsSync(full)) return sendJSON(res, 404, { ok: false, error: '文件不存在' });
+
+      /* 还在被引用就不删 */
+      let referenced = false;
+      const scanDir = function (d) {
+        if (!fs.existsSync(d)) return;
+        for (const f of fs.readdirSync(d)) {
+          const p2 = path.join(d, f);
+          if (fs.statSync(p2).isDirectory()) { scanDir(p2); continue; }
+          if (!/\.(json|md)$/i.test(f)) continue;
+          if (fs.readFileSync(p2, 'utf8').indexOf(rel) > -1) { referenced = true; return; }
+        }
+      };
+      scanDir(path.join(ROOT, 'content'));
+      if (referenced) return sendJSON(res, 409, { ok: false, error: '这个文件还在被文章/说说引用，先改掉再删' });
+
+      fs.unlinkSync(full);
+      return sendJSON(res, 200, { ok: true });
+    }
+
+    /* ---- 清理未被引用的上传文件 ---- */
+    if (req.method === 'POST' && p === '/api/cleanup') {
+      const refs = new Set();
+      const scan = function (d) {
+        if (!fs.existsSync(d)) return;
+        for (const f of fs.readdirSync(d)) {
+          const p2 = path.join(d, f);
+          if (fs.statSync(p2).isDirectory()) { scan(p2); continue; }
+          if (!/\.(json|md)$/i.test(f)) continue;
+          const txt = fs.readFileSync(p2, 'utf8');
+          const m = txt.match(/\/assets\/(?:audio|img\/posts)\/[^"')\s]+/g) || [];
+          m.forEach(function (x) { refs.add(decodeURIComponent(x)); });
+        }
+      };
+      scan(path.join(ROOT, 'content'));
+
+      /* 已经被 git 跟踪的文件视为“正式内容”，不自动删 */
+      const tracked = new Set();
+      try {
+        if (!GIT_BIN) GIT_BIN = findGit();
+        if (GIT_BIN) {
+          const out = execFileSync(GIT_BIN, ['ls-files', '-z'], { cwd: ROOT, maxBuffer: 64 * 1024 * 1024 }).toString();
+          out.split('\0').filter(Boolean).forEach(function (p) {
+            tracked.add('/' + p.split(path.sep).join('/'));
+          });
+        }
+      } catch (e) {}
+
+      let removed = 0;
+      const gone = [];
+      const dirs = [path.join(ROOT, 'assets', 'audio'), path.join(ROOT, 'assets', 'img', 'posts')];
+      for (const dir of dirs) {
+        if (!fs.existsSync(dir)) continue;
+        for (const f of fs.readdirSync(dir)) {
+          const rel = '/' + path.relative(ROOT, path.join(dir, f)).split(path.sep).join('/');
+          if (refs.has(rel)) continue;
+          if (tracked.has(rel)) continue;
+          try { fs.unlinkSync(path.join(dir, f)); removed++; gone.push(rel); } catch (e) {}
+        }
+      }
+      return sendJSON(res, 200, { ok: true, removed: removed, files: gone.slice(0, 20) });
     }
 
     /* ---- 构建 ---- */
