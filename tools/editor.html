@@ -178,13 +178,14 @@
     border-radius:18px;border:1px solid var(--glass-edge);
     background:var(--surface-solid);color:var(--ink);
     box-shadow:0 18px 40px -18px rgba(30,18,26,.5),inset 0 1px 0 rgba(255,255,255,.35);
+    opacity:0;visibility:hidden;pointer-events:none;
     transform:translateY(-6px) scale(.985);
-    will-change:transform;
+    will-change:transform,opacity;
+    transition:opacity .12s ease,transform .14s ease,visibility 0s .14s;
   }
-  .dt-pop.on{animation:dt-in .16s cubic-bezier(.16,1,.3,1) both}
-  @keyframes dt-in{from{transform:translateY(-6px) scale(.985)}to{transform:none}}
-  .dt-pop.out{animation:dt-out .13s ease both}
-  @keyframes dt-out{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-4px) scale(.985)}}
+  .dt-pop.on{opacity:1;visibility:visible;pointer-events:auto;transform:none;
+    transition:opacity .12s ease,transform .14s ease,visibility 0s}
+  .dt-pop.hidden{opacity:0}
   .dt-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
   .dt-title{font-size:.875rem;font-weight:600;letter-spacing:.02em}
   .dt-nav{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:transparent;
@@ -809,8 +810,9 @@
   }
 
   /* ============ 自定义日期时间选择器 ============ */
+  /* ============ 自绘日期时间选择器（复用同一个浮层） ============ */
   var DT = (function () {
-    var pop = null, input = null, view = null, sel = null;
+    var pop = null, input = null, view = null, sel = null, lastFocus = null;
 
     function pad(n) { return (n < 10 ? '0' : '') + n; }
     function daysIn(y, m) { return new Date(y, m + 1, 0).getDate(); }
@@ -818,101 +820,24 @@
       var m = String(v || '').match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?/);
       var n = new Date();
       if (!m) return { y: n.getFullYear(), mo: n.getMonth(), d: n.getDate(), h: n.getHours(), mi: n.getMinutes(), s: n.getSeconds() };
-      return {
-        y: +m[1], mo: +m[2] - 1, d: +m[3],
-        h: m[4] ? +m[4] : 0, mi: m[5] ? +m[5] : 0, s: m[6] ? +m[6] : 0
-      };
+      return { y: +m[1], mo: +m[2] - 1, d: +m[3], h: m[4] ? +m[4] : 0, mi: m[5] ? +m[5] : 0, s: m[6] ? +m[6] : 0 };
     }
     function fmt() {
-      return sel.y + '-' + pad(sel.mo + 1) + '-' + pad(sel.d) + ' ' +
-        pad(sel.h) + ':' + pad(sel.mi) + ':' + pad(sel.s);
-    }
-    function close() {
-      if (!pop) return;
-      var p = pop;
-      pop = null; input = null;
-      document.removeEventListener('keydown', onKey);
-      p.style.pointerEvents = 'none';
-      p.classList.remove('on');
-      p.classList.add('out');
-      var done = false;
-      var kill = function () {
-        if (done) return;
-        done = true;
-        p.removeEventListener('animationend', kill);
-        if (p.parentNode) p.parentNode.removeChild(p);
-      };
-      p.addEventListener('animationend', kill);
-      setTimeout(kill, 220);
-    }
-    function onKey(e) { if (e.key === 'Escape') close(); }
-
-    function render() {
-      var first = new Date(view.y, view.mo, 1);
-      var start = (first.getDay() + 6) % 7; /* 周一开头 */
-      var total = daysIn(view.y, view.mo);
-      var prevTotal = daysIn(view.y, view.mo - 1);
-
-      var cells = '';
-      for (var i = 0; i < start; i++) {
-        var pd = prevTotal - start + 1 + i;
-        cells += '<button type="button" class="dt-d out" data-day="p' + pd + '">' + pd + '</button>';
-      }
-      for (var d = 1; d <= total; d++) {
-        var on = (d === sel.d && view.mo === sel.mo && view.y === sel.y);
-        cells += '<button type="button" class="dt-d' + (on ? ' on' : '') + '" data-day="' + d + '">' + d + '</button>';
-      }
-      var rest = (7 - ((start + total) % 7)) % 7;
-      for (var k = 1; k <= rest; k++) cells += '<button type="button" class="dt-d out" data-day="n' + k + '">' + k + '</button>';
-
-      function opts(n, cur) {
-        var out = '';
-        for (var i = 0; i < n; i++) out += '<option value="' + i + '"' + (i === cur ? ' selected' : '') + '>' + pad(i) + '</option>';
-        return out;
-      }
-
-      pop.querySelector('.dt-title').textContent = view.y + ' 年 ' + (view.mo + 1) + ' 月';
-      pop.querySelector('.dt-grid').innerHTML =
-        ['一', '二', '三', '四', '五', '六', '日'].map(function (w) { return '<span class="dt-w">' + w + '</span>'; }).join('') + cells;
-      pop.querySelector('.dt-h').innerHTML = opts(24, sel.h);
-      pop.querySelector('.dt-m').innerHTML = opts(60, sel.mi);
-      pop.querySelector('.dt-s').innerHTML = opts(60, sel.s);
+      return sel.y + '-' + pad(sel.mo + 1) + '-' + pad(sel.d) + ' ' + pad(sel.h) + ':' + pad(sel.mi) + ':' + pad(sel.s);
     }
 
-    function open(inp) {
-      if (pop && input === inp) { close(); return; }
-      close();
-      input = inp;
-      sel = parse(inp.value);
-      view = { y: sel.y, mo: sel.mo };
-
+    function build() {
+      if (pop) return pop;
       pop = document.createElement('div');
       pop.className = 'dt-pop';
       pop.innerHTML =
         '<div class="dt-head"><button type="button" class="dt-nav" data-nav="-1">‹</button>' +
         '<span class="dt-title"></span>' +
         '<button type="button" class="dt-nav" data-nav="1">›</button></div>' +
-        '<div class="dt-week">' + '' + '</div>' +
         '<div class="dt-grid"></div>' +
         '<div class="dt-time"><select class="dt-h" aria-label="时"></select><span>:</span><select class="dt-m" aria-label="分"></select><span>:</span><select class="dt-s" aria-label="秒"></select></div>' +
         '<div class="dt-actions"><button type="button" class="now" data-act="now">现在</button><button type="button" data-act="clear">清除</button><button type="button" class="ok" data-act="ok">确定</button></div>';
       document.body.appendChild(pop);
-
-      /* 位置 */
-      var r = inp.getBoundingClientRect();
-      if (window.innerWidth <= 640) {
-        pop.classList.add('sheet');
-      } else {
-        var left = Math.min(r.left, window.innerWidth - 316);
-        var top = r.bottom + 8;
-        if (top + 360 > window.innerHeight) top = Math.max(12, r.top - 368);
-        pop.style.left = Math.max(12, left) + 'px';
-        pop.style.top = top + 'px';
-      }
-
-      render();
-      setTimeout(function () { pop.classList.add('on'); }, 10);
-      document.addEventListener('keydown', onKey);
 
       pop.addEventListener('click', function (e) {
         var nav = e.target.closest('[data-nav]');
@@ -947,11 +872,11 @@
           view = { y: sel.y, mo: sel.mo };
           render();
         } else if (a === 'clear') {
-          input.value = '';
-          close();
+          if (input) input.value = '';
+          hide();
         } else if (a === 'ok') {
-          input.value = fmt();
-          close();
+          if (input) input.value = fmt();
+          hide();
         }
       });
 
@@ -961,15 +886,97 @@
         if (t.classList.contains('dt-m')) sel.mi = Number(t.value);
         if (t.classList.contains('dt-s')) sel.s = Number(t.value);
       });
+
+      return pop;
     }
 
-    return { open: open };
-  })();
+    function render() {
+      var first = new Date(view.y, view.mo, 1);
+      var startW = (first.getDay() + 6) % 7;
+      var total = daysIn(view.y, view.mo);
+      var prevTotal = daysIn(view.y, view.mo - 1);
+      var cells = '';
+      for (var i = 0; i < startW; i++) {
+        var pd = prevTotal - startW + 1 + i;
+        cells += '<button type="button" class="dt-d out" data-day="p' + pd + '">' + pd + '</button>';
+      }
+      for (var d = 1; d <= total; d++) {
+        var on = (d === sel.d && view.mo === sel.mo && view.y === sel.y);
+        cells += '<button type="button" class="dt-d' + (on ? ' on' : '') + '" data-day="' + d + '">' + d + '</button>';
+      }
+      var rest = (7 - ((startW + total) % 7)) % 7;
+      for (var k = 1; k <= rest; k++) cells += '<button type="button" class="dt-d out" data-day="n' + k + '">' + k + '</button>';
 
-  document.addEventListener('click', function (e) {
-    var inp = e.target.closest('input[data-dt]');
-    if (inp) { DT.open(inp); }
-  });
+      function opts(n, cur) {
+        var out = '';
+        for (var j = 0; j < n; j++) out += '<option value="' + j + '"' + (j === cur ? ' selected' : '') + '>' + pad(j) + '</option>';
+        return out;
+      }
+
+      pop.querySelector('.dt-title').textContent = view.y + ' 年 ' + (view.mo + 1) + ' 月';
+      pop.querySelector('.dt-grid').innerHTML =
+        ['一', '二', '三', '四', '五', '六', '日'].map(function (w) { return '<span class="dt-w">' + w + '</span>'; }).join('') + cells;
+      pop.querySelector('.dt-h').innerHTML = opts(24, sel.h);
+      pop.querySelector('.dt-m').innerHTML = opts(60, sel.mi);
+      pop.querySelector('.dt-s').innerHTML = opts(60, sel.s);
+    }
+
+    function place() {
+      var r = input.getBoundingClientRect();
+      if (window.innerWidth <= 640) {
+        pop.classList.add('sheet');
+        pop.style.left = '';
+        pop.style.top = '';
+        return;
+      }
+      pop.classList.remove('sheet');
+      var w = 300;
+      var left = Math.min(r.left, window.innerWidth - w - 16);
+      var top = r.bottom + 8;
+      if (top + 370 > window.innerHeight) top = Math.max(12, r.top - 378);
+      pop.style.left = Math.max(12, left) + 'px';
+      pop.style.top = top + 'px';
+    }
+
+    function show(inp) {
+      build();
+      input = inp;
+      sel = parse(inp.value);
+      view = { y: sel.y, mo: sel.mo };
+      render();
+      place();
+      pop.classList.remove('hidden');
+      /* 强制一次样式计算，让过渡从初始态开始（比 rAF 更稳） */
+      void pop.offsetWidth;
+      pop.classList.add('on');
+    }
+
+    function hide() {
+      if (!pop) return;
+      pop.classList.remove('on');
+      pop.classList.add('hidden');
+      input = null;
+    }
+
+    function open(inp) {
+      if (pop && pop.classList.contains('on') && input === inp) { hide(); return; }
+      if (pop && pop.classList.contains('on')) { hide(); }
+      show(inp);
+    }
+
+    document.addEventListener('click', function (e) {
+      var inp = e.target.closest('input[data-dt]');
+      if (inp) { open(inp); return; }
+      if (pop && pop.contains(e.target)) return;
+      if (pop && pop.classList.contains('on')) hide();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && pop && pop.classList.contains('on')) hide();
+    });
+
+    return { open: open, hide: hide };
+  })();
 
   function upload(cb, opts) {
     opts = opts || {};
