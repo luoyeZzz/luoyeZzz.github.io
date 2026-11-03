@@ -9,7 +9,6 @@ tools/_*
 
 # 每台机器自己的配置与手写笔记（不跟仓库走）
 tools/config.json
-tools/使用手册.md
 tools/moon.ico
 tools/moon-256.png
 
