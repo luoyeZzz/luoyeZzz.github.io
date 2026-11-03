@@ -177,6 +177,12 @@ function renderBody(md) {
 /* ============================ 图标 ============================ */
 
 const ICON = {
+  qq: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 2.4c-3.2 0-5.4 2.3-5.4 5.6 0 1 .2 2 .5 2.8-.9 1.3-1.6 2.8-1.6 4.3 0 .8.3 1.4.8 1.4.4 0 .8-.4 1.1-1 .3 1 .9 2 1.7 2.6-.6.3-1 .7-1 1.2 0 .8 1.7 1.5 3.9 1.5s3.9-.7 3.9-1.5c0-.5-.4-.9-1-1.2.8-.6 1.4-1.6 1.7-2.6.3.6.7 1 1.1 1 .5 0 .8-.6.8-1.4 0-1.5-.7-3-1.6-4.3.3-.8.5-1.8.5-2.8 0-3.3-2.2-5.6-5.4-5.6z"/><circle cx="9.9" cy="8" r="1.15" fill="#fff"/><circle cx="14.1" cy="8" r="1.15" fill="#fff"/><path d="M12 10.2l1 1.4h-2z" fill="#fff"/></svg>',
+  steam: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="15.2" cy="8.6" r="3.2"/><circle cx="8.8" cy="15.2" r="3"/><path d="M10.9 13.1l2.3-2.1"/><path d="M2.6 17.4l3.9 1.6"/></svg>',
+  discord: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M19.6 6.1A15.6 15.6 0 0 0 15.8 5l-.3.6a12 12 0 0 1 3.3 1.1 11.4 11.4 0 0 0-9.6 0A12 12 0 0 1 12.5 5.6L12.2 5a15.6 15.6 0 0 0-3.8 1.1C5.8 10 5.1 13.7 5.4 17.3a15.6 15.6 0 0 0 4.7 2.4l.9-1.4c-.8-.3-1.5-.6-2.2-1l.5-.3a11.2 11.2 0 0 0 9 0l.5.3c-.7.4-1.4.7-2.2 1l.9 1.4a15.6 15.6 0 0 0 4.7-2.4c.4-4-.7-7.7-2.6-11.2z"/><circle cx="9.6" cy="13.3" r="1.35" fill="#fff"/><circle cx="14.4" cy="13.3" r="1.35" fill="#fff"/></svg>',
+  netease: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.2"/><path d="M14.6 7.6v6.6a2.2 2.2 0 1 1-2.2-2.2"/></svg>',
+  zhihu: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><path d="M8 8.4h8M12 8.4v7.4M9.2 11.6h5.6M8.4 15.8h7.2"/></svg>',
+  xiaohongshu: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><path d="M7.6 8.4h4.2v3.2H7.6zM7.6 15.2h4.2M14 8.4v7.6M12.6 12h2.8"/></svg>',
   wechat: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.3 4.6C5.7 4.6 3 6.9 3 9.6c0 1.5.8 2.9 2.2 3.8L4.7 16l2.7-1.3c.6.15 1.2.23 1.9.23"/><path d="M21 13.4c0-2.5-2.3-4.5-5.2-4.5s-5.2 2-5.2 4.5 2.3 4.5 5.2 4.5c.6 0 1.2-.08 1.7-.23L20 19l-.4-2.2c.9-.8 1.4-2 1.4-3.4z"/><circle cx="7.3" cy="9.3" r=".8" fill="currentColor" stroke="none"/><circle cx="11.2" cy="9.3" r=".8" fill="currentColor" stroke="none"/></svg>',
   x: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M5 4.5l14 15M19 4.5l-14 15"/></svg>',
   telegram: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 4.5L2.8 11.6l6.1 2.1L15 8.4l-4.3 6.3 2.3 5.6L21 4.5z"/></svg>',
@@ -457,9 +463,9 @@ const PILL_ICONS = {
   github: ICON.github, bilibili: ICON.bilibili, email: ICON.email, link: ICON.link,
   wechat: ICON.wechat, x: ICON.x, telegram: ICON.telegram, youtube: ICON.youtube,
   instagram: ICON.instagram, douyin: ICON.douyin, weibo: ICON.weibo, rss: ICON.rss,
-  qq: letterIcon('QQ'), zhihu: letterIcon('知'), xiaohongshu: letterIcon('红'),
-  pixiv: letterIcon('P'), steam: letterIcon('S'), discord: letterIcon('D'),
-  netease: letterIcon('网'), bilibili2: letterIcon('B')
+  qq: ICON.qq, zhihu: ICON.zhihu, xiaohongshu: ICON.xiaohongshu,
+  pixiv: letterIcon('P'), steam: ICON.steam, discord: ICON.discord,
+  netease: ICON.netease
 };
 
 function linkPills(list) {

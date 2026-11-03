@@ -114,6 +114,22 @@
     color:var(--ink-3);display:grid;place-items:center;font-size:.75rem;cursor:pointer;transition:.2s;padding:0}
   .icon-pick-btn:hover{border-color:var(--accent-soft);color:var(--accent)}
   .icon-pick-btn.is-on{border-color:var(--accent);color:var(--accent);background:var(--accent-wash)}
+  /* 说说卡片 */
+  .m-card{border:1px solid var(--line);border-radius:16px;padding:14px;background:var(--surface-solid);display:flex;flex-direction:column;gap:10px}
+  .m-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .m-date{width:150px!important;height:34px!important;flex:none}
+  .m-card textarea{min-height:70px;resize:vertical}
+  .m-imgs{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .m-img{position:relative;width:72px;height:72px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+  .m-img img{width:100%;height:100%;object-fit:cover;display:block}
+  .m-img button{position:absolute;right:2px;top:2px;width:18px;height:18px;border-radius:50%;border:0;
+    background:rgba(0,0,0,.55);color:#fff;font-size:12px;line-height:1;display:grid;place-items:center;cursor:pointer}
+  .emoji-grid{display:grid;grid-template-columns:repeat(6,44px);gap:6px}
+  .emoji-btn{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--bg-2);
+    font-size:1.25rem;line-height:1;cursor:pointer}
+  .emoji-btn:hover{border-color:var(--accent)}
+  .rich-bar{margin:2px 0 6px;display:flex;gap:6px;flex-wrap:wrap}
+
   /* 图标选择器 */
   .icon-pick{position:relative;display:flex;align-items:end}
   .icon-trigger{width:40px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface-solid);
@@ -455,19 +471,19 @@
     github: { label: 'GitHub', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.73.5.5 5.73.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.05c-3.2.7-3.88-1.4-3.88-1.4-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.23-1.28-5.23-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.43-2.69 5.41-5.25 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.68.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/></svg>' },
     bilibili: { label: '哔哩哔哩', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7.5" width="18" height="12" rx="3"/><path d="M7.5 4l2.5 3M16.5 4L14 7"/></svg>' },
     wechat: { label: '微信', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.3 4.6C5.7 4.6 3 6.9 3 9.6c0 1.5.8 2.9 2.2 3.8L4.7 16l2.7-1.3c.6.15 1.2.23 1.9.23"/><path d="M21 13.4c0-2.5-2.3-4.5-5.2-4.5s-5.2 2-5.2 4.5 2.3 4.5 5.2 4.5c.6 0 1.2-.08 1.7-.23L20 19l-.4-2.2c.9-.8 1.4-2 1.4-3.4z"/><circle cx="7.3" cy="9.3" r=".8" fill="currentColor" stroke="none"/><circle cx="11.2" cy="9.3" r=".8" fill="currentColor" stroke="none"/></svg>' },
-    qq: { label: 'QQ', text: 'QQ' },
+    qq: { label: 'QQ', svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 2.4c-3.2 0-5.4 2.3-5.4 5.6 0 1 .2 2 .5 2.8-.9 1.3-1.6 2.8-1.6 4.3 0 .8.3 1.4.8 1.4.4 0 .8-.4 1.1-1 .3 1 .9 2 1.7 2.6-.6.3-1 .7-1 1.2 0 .8 1.7 1.5 3.9 1.5s3.9-.7 3.9-1.5c0-.5-.4-.9-1-1.2.8-.6 1.4-1.6 1.7-2.6.3.6.7 1 1.1 1 .5 0 .8-.6.8-1.4 0-1.5-.7-3-1.6-4.3.3-.8.5-1.8.5-2.8 0-3.3-2.2-5.6-5.4-5.6z"/><circle cx="9.9" cy="8" r="1.15" fill="#fff"/><circle cx="14.1" cy="8" r="1.15" fill="#fff"/><path d="M12 10.2l1 1.4h-2z" fill="#fff"/></svg>' },
     x: { label: 'X / Twitter', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M5 4.5l14 15M19 4.5l-14 15"/></svg>' },
     telegram: { label: 'Telegram', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 4.5L2.8 11.6l6.1 2.1L15 8.4l-4.3 6.3 2.3 5.6L21 4.5z"/></svg>' },
     youtube: { label: 'YouTube', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="2.8" y="6" width="18.4" height="12" rx="4.2"/><path d="M10.4 9.6l4.8 2.4-4.8 2.4z" fill="currentColor" stroke="none"/></svg>' },
     instagram: { label: 'Instagram', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.9" r="1" fill="currentColor" stroke="none"/></svg>' },
     douyin: { label: '抖音', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4v9.6a3.6 3.6 0 1 1-3.6-3.6"/><path d="M14 5.4c.8 1.9 2.4 3.1 4.4 3.3"/></svg>' },
     weibo: { label: '微博', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="11" cy="13.5" rx="7" ry="5"/><path d="M10 11.5c2.2-.4 4 .6 4.3 2.3.3 1.7-1.1 3.2-3.1 3.4-2 .2-3.8-.8-4-2.3"/><path d="M16.5 5.6c2.6-.5 4.7 1.2 4.7 3.6"/></svg>' },
-    zhihu: { label: '知乎', text: '知' },
-    xiaohongshu: { label: '小红书', text: '红' },
+    zhihu: { label: '知乎', svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><path d="M8 8.4h8M12 8.4v7.4M9.2 11.6h5.6M8.4 15.8h7.2"/></svg>' },
+    xiaohongshu: { label: '小红书', svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><path d="M7.6 8.4h4.2v3.2H7.6zM7.6 15.2h4.2M14 8.4v7.6M12.6 12h2.8"/></svg>' },
     pixiv: { label: 'Pixiv', text: 'P' },
-    steam: { label: 'Steam', text: 'S' },
-    discord: { label: 'Discord', text: 'D' },
-    netease: { label: '网易云音乐', text: '网' },
+    steam: { label: 'Steam', svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="15.2" cy="8.6" r="3.2"/><circle cx="8.8" cy="15.2" r="3"/><path d="M10.9 13.1l2.3-2.1"/><path d="M2.6 17.4l3.9 1.6"/></svg>' },
+    discord: { label: 'Discord', svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M19.6 6.1A15.6 15.6 0 0 0 15.8 5l-.3.6a12 12 0 0 1 3.3 1.1 11.4 11.4 0 0 0-9.6 0A12 12 0 0 1 12.5 5.6L12.2 5a15.6 15.6 0 0 0-3.8 1.1C5.8 10 5.1 13.7 5.4 17.3a15.6 15.6 0 0 0 4.7 2.4l.9-1.4c-.8-.3-1.5-.6-2.2-1l.5-.3a11.2 11.2 0 0 0 9 0l.5.3c-.7.4-1.4.7-2.2 1l.9 1.4a15.6 15.6 0 0 0 4.7-2.4c.4-4-.7-7.7-2.6-11.2z"/><circle cx="9.6" cy="13.3" r="1.35" fill="#fff"/><circle cx="14.4" cy="13.3" r="1.35" fill="#fff"/></svg>' },
+    netease: { label: '网易云音乐', svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.2"/><path d="M14.6 7.6v6.6a2.2 2.2 0 1 1-2.2-2.2"/></svg>' },
     rss: { label: 'RSS', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M5 19h.01"/><path d="M5 12.5a6.5 6.5 0 0 1 6.5 6.5"/><path d="M5 6a13 13 0 0 1 13 13"/></svg>' },
     email: { label: '邮箱', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="3"/><path d="M4 7.5l8 5.5 8-5.5"/></svg>' },
     link: { label: '普通链接', svg: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a4 4 0 0 0 5.7 0l2.6-2.6a4 4 0 0 0-5.7-5.7L11 6.3"/><path d="M14 11a4 4 0 0 0-5.7 0l-2.6 2.6a4 4 0 0 0 5.7 5.7L13 17.7"/></svg>' }
@@ -496,6 +512,133 @@
         '<button class="ghost sm del" data-del="' + i + '">×</button></div>';
     }).join('');
   }
+  /* 图形化弹窗：替代 confirm / prompt / alert */
+  function modal(opts) {
+    opts = opts || {};
+    return new Promise(function (resolve) {
+      var m = $('#modal'), ok = $('#modalOk'), cancel = $('#modalCancel'), inp = $('#modalInput');
+      $('#modalTitle').textContent = opts.title || '';
+      $('#modalBody').innerHTML = opts.html || '';
+      inp.hidden = !opts.input;
+      inp.value = opts.value || '';
+      inp.placeholder = opts.placeholder || '';
+      ok.textContent = opts.okText || '确定';
+      ok.className = opts.danger ? 'primary danger' : 'primary';
+      cancel.hidden = opts.hideCancel === true;
+      m.hidden = false;
+      setTimeout(function () { m.classList.add('on'); }, 10);
+
+      var done = false;
+      function close(v) {
+        if (done) return;
+        done = true;
+        m.classList.remove('on');
+        document.removeEventListener('keydown', onKey);
+        ok.onclick = null; cancel.onclick = null; m.onclick = null;
+        setTimeout(function () { m.hidden = true; }, 180);
+        resolve(v);
+      }
+      function onKey(e) {
+        if (e.key === 'Escape') close(null);
+        else if (e.key === 'Enter') close(opts.input ? inp.value : true);
+      }
+      document.addEventListener('keydown', onKey);
+      ok.onclick = function () { close(opts.input ? inp.value : true); };
+      cancel.onclick = function () { close(null); };
+      m.onclick = function (e) { if (e.target === m) close(null); };
+      if (opts.input) setTimeout(function () { inp.focus(); inp.select(); }, 60);
+    });
+  }
+  function confirmBox(title, text, okText, danger) {
+    return modal({ title: title, html: '<p>' + esc(text) + '</p>', okText: okText || '确定', danger: !!danger });
+  }
+
+  /* 回收站 */
+  var trashCache = [];
+  function openTrash() {
+    api('/api/trash').then(function (j) {
+      trashCache = j.items || [];
+      if (!trashCache.length) { toast('回收站是空的'); return; }
+      modal({
+        title: '回收站（' + trashCache.length + '）',
+        okText: '关闭',
+        hideCancel: true,
+        html: '<div class="trash-list">' + trashCache.map(function (x, i) {
+          return '<div class="trash-item"><div class="trash-main"><b>' + esc(x.title || x.slug) + '</b>' +
+            '<span>' + esc(x.slug) + (x.date ? ' · ' + esc(x.date) : '') + '</span></div>' +
+            '<button class="ghost sm" data-restore="' + i + '">恢复</button>' +
+            '<button class="ghost sm danger" data-purge="' + i + '">永久删除</button></div>';
+        }).join('') + '</div>'
+      });
+    }).catch(function (e) { toast(e.message, true); });
+  }
+  document.getElementById('modalBody').addEventListener('click', function (e) {
+    var r = e.target.closest('[data-restore]');
+    if (r) {
+      var item = trashCache[Number(r.getAttribute('data-restore'))];
+      post('/api/restore', { file: item.file }).then(function () {
+        toast('已恢复：' + (item.title || item.slug));
+        loadPosts();
+        setTimeout(openTrash, 260);
+      }).catch(function (err) { toast(err.message, true); });
+      return;
+    }
+    var p = e.target.closest('[data-purge]');
+    if (p) {
+      var it = trashCache[Number(p.getAttribute('data-purge'))];
+      confirmBox('永久删除', '「' + (it.title || it.slug) + '」会被彻底删掉，不能恢复。', '删除', true).then(function (yes) {
+        if (!yes) return;
+        post('/api/purge', { file: it.file }).then(function () {
+          toast('已永久删除');
+          setTimeout(openTrash, 220);
+        }).catch(function (err) { toast(err.message, true); });
+      });
+    }
+  });
+
+  /* 富文本工具条 */
+  var richTarget = null;
+  document.addEventListener('focusin', function (e) {
+    var t = e.target;
+    if (t && (t.id === 'a-intro' || t.id === 'a-story')) richTarget = t;
+  });
+  function richInsert(text) {
+    var el = richTarget;
+    if (!el) return;
+    var a = el.selectionStart || 0, b = el.selectionEnd || 0;
+    var v = el.value, sel = v.slice(a, b);
+    var out = text.replace('$1', sel || '');
+    el.value = v.slice(0, a) + out + v.slice(b);
+    el.focus();
+    var pos = a + out.length - (out.indexOf(sel) === 0 && sel ? sel.length : 0);
+    el.setSelectionRange(pos, pos);
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-rich]');
+    if (!b) return;
+    var k = b.getAttribute('data-rich');
+    if (k === 'img') richInsert('![](/assets/img/图片名.jpg)');
+    if (k === 'bold') richInsert('**$1**');
+    if (k === 'link') richInsert('[$1](https://)');
+    if (k === 'emoji') {
+      modal({
+        title: '挑一个表情', okText: '关闭', hideCancel: true,
+        html: '<div class="emoji-grid">' + ['🌙','✨','🌿','🍥','🎐','🫧','🌸','🍀','☕️','🎧','📖','🖊️','🙂','😴','🌧️','🕯️','🐈','🌊'].map(function (x) {
+          return '<button type="button" class="emoji-btn" data-emo="' + x + '">' + x + '</button>';
+        }).join('') + '</div>'
+      });
+      setTimeout(function () {
+        var host = document.getElementById('modalBody');
+        if (host) host.onclick = function (ev) {
+          var btn = ev.target.closest('[data-emo]');
+          if (!btn) return;
+          richInsert(btn.getAttribute('data-emo'));
+          document.getElementById('modalOk').click();
+        };
+      }, 0);
+    }
+  });
+
   function upload(cb) {
     var inp = document.createElement('input');
     inp.type = 'file'; inp.accept = 'image/*';
@@ -725,6 +868,9 @@
       '<label class="full">头像（路径或链接）<input id="a-avatar" value="' + esc(d.avatar || '') + '"></label>' +
       '<button class="ghost sm" id="a-avatarUp" style="justify-self:start">上传头像</button>' +
       '<label class="full">介绍标题<input id="a-introTitle" value="' + esc(d.introTitle || '') + '"></label>' +
+      '<div class="toolbar rich-bar" id="richBar">' +
+      '<button type="button" data-rich="img">图片</button><button type="button" data-rich="bold">加粗</button><button type="button" data-rich="link">链接</button><button type="button" data-rich="emoji">表情</button>' +
+      '</div>' +
       '<label class="full">介绍正文（每行一段，可贴图 / 加小表情）<textarea id="a-intro" rows="3">' + esc((d.intro || []).join('\n')) + '</textarea></label>' +
       '<h4>关于我（单独一块，可留空）</h4>' +
       '<label class="full">这一块的标题<input id="a-storyTitle" value="' + esc(d.bioTitle || '关于我') + '"></label>' +
@@ -773,41 +919,86 @@
       renderMoments();
     });
   }
+  function syncMoments() {
+    $$('#momentRows [data-mi]').forEach(function (el) {
+      var i = Number(el.getAttribute('data-mi'));
+      if (state.moments.items[i]) state.moments.items[i][el.getAttribute('data-k')] = el.value;
+    });
+  }
   function renderMoments() {
     var host = $('#momentRows');
+    if (!state.moments.items.length) {
+      host.innerHTML = '<p class="status">还没有说说，点下面「＋ 一条说说」写第一条。</p>';
+      return;
+    }
     host.innerHTML = state.moments.items.map(function (m, i) {
-      return '<div class="r" style="grid-template-columns:120px 1fr auto">' +
-        '<label>日期<input data-mi="' + i + '" data-k="date" value="' + esc(m.date) + '"></label>' +
-        '<label>内容<textarea data-mi="' + i + '" data-k="text" rows="2">' + esc(m.text) + '</textarea></label>' +
-        '<button class="ghost sm del" data-md="' + i + '">×</button>' +
-        '<label class="full" style="grid-column:1/-1">图片（每行一个：本地路径或 https 链接）<textarea data-mi="' + i + '" data-k="images" rows="2">' + esc((m.images || []).join('\n')) + '</textarea></label>' +
-        '</div>';
+      var imgs = (m.images || []).map(function (src, k) {
+        return '<span class="m-img" data-img="' + i + ':' + k + '"><img src="' + esc(src) + '" alt="">' +
+          '<button type="button" data-imgdel="' + i + ':' + k + '" aria-label="删掉这张">×</button></span>';
+      }).join('');
+      return '<article class="m-card">' +
+        '<header class="m-head">' +
+        '<input type="text" class="m-date" data-mi="' + i + '" data-k="date" value="' + esc(m.date || '') + '" placeholder="2026-11-03">' +
+        '<button type="button" class="ghost sm del" data-md="' + i + '">删除</button>' +
+        '</header>' +
+        '<textarea data-mi="' + i + '" data-k="text" rows="3" placeholder="今天想说的话…">' + esc(m.text || '') + '</textarea>' +
+        '<div class="m-imgs">' + imgs +
+        '<button type="button" class="ghost sm" data-imgadd="' + i + '">＋ 上传</button>' +
+        '<button type="button" class="ghost sm" data-imglink="' + i + '">＋ 链接</button>' +
+        '</div></article>';
     }).join('');
-    host.onclick = function (e) {
-      var b = e.target.closest('[data-md]');
-      if (!b) return;
-      /* 先同步输入框，再删除 */
-      $$('[data-mi]', host).forEach(function (el) {
-        var i = Number(el.getAttribute('data-mi')), k = el.getAttribute('data-k');
-        var v = el.value;
-        if (k === 'images') v = v.split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
-        if (state.moments.items[i]) state.moments.items[i][k] = v;
-      });
-      state.moments.items.splice(Number(b.getAttribute('data-md')), 1);
-      renderMoments();
-    };
   }
+  document.addEventListener('click', function (e) {
+    var host = document.getElementById('momentRows');
+    if (!host || !host.contains(e.target)) return;
+
+    var del = e.target.closest('[data-md]');
+    if (del) {
+      syncMoments();
+      state.moments.items.splice(Number(del.getAttribute('data-md')), 1);
+      renderMoments();
+      return;
+    }
+    var imgDel = e.target.closest('[data-imgdel]');
+    if (imgDel) {
+      syncMoments();
+      var pair = imgDel.getAttribute('data-imgdel').split(':');
+      var it = state.moments.items[Number(pair[0])];
+      if (it && it.images) it.images.splice(Number(pair[1]), 1);
+      renderMoments();
+      return;
+    }
+    var up = e.target.closest('[data-imgadd]');
+    if (up) {
+      var iAdd = Number(up.getAttribute('data-imgadd'));
+      upload(function (j) {
+        syncMoments();
+        var m = state.moments.items[iAdd];
+        m.images = m.images || [];
+        m.images.push(j.path);
+        renderMoments();
+      });
+      return;
+    }
+    var ln = e.target.closest('[data-imglink]');
+    if (ln) {
+      var iLn = Number(ln.getAttribute('data-imglink'));
+      modal({ title: '图片链接', input: true, value: 'https://', placeholder: 'https://... 或 /assets/...', okText: '添加' }).then(function (u2) {
+        if (!u2) return;
+        syncMoments();
+        var m2 = state.moments.items[iLn];
+        m2.images = m2.images || [];
+        m2.images.push(u2.trim());
+        renderMoments();
+      });
+    }
+  });
   $('#addMoment').onclick = function () {
     state.moments.items.unshift({ date: new Date().toISOString().slice(0, 10), text: '', images: [] });
     renderMoments();
   };
   $('#saveMoments').onclick = function () {
-    $$('#momentRows [data-mi]').forEach(function (el) {
-      var i = Number(el.getAttribute('data-mi')), k = el.getAttribute('data-k');
-      var v = el.value;
-      if (k === 'images') v = v.split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
-      state.moments.items[i][k] = v;
-    });
+    syncMoments();
     post('/api/moments', { data: state.moments }).then(function () { toast('说说已保存'); }).catch(function (e) { toast(e.message, true); });
   };
 
