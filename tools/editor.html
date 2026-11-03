@@ -117,13 +117,18 @@
   .icon-pick-btn:hover{border-color:var(--accent-soft);color:var(--accent)}
   .icon-pick-btn.is-on{border-color:var(--accent);color:var(--accent);background:var(--accent-wash)}
   /* 歌单行 */
-  .music-row{display:grid;grid-template-columns:26px 18px minmax(0,1.2fr) minmax(0,1.4fr) auto;
+  .music-row{display:grid;grid-template-columns:26px 18px minmax(0,1.2fr) minmax(0,1.4fr) auto auto;
     gap:8px;align-items:end;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--bg-2);
     margin-bottom:8px;transition:border-color .2s,opacity .2s}
   .music-row.dragging{opacity:.45}
   .music-row.over{border-color:var(--accent)}
   .m-idx{font-family:var(--mono);font-size:.75rem;color:var(--accent);text-align:center;padding-bottom:10px}
-  .m-drag{cursor:grab;color:var(--ink-3);text-align:center;padding-bottom:10px;user-select:none;font-size:1rem}
+  .m-drag{cursor:grab;color:var(--ink-3);text-align:center;padding-bottom:10px;user-select:none;font-size:1rem;
+    -webkit-user-drag:element}
+  .m-move{display:flex;gap:3px;padding-bottom:0;align-self:center}
+  .m-move button{width:24px;height:24px;border-radius:5px;border:1px solid var(--line);background:transparent;
+    color:var(--ink-3);font-size:.6875rem;line-height:1;cursor:pointer;padding:0}
+  .m-move button:hover{color:var(--accent);border-color:var(--accent-soft)}
   .m-drag:active{cursor:grabbing}
   @media (max-width:760px){
     .music-row{grid-template-columns:26px 18px 1fr auto}
@@ -1273,34 +1278,53 @@
     var songs = state.site.music.songs || [];
     host.innerHTML = songs.map(function (s, i) {
       var local = !!s.src;
-      return '<div class="music-row" draggable="true" data-row="' + i + '">' +
+      return '<div class="music-row" draggable="false" data-row="' + i + '">' +
         '<span class="m-idx">' + (i + 1) + '</span>' +
         '<span class="m-drag" title="拖动排序">⠿</span>' +
         '<label>名称<input data-song="' + i + '" data-k="name" value="' + esc(s.name || '') + '">' +
         (s.ok === false ? '<span class="status">⚠ 放不出来</span>' : '') + '</label>' +
         '<label>' + (local ? '本地文件' : '网易云 id') + '<input data-song="' + i + '" data-k="' + (local ? 'src' : 'id') + '" value="' + esc(local ? s.src : (s.id || '')) + '"></label>' +
+        '<span class="m-move"><button type="button" data-move="up" data-row="' + i + '" title="上移">↑</button>' +
+        '<button type="button" data-move="down" data-row="' + i + '" title="下移">↓</button></span>' +
         '<button class="ghost sm del" data-songdel="' + i + '">×</button></div>';
     }).join('') || '<p class="status">还没有歌，点下面「上传本地音乐」或「手动加一首」。</p>';
 
     /* 删除 */
     host.onclick = function (e) {
       var b = e.target.closest('[data-songdel]');
-      if (!b) return;
-      syncSongs();
-      songs.splice(Number(b.getAttribute('data-songdel')), 1);
-      renderMusic();
+      if (b) {
+        syncSongs();
+        songs.splice(Number(b.getAttribute('data-songdel')), 1);
+        renderMusic();
+        return;
+      }
+      var mv = e.target.closest('[data-move]');
+      if (mv) {
+        syncSongs();
+        var from = Number(mv.getAttribute('data-row'));
+        var to = mv.getAttribute('data-move') === 'up' ? from - 1 : from + 1;
+        if (to < 0 || to >= songs.length) return;
+        var item = songs.splice(from, 1)[0];
+        songs.splice(to, 0, item);
+        renderMusic();
+      }
     };
 
     /* 拖拽排序 */
     var dragFrom = -1;
     $$('.music-row', host).forEach(function (row) {
+      var grip = $('.m-drag', row);
+      if (grip) {
+        grip.addEventListener('mousedown', function () { row.draggable = true; });
+        grip.addEventListener('touchstart', function () { row.draggable = true; }, { passive: true });
+      }
       row.addEventListener('dragstart', function (e) {
         syncSongs();
         dragFrom = Number(row.getAttribute('data-row'));
         row.classList.add('dragging');
         try { e.dataTransfer.setData('text/plain', String(dragFrom)); e.dataTransfer.effectAllowed = 'move'; } catch (err) {}
       });
-      row.addEventListener('dragend', function () { row.classList.remove('dragging'); });
+      row.addEventListener('dragend', function () { row.draggable = false; row.classList.remove('dragging'); });
       row.addEventListener('dragover', function (e) { e.preventDefault(); row.classList.add('over'); });
       row.addEventListener('dragleave', function () { row.classList.remove('over'); });
       row.addEventListener('drop', function (e) {
