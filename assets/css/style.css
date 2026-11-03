@@ -698,8 +698,10 @@ body{font-size:1.0625rem;line-height:1.9;-webkit-font-smoothing:antialiased;-moz
 .moment .ava{width:40px;height:40px;border-radius:50%;object-fit:cover;border:1px solid var(--glass-edge)}
 [data-theme="dark"] .moment .ava{border-color:rgba(255,255,255,.2)}
 @media (max-width:900px){
-  .moment{grid-template-columns:40px 1fr;gap:10px 12px}
+  .moment{grid-template-columns:40px minmax(0,1fr);gap:10px 12px}
   .moment time{grid-column:2;padding-top:0}
+  .moment > div{grid-column:1/-1;min-width:0}
+  .moment p{font-size:.9375rem}
 }
 
 /* 图片放大 */
