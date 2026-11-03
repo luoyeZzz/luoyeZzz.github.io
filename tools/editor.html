@@ -299,7 +299,7 @@
         <button class="primary sm" id="savePost">保存</button>
       </div>
       <div class="meta3">
-        <label>日期<input id="date" type="date"></label>
+        <label>日期时间<input id="date" type="datetime-local" step="1"></label>
         <label>分类<input id="tag" placeholder="杂记"></label>
         <label>封面日文<input id="word" placeholder="ことば"></label>
         <label>配色<select id="tone"><option value="1">1 星空</option><option value="2">2 淡蓝</option><option value="3">3 青绿</option><option value="4">4 淡紫</option></select></label>
@@ -747,6 +747,23 @@
     }
   });
 
+  /* 时间工具：本地时间，支持时分秒 */
+  function nowLocal() {
+    var d = new Date();
+    function p(n) { return (n < 10 ? '0' : '') + n; }
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' +
+      p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+  }
+  function toInput(v) {
+    var m = String(v || '').match(/^(\d{4}-\d{2}-\d{2})(?:[T ](\d{2}:\d{2})(?::(\d{2}))?)?/);
+    if (!m) return '';
+    return m[1] + 'T' + (m[2] || '00:00') + ':' + (m[3] || '00');
+  }
+  function fromInput(v) {
+    if (!v) return '';
+    return String(v).replace('T', ' ').replace(/^(.{16})$/, '$1:00');
+  }
+
   function upload(cb, opts) {
     opts = opts || {};
     var inp = document.createElement('input');
@@ -790,7 +807,7 @@
   });
   function fillPost(m, body) {
     $('#title').value = m.title || '';
-    $('#date').value = m.date || new Date().toISOString().slice(0, 10);
+    $('#date').value = toInput(m.date) || toInput(nowLocal());
     $('#tag').value = m.tag || '杂记';
     $('#word').value = m.word || '';
     $('#tone').value = String(m.tone || 2);
@@ -822,7 +839,7 @@
       oldSlug: state.current,
       meta: {
         title: $('#title').value.trim(),
-        date: $('#date').value,
+        date: fromInput($('#date').value),
         tag: $('#tag').value.trim() || '杂记',
         word: $('#word').value.trim(),
         tone: Number($('#tone').value) || 2,
@@ -1065,7 +1082,7 @@
     }).join('');
     host.innerHTML =
       '<div class="r" style="grid-template-columns:160px 1fr">' +
-      '<label>日期<input id="mDate" value="' + esc(m.date || '') + '" placeholder="2026-11-03"></label>' +
+      '<label>日期时间<input id="mDate" type="datetime-local" step="1" value="' + esc(toInput(m.date)) + '"></label>' +
       '</div>' +
       '<label class="full">正文<textarea id="mText" rows="5" placeholder="今天想说的话…">' + esc(m.text || '') + '</textarea></label>' +
       '<div class="m-imgs">' + thumbs +
@@ -1080,7 +1097,7 @@
   function readMomentForm() {
     var m = state.moments.items[state.momentIndex];
     if (!m) return;
-    if ($('#mDate')) m.date = $('#mDate').value.trim();
+    if ($('#mDate')) m.date = fromInput($('#mDate').value);
     if ($('#mText')) m.text = $('#mText').value;
   }
   function renderMoments() {
@@ -1096,7 +1113,7 @@
   if ($('#mFilter')) $('#mFilter').addEventListener('input', renderMomentList);
 
   $('#addMoment').onclick = function () {
-    state.moments.items.unshift({ date: new Date().toISOString().slice(0, 10), text: '', images: [] });
+    state.moments.items.unshift({ date: nowLocal(), text: '', images: [] });
     state.momentIndex = 0;
     renderMoments();
     setTimeout(function () { var t = document.getElementById('mText'); if (t) t.focus(); }, 30);
@@ -1170,7 +1187,7 @@
     $('#albumForm').innerHTML =
       '<label>标题<input id="al-title" value="' + esc(a.title) + '"></label>' +
       '<label>短名<input id="al-slug" value="' + esc(a.slug) + '"></label>' +
-      '<label>日期<input id="al-date" value="' + esc(a.date) + '"></label>' +
+      '<label>日期时间<input id="al-date" type="datetime-local" step="1" value="' + esc(toInput(a.date)) + '"></label>' +
       '<label>封面（路径或链接）<input id="al-cover" value="' + esc(a.cover || '') + '"></label>' +
       '<label class="full">简介<textarea id="al-desc" rows="2">' + esc(a.desc || '') + '</textarea></label>';
     renderAlbumImages();
@@ -1195,7 +1212,7 @@
     };
   }
   $('#addAlbum').onclick = function () {
-    state.gallery.albums.push({ slug: 'album-' + Date.now().toString(36), title: '新相册', date: new Date().toISOString().slice(0, 10), desc: '', cover: '', images: [] });
+    state.gallery.albums.push({ slug: 'album-' + Date.now().toString(36), title: '新相册', date: nowLocal(), desc: '', cover: '', images: [] });
     selectAlbum(state.gallery.albums.length - 1);
   };
   $('#addImage').onclick = function () {
@@ -1218,7 +1235,7 @@
   $('#saveGallery').onclick = function () {
     var a = state.gallery.albums[state.albumIndex];
     if (!a) return toast('没有相册', true);
-    a.title = $('#al-title').value; a.slug = $('#al-slug').value; a.date = $('#al-date').value;
+    a.title = $('#al-title').value; a.slug = $('#al-slug').value; a.date = fromInput($('#al-date').value);
     a.cover = $('#al-cover').value; a.desc = $('#al-desc').value;
     $$('#albumImages [data-cap]').forEach(function (inp) {
       var i = Number(inp.getAttribute('data-cap'));

@@ -241,13 +241,13 @@ function loadPosts() {
     .filter(function (p) { return !p.draft; })
     .sort(function (a, b) {
       if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
-      return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
+      return tsOf(b.date) - tsOf(a.date);
     });
 }
 
 function loadMoments() {
   const d = readJSON(path.join(CONTENT, 'moments.json'), { items: [] });
-  return (d.items || []).slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+  return (d.items || []).slice().sort(function (a, b) { return tsOf(b.date) - tsOf(a.date); });
 }
 
 function loadGallery() {
@@ -259,7 +259,35 @@ function loadFriends() {
   return readJSON(path.join(CONTENT, 'friends.json'), { list: [] });
 }
 
-function dateLabel(iso) { return String(iso || '').replace(/-/g, '.'); }
+function pad2(n) { return (n < 10 ? '0' : '') + n; }
+
+function parseDT(v) {
+  const m = String(v || '').trim().match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (!m) return null;
+  return {
+    y: +m[1], mo: +m[2], d: +m[3],
+    h: m[4] === undefined ? null : +m[4],
+    mi: m[5] === undefined ? null : +m[5],
+    s: m[6] === undefined ? null : +m[6]
+  };
+}
+
+function tsOf(v) {
+  const t = parseDT(v);
+  if (!t) return 0;
+  return new Date(t.y, t.mo - 1, t.d, t.h || 0, t.mi || 0, t.s || 0).getTime();
+}
+
+function dateLabel(iso, withSeconds) {
+  const t = parseDT(iso);
+  if (!t) return String(iso || '');
+  let out = t.y + '.' + pad2(t.mo) + '.' + pad2(t.d);
+  if (t.h !== null) {
+    out += ' ' + pad2(t.h) + ':' + pad2(t.mi);
+    if (withSeconds && t.s !== null) out += ':' + pad2(t.s);
+  }
+  return out;
+}
 function readMinutes(n) { return Math.max(1, Math.round(n / 400)); }
 
 /* ============================ 公共片段 ============================ */
@@ -578,7 +606,7 @@ function postPage(site, post, prev, next) {
       '  <div class="article-top"><a class="pill-btn back-inline" href="' + u(site, '/posts/') + '" data-back>← 返回文章列表</a></div>\n' +
       '  <div class="cover">' + cover + '<span class="jp">' + esc(post.word) + '</span></div>\n' +
       '  <header class="article-head">\n' +
-      '    <p class="kicker">' + tagChip(post.tag) + '<span>' + esc(dateLabel(post.date)) + '</span><span>' + mins + ' min</span>' +
+      '    <p class="kicker">' + tagChip(post.tag) + '<span>' + esc(dateLabel(post.date, true)) + '</span><span>' + mins + ' min</span>' +
       (post.pinned ? '<span class="pin-mark">置顶</span>' : '') + '</p>\n' +
       '    <h1 class="article-title">' + esc(post.title) + '</h1>\n' +
       '  </header>\n' +
@@ -602,7 +630,7 @@ function postPage(site, post, prev, next) {
 
 function archivePage(site, posts) {
   const pg = (site.pages || {}).archive || {};
-  const sorted = posts.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+  const sorted = posts.slice().sort(function (a, b) { return tsOf(b.date) - tsOf(a.date); });
   const byYear = {};
   sorted.forEach(function (p) {
     const y = String(p.date).slice(0, 4) || '未标年份';
@@ -643,7 +671,7 @@ function momentsPage(site, items) {
     const text = esc(m.text).split('\n').join('<br>');
     return '<article class="moment">' +
       '<img class="ava" src="' + u(site, site.avatar || '/assets/img/avatar.svg') + '" alt="' + esc(site.brand.name) + '">' +
-      '<time>' + esc(dateLabel(m.date)) + '</time>' +
+      '<time>' + esc(dateLabel(m.date, true)) + '</time>' +
       '<div><p>' + text + '</p>' + imgs + '</div></article>';
   }).join('');
   return layout(site, {
@@ -862,7 +890,8 @@ function build(opts) {
     });
   }
 
-  const today = new Date().toISOString().slice(0, 10);
+  const _now = new Date();
+  const today = _now.getFullYear() + '-' + pad2(_now.getMonth() + 1) + '-' + pad2(_now.getDate());
   const urls = [
     { loc: '/', pri: '1.0', last: today },
     { loc: '/posts/', pri: '0.9', last: today },
@@ -873,7 +902,7 @@ function build(opts) {
     { loc: '/friends/', pri: '0.5', last: today },
     { loc: '/about/', pri: '0.6', last: today }
   ].concat(posts.map(function (p) {
-    return { loc: '/posts/' + p.slug + '/', pri: '0.8', last: p.date || today };
+    return { loc: '/posts/' + p.slug + '/', pri: '0.8', last: String(p.date || today).slice(0, 10) };
   }));
   const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
     urls.map(function (x) {
