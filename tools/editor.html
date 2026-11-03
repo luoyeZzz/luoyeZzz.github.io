@@ -114,6 +114,25 @@
     color:var(--ink-3);display:grid;place-items:center;font-size:.75rem;cursor:pointer;transition:.2s;padding:0}
   .icon-pick-btn:hover{border-color:var(--accent-soft);color:var(--accent)}
   .icon-pick-btn.is-on{border-color:var(--accent);color:var(--accent);background:var(--accent-wash)}
+  /* 说说：列表 + 编辑器 */
+  .list-head{display:flex;gap:8px;margin-bottom:10px}
+  .list-head input{flex:1;height:38px}
+  .li-date{font-family:var(--mono);font-size:.6875rem;color:var(--ink-3);min-width:76px}
+  .li-count{margin-left:auto;font-size:.6875rem;color:var(--accent);background:var(--accent-wash);
+    padding:2px 7px;border-radius:8px;flex:none}
+  .ed-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+  .ed-head h3{margin:0}
+  #momentForm .r{grid-template-columns:160px}
+  .rich-field{display:flex;flex-direction:column;gap:8px;grid-column:1/-1;width:100%}
+  .rich-field textarea{width:100%}
+  .rich-prev{display:none}
+  .rich-prev:not(.is-empty){display:block;padding:12px 14px;border:1px dashed var(--line);border-radius:12px;
+    background:var(--bg-2);font-size:.875rem;line-height:1.8;color:var(--ink-2)}
+  .rich-prev p{margin:0 0 8px}
+  .rich-prev p:last-child{margin-bottom:0}
+  .rich-prev img{display:block;max-width:100%;border-radius:10px;margin:6px 0}
+  .rich-prev a{color:var(--accent)}
+
   /* 说说卡片 */
   .m-card{border:1px solid var(--line);border-radius:16px;padding:14px;background:var(--surface-solid);display:flex;flex-direction:column;gap:10px}
   .m-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -278,11 +297,23 @@
   </section>
 
   <!-- 说说 -->
-  <section class="pane" id="pane-moments">
+  <section class="pane two" id="pane-moments">
     <div class="card">
-      <h3>说说</h3>
-      <div class="form"><div class="rows" id="momentRows"></div></div>
-      <div class="row-actions"><button class="ghost" id="addMoment">＋ 一条说说</button><button class="primary" id="saveMoments">保存</button></div>
+      <div class="list-head">
+        <input id="mFilter" placeholder="搜索说说…">
+        <button class="primary sm" id="addMoment">＋</button>
+      </div>
+      <div class="list" id="momentList"></div>
+    </div>
+    <div class="card">
+      <div class="ed-head">
+        <h3>编辑说说</h3>
+        <div class="row-actions">
+          <button class="primary" id="saveMoments">保存</button>
+          <button class="ghost danger" id="delMoment">删除</button>
+        </div>
+      </div>
+      <div class="form" id="momentForm"><p class="status">从左边选一条，或点 ＋ 新建。</p></div>
     </div>
   </section>
 
@@ -596,14 +627,36 @@
     }
   });
 
+  /* 富文本：预览 */
+  function richPreview(text) {
+    var html = esc(text)
+      .replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, function (m, alt, src) {
+        return '<img src="' + src + '" alt="' + alt + '">';
+      })
+      .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    return html.split('\n').filter(function (x) { return x.trim(); })
+      .map(function (p) { return '<p>' + p + '</p>'; }).join('');
+  }
+  function refreshPrev(id) {
+    var ta = document.getElementById(id);
+    var box = document.getElementById('prev-' + id);
+    if (!ta || !box) return;
+    box.innerHTML = richPreview(ta.value);
+    box.classList.toggle('is-empty', !ta.value.trim());
+  }
+  document.addEventListener('input', function (e) {
+    if (e.target.id === 'a-intro' || e.target.id === 'a-story') refreshPrev(e.target.id);
+  });
+
   /* 富文本工具条 */
   var richTarget = null;
   document.addEventListener('focusin', function (e) {
     var t = e.target;
     if (t && (t.id === 'a-intro' || t.id === 'a-story')) richTarget = t;
   });
-  function richInsert(text) {
-    var el = richTarget;
+  function richInsert(text, target) {
+    var el = target || richTarget;
     if (!el) return;
     var a = el.selectionStart || 0, b = el.selectionEnd || 0;
     var v = el.value, sel = v.slice(a, b);
@@ -617,9 +670,11 @@
     var b = e.target.closest('[data-rich]');
     if (!b) return;
     var k = b.getAttribute('data-rich');
-    if (k === 'img') richInsert('![](/assets/img/图片名.jpg)');
-    if (k === 'bold') richInsert('**$1**');
-    if (k === 'link') richInsert('[$1](https://)');
+    var t = document.getElementById(b.getAttribute('data-rich-for')) || richTarget;
+    if (k === 'img') richInsert('![](/assets/img/图片名.jpg)', t);
+    if (k === 'bold') richInsert('**$1**', t);
+    if (k === 'link') richInsert('[$1](https://)', t);
+    if (t) refreshPrev(t.id);
     if (k === 'emoji') {
       modal({
         title: '挑一个表情', okText: '关闭', hideCancel: true,
@@ -632,7 +687,8 @@
         if (host) host.onclick = function (ev) {
           var btn = ev.target.closest('[data-emo]');
           if (!btn) return;
-          richInsert(btn.getAttribute('data-emo'));
+          richInsert(btn.getAttribute('data-emo'), richTarget);
+          if (richTarget) refreshPrev(richTarget.id);
           document.getElementById('modalOk').click();
         };
       }, 0);
@@ -868,13 +924,18 @@
       '<label class="full">头像（路径或链接）<input id="a-avatar" value="' + esc(d.avatar || '') + '"></label>' +
       '<button class="ghost sm" id="a-avatarUp" style="justify-self:start">上传头像</button>' +
       '<label class="full">介绍标题<input id="a-introTitle" value="' + esc(d.introTitle || '') + '"></label>' +
-      '<div class="toolbar rich-bar" id="richBar">' +
-      '<button type="button" data-rich="img">图片</button><button type="button" data-rich="bold">加粗</button><button type="button" data-rich="link">链接</button><button type="button" data-rich="emoji">表情</button>' +
-      '</div>' +
-      '<label class="full">介绍正文（每行一段，可贴图 / 加小表情）<textarea id="a-intro" rows="3">' + esc((d.intro || []).join('\n')) + '</textarea></label>' +
+      '<label class="full">个人简介（每行一段，可贴图 / 加小表情）</label>' +
+      '<div class="rich-field full" data-for="a-intro">' +
+      '<div class="toolbar rich-bar"><button type="button" data-rich="img" data-rich-for="a-intro">图片</button><button type="button" data-rich="bold" data-rich-for="a-intro">加粗</button><button type="button" data-rich="link" data-rich-for="a-intro">链接</button><button type="button" data-rich="emoji" data-rich-for="a-intro">表情</button></div>' +
+      '<textarea id="a-intro" rows="4">' + esc((d.intro || []).join('\n')) + '</textarea>' +
+      '<div class="rich-prev" id="prev-a-intro"></div></div>' +
       '<h4>关于我（单独一块，可留空）</h4>' +
       '<label class="full">这一块的标题<input id="a-storyTitle" value="' + esc(d.bioTitle || '关于我') + '"></label>' +
-      '<label class="full">内容（每行一段，可贴图 / 加小表情）<textarea id="a-story" rows="6" placeholder="我喜欢在夜里写字，也喜欢月亮。\n配图直接写 ![](/assets/img/xxx.jpg)，表情直接打 🙂"></textarea></label>' +
+      '<label class="full">内容（每行一段）</label>' +
+      '<div class="rich-field full" data-for="a-story">' +
+      '<div class="toolbar rich-bar"><button type="button" data-rich="img" data-rich-for="a-story">图片</button><button type="button" data-rich="bold" data-rich-for="a-story">加粗</button><button type="button" data-rich="link" data-rich-for="a-story">链接</button><button type="button" data-rich="emoji" data-rich-for="a-story">表情</button></div>' +
+      '<textarea id="a-story" rows="6" placeholder="我喜欢在夜里写字，也喜欢月亮。配图写 ![](/assets/img/x.jpg)"></textarea>' +
+      '<div class="rich-prev" id="prev-a-story"></div></div>' +
       '<h4>档案（第三格是夜间显示的值，可留空）</h4><div class="rows" id="a-facts"></div>' +
       '<button class="ghost sm" id="addFact" style="justify-self:start">＋ 一行</button>' +
       '<h4>这一栏的标题</h4>' +
@@ -886,6 +947,7 @@
 
     if ($('#a-favTitle')) $('#a-favTitle').value = d.favoritesTitle || '心上人与心头好';
     if ($('#a-story')) $('#a-story').value = (d.bio || []).join('\n');
+    setTimeout(function () { refreshPrev('a-intro'); refreshPrev('a-story'); }, 0);
     if ($('#a-storyTitle')) $('#a-storyTitle').value = d.bioTitle || '关于我';
     $('#a-facts').innerHTML = rowsHTML(d.facts || [], ['k', 'v', 'vn'], { k: '项目', v: '内容', vn: '夜间内容' });
     $('#a-favs').innerHTML = rowsHTML(d.favorites || [], ['name', 'src'], { name: '角色', src: '出处' });
@@ -915,92 +977,112 @@
   function loadMoments() {
     api('/api/moments').then(function (j) {
       state.moments = j.data || { items: [] };
+      state.momentIndex = state.momentIndex || 0;
       state.moments.items = state.moments.items || [];
       renderMoments();
     });
   }
-  function syncMoments() {
-    $$('#momentRows [data-mi]').forEach(function (el) {
-      var i = Number(el.getAttribute('data-mi'));
-      if (state.moments.items[i]) state.moments.items[i][el.getAttribute('data-k')] = el.value;
-    });
+  function momentExcerpt(t) {
+    var x = String(t || '').replace(/\s+/g, ' ').trim();
+    return x.length > 46 ? x.slice(0, 46) + '…' : (x || '（空）');
   }
-  function renderMoments() {
-    var host = $('#momentRows');
-    if (!state.moments.items.length) {
-      host.innerHTML = '<p class="status">还没有说说，点下面「＋ 一条说说」写第一条。</p>';
-      return;
-    }
-    host.innerHTML = state.moments.items.map(function (m, i) {
-      var imgs = (m.images || []).map(function (src, k) {
-        return '<span class="m-img" data-img="' + i + ':' + k + '"><img src="' + esc(src) + '" alt="">' +
-          '<button type="button" data-imgdel="' + i + ':' + k + '" aria-label="删掉这张">×</button></span>';
-      }).join('');
-      return '<article class="m-card">' +
-        '<header class="m-head">' +
-        '<input type="text" class="m-date" data-mi="' + i + '" data-k="date" value="' + esc(m.date || '') + '" placeholder="2026-11-03">' +
-        '<button type="button" class="ghost sm del" data-md="' + i + '">删除</button>' +
-        '</header>' +
-        '<textarea data-mi="' + i + '" data-k="text" rows="3" placeholder="今天想说的话…">' + esc(m.text || '') + '</textarea>' +
-        '<div class="m-imgs">' + imgs +
-        '<button type="button" class="ghost sm" data-imgadd="' + i + '">＋ 上传</button>' +
-        '<button type="button" class="ghost sm" data-imglink="' + i + '">＋ 链接</button>' +
-        '</div></article>';
+  function renderMomentList() {
+    var q = ($('#mFilter') && $('#mFilter').value || '').trim();
+    var host = $('#momentList');
+    var list = state.moments.items.map(function (m, i) { return { m: m, i: i }; });
+    if (q) list = list.filter(function (x) { return String(x.m.text || '').indexOf(q) > -1 || String(x.m.date || '').indexOf(q) > -1; });
+    if (!list.length) { host.innerHTML = '<p class="status">' + (q ? '没有匹配的说说' : '还没有说说') + '</p>'; return; }
+    host.innerHTML = list.map(function (x) {
+      var n = (x.m.images || []).length;
+      return '<button type="button" class="list-item' + (x.i === state.momentIndex ? ' on' : '') + '" data-moment="' + x.i + '">' +
+        '<span class="li-date">' + esc(x.m.date || '') + '</span>' +
+        '<span class="li-title">' + esc(momentExcerpt(x.m.text)) + '</span>' +
+        (n ? '<span class="li-count">' + n + ' 图</span>' : '') +
+        '</button>';
     }).join('');
   }
-  document.addEventListener('click', function (e) {
-    var host = document.getElementById('momentRows');
-    if (!host || !host.contains(e.target)) return;
+  function renderMomentForm() {
+    var host = $('#momentForm');
+    var m = state.moments.items[state.momentIndex];
+    if (!m) { host.innerHTML = '<p class="status">从左边选一条，或点 ＋ 新建。</p>'; return; }
+    var thumbs = (m.images || []).map(function (src, k) {
+      return '<span class="m-img"><img src="' + esc(src) + '" alt=""><button type="button" data-mimgdel="' + k + '">×</button></span>';
+    }).join('');
+    host.innerHTML =
+      '<div class="r" style="grid-template-columns:160px 1fr">' +
+      '<label>日期<input id="mDate" value="' + esc(m.date || '') + '" placeholder="2026-11-03"></label>' +
+      '</div>' +
+      '<label class="full">正文<textarea id="mText" rows="5" placeholder="今天想说的话…">' + esc(m.text || '') + '</textarea></label>' +
+      '<div class="m-imgs">' + thumbs +
+      '<button type="button" class="ghost sm" id="mAddImg">＋ 上传</button>' +
+      '<button type="button" class="ghost sm" id="mAddLink">＋ 链接</button></div>';
+  }
+  function selectMoment(i) {
+    state.momentIndex = i;
+    renderMomentList();
+    renderMomentForm();
+  }
+  function readMomentForm() {
+    var m = state.moments.items[state.momentIndex];
+    if (!m) return;
+    if ($('#mDate')) m.date = $('#mDate').value.trim();
+    if ($('#mText')) m.text = $('#mText').value;
+  }
+  function renderMoments() {
+    state.momentIndex = Math.min(state.momentIndex, Math.max(0, state.moments.items.length - 1));
+    renderMomentList();
+    renderMomentForm();
+  }
+  $('#momentList').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-moment]');
+    if (!b) return;
+    selectMoment(Number(b.getAttribute('data-moment')));
+  });
+  if ($('#mFilter')) $('#mFilter').addEventListener('input', renderMomentList);
 
-    var del = e.target.closest('[data-md]');
-    if (del) {
-      syncMoments();
-      state.moments.items.splice(Number(del.getAttribute('data-md')), 1);
+  $('#saveMoments').onclick = function () {
+    readMomentForm();
+    post('/api/moments', { data: state.moments }).then(function () {
+      toast('已保存');
+      renderMomentList();
+    }).catch(function (e) { toast(e.message, true); });
+  };
+  $('#delMoment').onclick = function () {
+    var m = state.moments.items[state.momentIndex];
+    if (!m) return;
+    confirmBox('删除这条说说', '删掉后就没了，不能恢复。', '删除', true).then(function (yes) {
+      if (!yes) return;
+      state.moments.items.splice(state.momentIndex, 1);
+      state.momentIndex = 0;
       renderMoments();
+      toast('已删除，记得点保存');
+    });
+  };
+  document.getElementById('momentForm').addEventListener('click', function (e) {
+    var m = state.moments.items[state.momentIndex];
+    if (!m) return;
+    if (e.target.id === 'mAddImg') {
+      readMomentForm();
+      upload(function (j) { m.images = m.images || []; m.images.push(j.path); renderMomentForm(); });
       return;
     }
-    var imgDel = e.target.closest('[data-imgdel]');
-    if (imgDel) {
-      syncMoments();
-      var pair = imgDel.getAttribute('data-imgdel').split(':');
-      var it = state.moments.items[Number(pair[0])];
-      if (it && it.images) it.images.splice(Number(pair[1]), 1);
-      renderMoments();
-      return;
-    }
-    var up = e.target.closest('[data-imgadd]');
-    if (up) {
-      var iAdd = Number(up.getAttribute('data-imgadd'));
-      upload(function (j) {
-        syncMoments();
-        var m = state.moments.items[iAdd];
-        m.images = m.images || [];
-        m.images.push(j.path);
-        renderMoments();
-      });
-      return;
-    }
-    var ln = e.target.closest('[data-imglink]');
-    if (ln) {
-      var iLn = Number(ln.getAttribute('data-imglink'));
+    if (e.target.id === 'mAddLink') {
       modal({ title: '图片链接', input: true, value: 'https://', placeholder: 'https://... 或 /assets/...', okText: '添加' }).then(function (u2) {
         if (!u2) return;
-        syncMoments();
-        var m2 = state.moments.items[iLn];
-        m2.images = m2.images || [];
-        m2.images.push(u2.trim());
-        renderMoments();
+        readMomentForm();
+        m.images = m.images || [];
+        m.images.push(u2.trim());
+        renderMomentForm();
       });
+      return;
+    }
+    var d = e.target.closest('[data-mimgdel]');
+    if (d) {
+      readMomentForm();
+      m.images.splice(Number(d.getAttribute('data-mimgdel')), 1);
+      renderMomentForm();
     }
   });
-  $('#addMoment').onclick = function () {
-    state.moments.items.unshift({ date: new Date().toISOString().slice(0, 10), text: '', images: [] });
-    renderMoments();
-  };
-  $('#saveMoments').onclick = function () {
-    syncMoments();
-    post('/api/moments', { data: state.moments }).then(function () { toast('说说已保存'); }).catch(function (e) { toast(e.message, true); });
-  };
 
   /* ================= 相册 ================= */
   function loadGallery() {
