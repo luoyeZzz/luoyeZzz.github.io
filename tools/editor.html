@@ -149,8 +149,11 @@
   #momentForm .r{grid-template-columns:220px}
   .rich-field{display:flex;flex-direction:column;gap:8px;grid-column:1/-1;width:100%}
   .rich-field textarea{width:100%}
-  .rich-prev{display:none}
-  .rich-prev:not(.is-empty){display:block;padding:12px 14px;border:1px dashed var(--line);border-radius:12px;
+  .rich-prev{display:block;padding:10px 12px;border:1px dashed var(--line);border-radius:12px;
+    margin-top:6px;font-size:.875rem;color:var(--ink-2);min-height:44px}
+  .rich-prev.is-empty::after{content:"预览：输入内容后这里会显示排版效果";color:var(--ink-3);font-size:.8125rem}
+  .rich-prev.is-empty{padding:12px 14px}
+  .rich-prev:not(.is-empty){
     background:var(--bg-2);font-size:.875rem;line-height:1.8;color:var(--ink-2)}
   .rich-prev p{margin:0 0 8px}
   .rich-prev p:last-child{margin-bottom:0}
@@ -333,15 +336,34 @@
 
   .mini-linkbar{display:flex;justify-content:flex-end;margin:2px 0 4px}
   .mini-linkbar .ghost{padding:4px 10px;font-size:.75rem}
-  body.writing-full .body-wrap{
-    position:fixed;inset:0;z-index:300;margin:0;padding:18px 18px 20px;
-    background:var(--bg);display:flex;flex-direction:column;gap:10px;
-  }
-  body.writing-full .body-wrap textarea{
-    flex:1;min-height:0;height:auto;font-size:1.05rem;line-height:2;padding:20px 22px;
-    border-radius:16px;resize:none;
-  }
-  body.writing-full .pane{filter:none}
+  .body-wrap textarea{min-height:62vh;font-size:1rem;line-height:2;padding:18px 20px;resize:vertical}
+  @media (max-width:760px){ .body-wrap textarea{min-height:52vh} }
+  .ed-modal{position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;
+    padding:20px;background:rgba(20,16,23,.42);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+  .ed-modal-card{width:min(420px,100%);padding:22px;border-radius:18px;background:var(--surface-solid);
+    border:1px solid var(--glass-edge);box-shadow:0 40px 80px -40px rgba(20,16,23,.6)}
+  .ed-modal-card h3{margin:0 0 12px;font-size:1rem}
+  .ed-modal-input{width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--line);
+    background:var(--surface);color:var(--ink);font-size:.9375rem}
+  .ed-modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+  .mini-linkbar{display:flex;gap:4px;justify-content:flex-end;margin:2px 0 4px}
+  .mini-linkbar button{padding:4px 9px;font-size:.75rem}
+  .emoji-pop{position:absolute;z-index:410;display:flex;gap:4px;padding:6px;border-radius:12px;
+    background:var(--surface-solid);border:1px solid var(--glass-edge);box-shadow:var(--shadow-soft)}
+  .emoji-pop button{border:0;background:transparent;font-size:1.1rem;cursor:pointer;padding:2px 4px}
+
+  select{appearance:none;-webkit-appearance:none;padding-right:30px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%239C8C95' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 12px center;}
+  .tone-pick{display:flex;gap:6px;margin-top:4px}
+  .tone-pick button{border:1px solid var(--line);background:transparent;color:var(--ink-2);
+    border-radius:999px;padding:7px 12px;font-size:.75rem;cursor:pointer;transition:.22s var(--ease)}
+  .tone-pick button:hover{transform:translateY(-1px)}
+  .tone-pick button.on{border-color:transparent;color:#fff;box-shadow:0 10px 22px -14px rgba(179,65,104,.8)}
+  .tone-pick .t1.on{background:linear-gradient(135deg,#a78bcf,#6f6bb0)}
+  .tone-pick .t2.on{background:linear-gradient(135deg,#9db4e0,#7f9ad6)}
+  .tone-pick .t3.on{background:linear-gradient(135deg,#8ac0b4,#6aa89b)}
+  .tone-pick .t4.on{background:linear-gradient(135deg,#b993cf,#9a74bb)}
 </style>
 </head>
 <body class="admin">
@@ -402,7 +424,15 @@
         <label>日期时间<input id="date" readonly data-dt placeholder="点这里选时间"></label>
         <label>分类<input id="tag" placeholder="杂记"></label>
         <label>封面日文<input id="word" placeholder="ことば"></label>
-        <label>配色<select id="tone"><option value="1">1 星空</option><option value="2">2 淡蓝</option><option value="3">3 青绿</option><option value="4">4 淡紫</option></select></label>
+        <label>配色
+          <div class="tone-pick" id="tonePick">
+            <button type="button" data-tone="1" class="t1">星空</button>
+            <button type="button" data-tone="2" class="t2">淡蓝</button>
+            <button type="button" data-tone="3" class="t3">青绿</button>
+            <button type="button" data-tone="4" class="t4">淡紫</button>
+          </div>
+          <input type="hidden" id="tone" value="1">
+        </label>
         <label class="chk"><input id="pinned" type="checkbox">置顶</label>
       </div>
       <div class="meta2">
@@ -419,7 +449,6 @@
         <button id="uploadBody">＋ 上传图片</button>
         <button id="linkBody">＋ 图片链接</button>
         <button id="linkText">🔗 文字链接</button>
-        <button id="fullWrite">⛶ 全屏写作</button>
       </div>
       <div class="body-wrap">
         <textarea id="body" placeholder="用 Markdown 写正文…"></textarea>
@@ -1222,6 +1251,7 @@
     $('#tag').value = m.tag || '杂记';
     $('#word').value = m.word || '';
     $('#tone').value = String(m.tone || 2);
+    syncTone(m.tone || 2);
     $('#pinned').checked = m.pinned === true;
     $('#excerpt').value = m.excerpt || '';
     $('#cover').value = m.cover || '';
@@ -1310,18 +1340,45 @@
   };
 
   /* 文字链接：选中文字 → Ctrl+K 或点「🔗 文字链接」 */
+  function askUrl(cb) {
+    var mask = document.createElement('div');
+    mask.className = 'ed-modal';
+    mask.innerHTML = '<div class="ed-modal-card"><h3>插入链接</h3>' +
+      '<input class="ed-modal-input" placeholder="https://example.com" value="https://">' +
+      '<div class="ed-modal-actions"><button type="button" class="ghost" data-x="cancel">取消</button>' +
+      '<button type="button" class="primary" data-x="ok">插入</button></div></div>';
+    document.body.appendChild(mask);
+    var input = mask.querySelector('input');
+    input.focus();
+    input.select();
+    function close() { if (mask.parentNode) mask.remove(); }
+    function ok() {
+      var v = input.value.trim();
+      close();
+      if (v && v !== 'https://') cb(v);
+    }
+    mask.addEventListener('click', function (ev) {
+      if (ev.target === mask || ev.target.getAttribute('data-x') === 'cancel') close();
+      if (ev.target.getAttribute('data-x') === 'ok') ok();
+    });
+    input.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Enter') { ev.preventDefault(); ok(); }
+      if (ev.key === 'Escape') close();
+    });
+  }
+
   function insertLink(ta) {
     if (!ta) return;
     var s = ta.selectionStart, e2 = ta.selectionEnd;
     var sel = ta.value.slice(s, e2);
-    var url = window.prompt('链接地址（https://…）', 'https://');
-    if (!url || url === 'https://') return;
-    var text = sel || '链接文字';
-    var md = '[' + text + '](' + url + ')';
-    ta.value = ta.value.slice(0, s) + md + ta.value.slice(e2);
-    ta.focus();
-    ta.selectionStart = s;
-    ta.selectionEnd = s + md.length;
+    askUrl(function (url) {
+      var text = sel || '链接文字';
+      var md = '[' + text + '](' + url + ')';
+      ta.value = ta.value.slice(0, s) + md + ta.value.slice(e2);
+      ta.focus();
+      ta.selectionStart = s;
+      ta.selectionEnd = s + md.length;
+    });
   }
   var linkTextBtn = $('#linkText');
   if (linkTextBtn) linkTextBtn.onclick = function () { insertLink($('#body')); };
@@ -1332,6 +1389,21 @@
       e.preventDefault();
       insertLink(t);
     }
+  });
+  /* 配色选择：自绘胶囊，不用原生下拉 */
+  function syncTone(v) {
+    var pick = $('#tonePick');
+    if (!pick) return;
+    [].slice.call(pick.querySelectorAll('button')).forEach(function (b) {
+      b.classList.toggle('on', b.getAttribute('data-tone') === String(v));
+    });
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('#tonePick button') : null;
+    if (!b) return;
+    var v = b.getAttribute('data-tone');
+    if ($('#tone')) $('#tone').value = v;
+    syncTone(v);
   });
   $('#previewBtn').onclick = function () {
     var wrap = $('.body-wrap');
@@ -1990,46 +2062,73 @@
     upload(function (j) { inp.value = j.url; toast('已上传 ' + j.url); }, { max: key === 'avatar' ? 400 : 1600 });
   });
 
-  /* ===== 全屏写作 ===== */
-  var fullBtn = $('#fullWrite');
-  if (fullBtn) {
-    var toggleFull = function (on) {
-      document.body.classList.toggle('writing-full', on);
-      fullBtn.textContent = on ? '⛶ 退出全屏' : '⛶ 全屏写作';
-      if (on) { var ta = $('#body'); if (ta) ta.focus(); }
-    };
-    fullBtn.onclick = function () { toggleFull(!document.body.classList.contains('writing-full')); };
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && document.body.classList.contains('writing-full')) toggleFull(false);
-    });
-  }
-
-  /* ===== 所有文本框都加一条「插入链接」 ===== */
-  function addLinkBar(ta) {
-    if (!ta || ta.id === 'body' || ta.dataset.linkbar) return;
-    ta.dataset.linkbar = '1';
+  /* ===== 没有工具栏的文本框，补一条：链接 / 加粗 / 表情 ===== */
+  var EMOJIS = ['🌙','✨','🍃','☕','🎐','😊','💭','🌸'];
+  function addMiniBar(ta) {
+    if (!ta || ta.id === 'body' || ta.dataset.minibar) return;
+    if (ta.closest('.rich-field')) return;
+    ta.dataset.minibar = '1';
     var bar = document.createElement('div');
     bar.className = 'mini-linkbar';
-    var b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'ghost sm';
-    b.textContent = '🔗 插入链接';
-    b.onclick = function () {
+
+    var link = document.createElement('button');
+    link.type = 'button';
+    link.className = 'ghost sm';
+    link.textContent = '🔗 链接';
+    link.onclick = function () { insertLink(ta); };
+    bar.appendChild(link);
+
+    var bold = document.createElement('button');
+    bold.type = 'button';
+    bold.className = 'ghost sm';
+    bold.textContent = 'B 加粗';
+    bold.onclick = function () {
       var s = ta.selectionStart, e2 = ta.selectionEnd;
-      var sel = ta.value.slice(s, e2);
-      var url = window.prompt('链接地址（https://…）', 'https://');
-      if (!url || url === 'https://') return;
-      var md = '[' + (sel || '链接文字') + '](' + url + ')';
+      var sel = ta.value.slice(s, e2) || '加粗文字';
+      var md = '**' + sel + '**';
       ta.value = ta.value.slice(0, s) + md + ta.value.slice(e2);
       ta.focus();
       ta.selectionStart = s;
       ta.selectionEnd = s + md.length;
     };
-    bar.appendChild(b);
+    bar.appendChild(bold);
+
+    var emo = document.createElement('button');
+    emo.type = 'button';
+    emo.className = 'ghost sm';
+    emo.textContent = '😊 表情';
+    emo.onclick = function () {
+      var pop = document.createElement('div');
+      pop.className = 'emoji-pop';
+      var r = emo.getBoundingClientRect();
+      pop.style.left = Math.max(8, r.left - 40) + 'px';
+      pop.style.top = (r.bottom + window.scrollY + 6) + 'px';
+      EMOJIS.forEach(function (ch) {
+        var b2 = document.createElement('button');
+        b2.type = 'button';
+        b2.textContent = ch;
+        b2.onclick = function () {
+          var s = ta.selectionStart, e2 = ta.selectionEnd;
+          ta.value = ta.value.slice(0, s) + ch + ta.value.slice(e2);
+          ta.focus();
+          ta.selectionStart = ta.selectionEnd = s + ch.length;
+          pop.remove();
+        };
+        pop.appendChild(b2);
+      });
+      document.body.appendChild(pop);
+      setTimeout(function () {
+        document.addEventListener('click', function close(ev) {
+          if (!pop.contains(ev.target)) { pop.remove(); document.removeEventListener('click', close); }
+        });
+      }, 0);
+    };
+    bar.appendChild(emo);
+
     ta.parentNode.insertBefore(bar, ta);
   }
   function scanTextareas() {
-    [].slice.call(document.querySelectorAll('textarea')).forEach(addLinkBar);
+    [].slice.call(document.querySelectorAll('textarea')).forEach(addMiniBar);
   }
   scanTextareas();
   new MutationObserver(function () { setTimeout(scanTextareas, 60); }).observe(document.body, { childList: true, subtree: true });

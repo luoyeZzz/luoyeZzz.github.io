@@ -782,7 +782,6 @@
           if (finished) return;
           finished = true;
           busy = false;
-          root.classList.remove('spa-nav');
           progress(false, true);
         };
         var run = function () {
@@ -796,15 +795,13 @@
           finish();
         };
         var armed = false;
-        var once = function () { if (armed) return; armed = true; run(); };
-        if (doc.startViewTransition && !reduce) {
-          root.classList.add('spa-nav');
-          try { doc.startViewTransition(once); } catch (e) { once(); }
-          /* 兜底：某些环境里 View Transition 回调不触发 */
-          setTimeout(once, 420);
-        } else {
-          once();
-        }
+        var once = function () {
+          if (armed) return;
+          armed = true;
+          run();
+        };
+        /* 换页不用 View Transition：它会先显示旧页面快照，容易看到“闪一下上一个页面” */
+        once();
       };
 
       var cached = cache[href];
