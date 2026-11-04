@@ -419,6 +419,14 @@
     -webkit-text-fill-color:var(--ink)!important;
     transition:background-color 99999s ease-in-out 0s;
   }
+
+  /* 滚动条与主题一致，避免深色下出现白色轨道 */
+  html[data-theme="light"]{color-scheme:light}
+  html[data-theme="dark"]{color-scheme:dark}
+  .list::-webkit-scrollbar-track{background:transparent}
+  .list::-webkit-scrollbar-corner{background:transparent}
+  /* 左侧列表：去掉毛玻璃，避免滚动/聚焦时出现白色渲染残影 */
+  .card.list{background:var(--surface-solid);-webkit-backdrop-filter:none;backdrop-filter:none}
 </style>
 </head>
 <body class="admin">
