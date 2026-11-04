@@ -303,11 +303,11 @@
       fab.classList.add('is-armed');
       /* 手机端给一句可见提示：点一下继续播放 */
       try {
-        if (window.innerWidth <= 900 && st && (st.playing || autoplay) && !document.getElementById('music-hint')) {
+        if ((st || autoplay) && !document.getElementById('music-hint')) {
           var tip = document.createElement('div');
           tip.id = 'music-hint';
           tip.className = 'music-hint';
-          tip.textContent = '点一下继续播放';
+          tip.textContent = '点一下开始播放音乐';
           dock.appendChild(tip);
           setTimeout(function () { if (tip.parentNode) tip.remove(); }, 8000);
         }
@@ -448,23 +448,15 @@
     /* 进站自动播放：上次在播就续上，否则看配置 */
     var resumePlaying = !!(st && st.playing);
     var respectPause = !!(st && st.paused);
-    var conn = navigator.connection || {};
-    var slowNet = !!conn.saveData || /2g|3g/i.test(conn.effectiveType || '');
-
     if (!respectPause && (autoplay || resumePlaying)) {
-      if (slowNet) {
-        /* 慢网/省流：不自动下载音频，等用户点一下 */
-        armGesture();
-      } else {
-        var kickoff = function () {
-          setTimeout(function () {
-            load(idx, false);
-            play();
-          }, 800);
-        };
-        if (document.readyState === 'complete') kickoff();
-        else window.addEventListener('load', kickoff, { once: true });
-      }
+      var kickoff = function () {
+        setTimeout(function () {
+          load(idx, false);
+          play();
+        }, 300);
+      };
+      if (document.readyState === 'complete') kickoff();
+      else window.addEventListener('load', kickoff, { once: true });
     }
   })();
 
