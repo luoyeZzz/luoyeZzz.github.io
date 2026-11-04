@@ -413,6 +413,12 @@
     background-color:var(--accent);
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 6.2l2.6 2.6L10 3.4' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
   input[type="checkbox"]::after{display:none!important;content:none!important}
+
+  input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill{
+    -webkit-box-shadow:0 0 0 1000px var(--surface-solid) inset!important;
+    -webkit-text-fill-color:var(--ink)!important;
+    transition:background-color 99999s ease-in-out 0s;
+  }
 </style>
 </head>
 <body class="admin">
@@ -701,7 +707,7 @@
 
   /* 通用行编辑 */
   function rowsHTML(arr, cols, labels) {
-    var IMG_KEYS = { avatar: 1, img: 1, image: 1, cover: 1, src: 1, photo: 1 };
+    var IMG_KEYS = { avatar: 1, img: 1, image: 1, cover: 1 };
     return arr.map(function (row, i) {
       return '<div class="r" style="grid-template-columns:' + cols.map(function () { return '1fr'; }).join(' ') + ' auto">' +
         cols.map(function (c) {
@@ -710,7 +716,7 @@
             ? '<img class="row-thumb' + (row[c] ? ' is-on' : '') + '" data-thumb="' + c + '" src="' + esc(row[c] || '') + '" alt="">'
             : '';
           var up = isImg
-            ? '<button type="button" class="ghost sm row-up" data-up="' + c + '">↑ 上传头像</button>'
+            ? '<button type="button" class="ghost sm row-up" data-up="' + c + '">↑ 上传图片</button>'
             : '';
           return '<label class="r-field">' + esc(labels[c]) + thumb +
             '<input data-i="' + i + '" data-k="' + c + '" value="' + esc(row[c] || '') + '">' + up + '</label>';
@@ -1385,11 +1391,60 @@
     ta.focus();
     ta.selectionStart = ta.selectionEnd = s + text.length;
   }
+  function toolDialog(kind) {
+    if (kind === 'hr') { insert(SNIP.hr); return; }
+    var NL = String.fromCharCode(10);
+    var meta = {
+      h2: { title: '插入小标题', label: '标题文字', rows: 0, ph: '没有算法的地方' },
+      quote: { title: '插入引用', label: '引用内容（每行一句）', rows: 3, ph: '第一句' + NL + '第二句' },
+      dialogue: { title: '插入对白', label: '每行一句，自动加「」', rows: 4, ph: '做这个有人看吗？' + NL + '大概没有' },
+      note: { title: '插入便签', label: '便签内容（每行一句）', rows: 3, ph: '注：……' }
+    }[kind];
+    if (!meta) return;
+
+    var mask = document.createElement('div');
+    mask.className = 'ed-modal';
+    var fieldHtml = meta.rows
+      ? '<textarea class="ed-modal-input" rows="' + meta.rows + '" placeholder="' + meta.ph + '"></textarea>'
+      : '<input class="ed-modal-input" placeholder="' + meta.ph + '">';
+    mask.innerHTML = '<div class="ed-modal-card"><h3>' + meta.title + '</h3>' +
+      '<label class="ed-field">' + meta.label + fieldHtml + '</label>' +
+      '<div class="ed-modal-actions"><button type="button" class="ghost" data-x="cancel">取消</button>' +
+      '<button type="button" class="primary" data-x="ok">插入</button></div></div>';
+    document.body.appendChild(mask);
+    var field = mask.querySelector('.ed-modal-input');
+    field.focus();
+    function close() { if (mask.parentNode) mask.remove(); }
+    function ok() {
+      var val = field.value.replace(/s+$/, '');
+      if (!val.trim()) { close(); return; }
+      var lines = val.split(NL).map(function (x) { return x.trim(); }).filter(Boolean);
+      var out = '';
+      if (kind === 'h2') out = NL + NL + '## ' + val.trim() + NL + NL;
+      if (kind === 'quote') out = NL + NL + lines.map(function (l) { return '> ' + l; }).join(NL) + NL + NL;
+      if (kind === 'dialogue') out = NL + NL + ':::dialogue' + NL + lines.map(function (l) {
+        var t = l.replace(/^[「」]+|[「」]+$/g, '');
+        return '「' + t + '」';
+      }).join(NL) + NL + ':::' + NL + NL;
+      if (kind === 'note') out = NL + NL + ':::note' + NL + lines.join(NL) + NL + ':::' + NL + NL;
+      close();
+      insert(out);
+    }
+    mask.addEventListener('click', function (ev) {
+      if (ev.target === mask || ev.target.getAttribute('data-x') === 'cancel') close();
+      if (ev.target.getAttribute('data-x') === 'ok') ok();
+    });
+    mask.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Escape') close();
+      if (ev.key === 'Enter' && (ev.metaKey || ev.ctrlKey)) { ev.preventDefault(); ok(); }
+    });
+  }
+
   $('#toolbar').onclick = function (e) {
     var b = e.target.closest('button');
     if (!b) return;
     var ins = b.getAttribute('data-ins');
-    if (ins) { insert(SNIP[ins] || ''); return; }
+    if (ins) { toolDialog(ins); return; }
     var act = b.getAttribute('data-act');
     if (act === 'img') pickImage($('#body'));
     if (act === 'link') insertLink($('#body'));
@@ -2274,7 +2329,18 @@
     [].slice.call(document.querySelectorAll('textarea')).forEach(addMiniBar);
   }
   scanTextareas();
-  new MutationObserver(function () { setTimeout(scanTextareas, 60); }).observe(document.body, { childList: true, subtree: true });
+  function killAutofill() {
+    [].slice.call(document.querySelectorAll('input, textarea')).forEach(function (el) {
+      if (el.dataset.noaf) return;
+      el.dataset.noaf = '1';
+      el.setAttribute('autocomplete', 'off');
+      el.setAttribute('autocorrect', 'off');
+      el.setAttribute('autocapitalize', 'off');
+      el.setAttribute('spellcheck', 'false');
+    });
+  }
+  killAutofill();
+  new MutationObserver(function () { setTimeout(function () { scanTextareas(); killAutofill(); }, 60); }).observe(document.body, { childList: true, subtree: true });
 
 })();
 </script>
