@@ -25,6 +25,7 @@
   }
   applyTheme(root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light', false);
   function switchTheme(next, x, y) {
+    if (next === 'dark' && typeof ensureHeroNight === 'function') ensureHeroNight();
     if (!document.startViewTransition || reduce) { applyTheme(next); return; }
     root.style.setProperty('--vt-x', x + 'px');
     root.style.setProperty('--vt-y', y + 'px');
@@ -33,6 +34,22 @@
       if (root.getAttribute('data-theme') !== next) applyTheme(next);
     }, 600);
   }
+  function ensureHeroNight() {
+    var img = document.querySelector('.hero-char--night img[data-src]');
+    if (!img || img.getAttribute('data-loaded')) return;
+    img.setAttribute('data-loaded', '1');
+    img.src = img.getAttribute('data-src');
+  }
+  function prefetchHeroNight() {
+    if (document.readyState === 'complete') {
+      setTimeout(ensureHeroNight, 1800);
+    } else {
+      window.addEventListener('load', function () { setTimeout(ensureHeroNight, 1800); }, { once: true });
+    }
+  }
+  if (root.getAttribute('data-theme') === 'dark') ensureHeroNight();
+  prefetchHeroNight();
+
   if (themeBtn) {
     themeBtn.addEventListener('click', function (e) {
       var r = themeBtn.getBoundingClientRect();
@@ -394,9 +411,23 @@
     /* 进站自动播放：上次在播就续上，否则看配置 */
     var resumePlaying = !!(st && st.playing);
     var respectPause = !!(st && st.paused);
+    var conn = navigator.connection || {};
+    var slowNet = !!conn.saveData || /2g|3g/i.test(conn.effectiveType || '');
+
     if (!respectPause && (autoplay || resumePlaying)) {
-      load(idx, false);
-      play();
+      if (slowNet) {
+        /* 慢网/省流：不自动下载音频，等用户点一下 */
+        armGesture();
+      } else {
+        var kickoff = function () {
+          setTimeout(function () {
+            if (!audio.src) load(idx, false);
+            play();
+          }, 800);
+        };
+        if (document.readyState === 'complete') kickoff();
+        else window.addEventListener('load', kickoff, { once: true });
+      }
     }
   })();
 

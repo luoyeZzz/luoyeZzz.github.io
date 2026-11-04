@@ -556,8 +556,13 @@ function homePage(site, posts) {
 
 function charBlock(site, kind, c) {
   if (!c || !c.img) return '';
+  const isDay = kind === 'day';
+  /* 只给当前主题那张真 src；另一张放 data-src，切主题/空闲时再加载 */
+  const src = isDay
+    ? ' src="' + u(site, c.img) + '" loading="eager" fetchpriority="high"'
+    : ' src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="' + u(site, c.img) + '" loading="lazy" decoding="async"';
   return '<div class="hero-char hero-char--' + kind + '">' +
-    '<img src="' + u(site, c.img) + '" alt="看板娘：' + esc(c.name) + '" width="' + (c.width || 1200) + '" height="' + (c.height || 1600) + '" loading="eager">' +
+    '<img' + src + ' alt="看板娘：' + esc(c.name) + '" width="' + (c.width || 1200) + '" height="' + (c.height || 1600) + '">' +
     '<div class="nameplate"><b>' + esc(c.name) + '</b><span>' + esc(c.sub) + ' · ' + esc(c.role) + '</span></div></div>';
 }
 

@@ -978,6 +978,51 @@
     return { open: open, hide: hide };
   })();
 
+  function fmtSize(n) {
+    return n > 1024 * 1024 ? (n / 1048576).toFixed(1) + 'MB' : Math.round(n / 1024) + 'KB';
+  }
+
+  /* 图片压缩：只缩尺寸 + 重编码，透明 PNG 保持 PNG */
+  function compressImage(file, maxW, quality) {
+    return new Promise(function (resolve) {
+      if (!/^image\//.test(file.type)) return resolve({ raw: file });
+      if (/^image\/(gif|svg\+xml)$/.test(file.type)) return resolve({ raw: file });
+
+      function passRaw() { resolve({ raw: file }); }
+      if (file.size < 150 * 1024) return passRaw();
+
+      var done = false;
+      function fallback() { if (!done) { done = true; passRaw(); } }
+
+      if (typeof createImageBitmap !== 'function') return fallback();
+      createImageBitmap(file, { imageOrientation: 'from-image' }).then(function (bmp) {
+        var scale = Math.min(1, maxW / bmp.width);
+        if (scale === 1 && file.size < 600 * 1024) { done = true; return resolve({ raw: file }); }
+        var w = Math.max(1, Math.round(bmp.width * scale));
+        var h = Math.max(1, Math.round(bmp.height * scale));
+        var cv = document.createElement('canvas');
+        cv.width = w; cv.height = h;
+        var ctx = cv.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(bmp, 0, 0, w, h);
+        var isPng = file.type === 'image/png';
+        var type = isPng ? 'image/png' : 'image/jpeg';
+        var ext = isPng ? '.png' : '.jpg';
+        cv.toBlob(function (blob) {
+          if (!blob || (blob.size >= file.size && scale === 1)) { done = true; return passRaw(); }
+          var base = file.name.replace(/\.[^.]+$/, '');
+          var reader = new FileReader();
+          reader.onload = function () {
+            done = true;
+            resolve({ name: base + ext, data: reader.result, before: file.size, after: blob.size, w: w, h: h });
+          };
+          reader.readAsDataURL(blob);
+        }, type, quality);
+      }).catch(fallback);
+    });
+  }
+
   function upload(cb, opts) {
     opts = opts || {};
     var inp = document.createElement('input');
@@ -985,12 +1030,39 @@
     inp.accept = opts.audio ? 'audio/*,.mp3,.m4a,.ogg,.wav,.flac,.aac' : 'image/*';
     inp.onchange = function () {
       var f = inp.files[0]; if (!f) return;
-      var r = new FileReader();
-      r.onload = function () {
-        post('/api/upload', { name: f.name, data: r.result, type: opts.audio ? 'audio' : '' })
-          .then(cb).catch(function (e) { toast(e.message, true); });
-      };
-      r.readAsDataURL(f);
+
+      if (opts.audio) {
+        var r0 = new FileReader();
+        r0.onload = function () {
+          post('/api/upload', { name: f.name, data: r0.result, type: 'audio' })
+            .then(cb).catch(function (e) { toast(e.message, true); });
+        };
+        r0.readAsDataURL(f);
+        return;
+      }
+
+      var maxW = opts.max || 1600;
+      var quality = opts.quality || 0.82;
+      toast('正在压缩…');
+      compressImage(f, maxW, quality).then(function (res) {
+        var payload = res.raw
+          ? { name: f.name, data: null, type: '' }
+          : { name: res.name, data: res.data, type: '' };
+
+        var send = function (dataUrl) {
+          payload.data = dataUrl;
+          post('/api/upload', payload).then(function (j) {
+            if (res.raw) toast('已上传 ' + fmtSize(f.size));
+            else toast('已压缩 ' + fmtSize(res.before) + ' → ' + fmtSize(res.after) + '（' + res.w + '×' + res.h + '）');
+            cb(j);
+          }).catch(function (e) { toast(e.message, true); });
+        };
+
+        if (payload.data) return send(payload.data);
+        var r = new FileReader();
+        r.onload = function () { send(r.result); };
+        r.readAsDataURL(f);
+      });
     };
     inp.click();
   }
@@ -1087,11 +1159,11 @@
   };
   $('#trashBtn').onclick = openTrash;
   $('#coverBtn').onclick = function () {
-    upload(function (j) { $('#cover').value = j.path; toast('封面已上传'); });
+    upload(function (j) { $('#cover').value = j.path; }, { max: 1600 });
   };
   $('#coverClear').onclick = function () { $('#cover').value = ''; };
   $('#uploadBody').onclick = function () {
-    upload(function (j) { insert('\n\n![](' + j.path + ')\n\n'); });
+    upload(function (j) { insert('\n\n![](' + j.path + ')\n\n'); }, { max: 1600 });
   };
   var SNIP = {
     h2: '\n\n## 小标题\n\n',
@@ -1355,7 +1427,7 @@
     if (!m) return;
     if (e.target.id === 'mAddImg') {
       readMomentForm();
-      upload(function (j) { m.images = m.images || []; m.images.push(j.path); renderMomentForm(); });
+      upload(function (j) { m.images = m.images || []; m.images.push(j.path); renderMomentForm(); }, { max: 1600 });
       return;
     }
     if (e.target.id === 'mAddLink') {
@@ -1436,7 +1508,7 @@
       a.images = a.images || [];
       a.images.push({ src: j.path, caption: '' });
       renderAlbumImages();
-    });
+    }, { max: 1800 });
   };
   $('#delAlbum').onclick = function () {
     confirmBox('删除相册', '相册和里面的照片记录会一起删除，图片文件还在。', '删除', true).then(function (yes) {
