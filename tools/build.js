@@ -425,6 +425,7 @@ function layout(site, opts) {
     '<title>' + esc(o.title) + '</title>\n' +
     '<meta name="description" content="' + esc(desc) + '">\n' +
     '<meta name="theme-color" content="#FBF7F5">\n' +
+    '<meta name="color-scheme" content="light dark">\n' +
     '<link rel="canonical" href="' + esc(url) + '">\n' +
     '<meta property="og:type" content="' + (o.type || 'website') + '">\n' +
     '<meta property="og:title" content="' + esc(o.title) + '">\n' +

@@ -915,3 +915,22 @@ body{font-size:1.0625rem;line-height:1.9;-webkit-font-smoothing:antialiased;-moz
 
 /* 菜单打开时收起音乐提示 */
 body.nav-open .music-hint{opacity:0;pointer-events:none}
+
+/* 告诉浏览器：两套主题都由站点自己处理 */
+html[data-theme="light"]{color-scheme:light}
+html[data-theme="dark"]{color-scheme:dark}
+
+/* 音乐提示：小胶囊，不占满屏 */
+.music-hint{
+  position:fixed;right:24px;bottom:92px;
+  width:max-content;max-width:calc(100vw - 32px);
+  padding:10px 16px;border-radius:999px;white-space:nowrap;
+  background:var(--accent);color:#fff;border:1px solid transparent;
+  font-size:.8125rem;font-weight:600;letter-spacing:.02em;
+  box-shadow:0 14px 30px -14px rgba(179,65,104,.7);
+  z-index:95;pointer-events:auto;cursor:pointer;
+}
+.music-hint:hover{color:#fff;border-color:transparent;transform:translateY(-1px)}
+@media (max-width:900px){
+  .music-hint{left:0;right:0;margin:0 auto;bottom:96px;padding:11px 18px;font-size:.8125rem}
+}
