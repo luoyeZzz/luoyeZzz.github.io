@@ -970,8 +970,8 @@ html[data-theme="dark"]{color-scheme:dark}
 body.nav-glider-ready .menu a[aria-current="page"]{background:none;border-color:transparent}
 
 /* 换页过渡（View Transitions 可用时） */
-::view-transition-old(root){animation:vt-out .18s ease both}
-::view-transition-new(root){animation:vt-in .32s cubic-bezier(.22,1,.36,1) both}
+html.spa-nav ::view-transition-old(root){animation:vt-out .18s ease both}
+html.spa-nav ::view-transition-new(root){animation:vt-in .32s cubic-bezier(.22,1,.36,1) both}
 @keyframes vt-out{to{opacity:0}}
 @keyframes vt-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 

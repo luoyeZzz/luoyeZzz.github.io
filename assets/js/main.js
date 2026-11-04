@@ -801,6 +801,7 @@
           if (finished) return;
           finished = true;
           busy = false;
+          root.classList.remove('spa-nav');
           progress(false, true);
         };
         var run = function () {
@@ -816,6 +817,7 @@
         var armed = false;
         var once = function () { if (armed) return; armed = true; run(); };
         if (doc.startViewTransition && !reduce) {
+          root.classList.add('spa-nav');
           try { doc.startViewTransition(once); } catch (e) { once(); }
           /* 兜底：某些环境里 View Transition 回调不触发 */
           setTimeout(once, 420);
@@ -847,7 +849,6 @@
         });
     }
 
-    window.__spaDebug = { internal: internal, samePage: samePage };
     doc.addEventListener('click', function (e) {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       var a = e.target.closest ? e.target.closest('a') : null;
