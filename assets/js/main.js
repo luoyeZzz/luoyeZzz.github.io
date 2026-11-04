@@ -278,6 +278,7 @@
           try { if (window.__luoyueMusic) window.__luoyueMusic.play(); } catch (er) {}
         } else {
           window.__luoyueQuiet = true;
+          try { if (window.__luoyueMusic) window.__luoyueMusic.pause(); } catch (er) {}
         }
         hide();
       }
@@ -315,6 +316,13 @@
     }
 
     window.__luoyueNotice = { show: show, hide: hide, isOff: isOff };
+
+    /* 从写作台「查看站点」进来时（?notice=1），无论能不能自动播放都先说明一次 */
+    try {
+      if (new URLSearchParams(location.search).get('notice') === '1') {
+        setTimeout(function () { show(); }, 600);
+      }
+    } catch (e) {}
   })();
 
   /* ---------------- 音乐播放器 ---------------- */
@@ -416,6 +424,13 @@
     /* 开场页点「进入」时调用 */
     window.__luoyueMusic = {
       play: function () { if (audio.paused) play(); },
+      pause: function () {
+        if (audio.paused) return;
+        userPaused = true;
+        audio.pause();
+        setPlaying(false);
+        save();
+      },
       isPlaying: function () { return !audio.paused; }
     };
 

@@ -822,7 +822,6 @@ function aboutPage(site) {
       '  </aside>\n' +
       '  <div class="about-body">\n' +
       '    <h2>' + esc(d.introTitle) + '</h2>' + intro +
-      (bio ? '    <h2>' + esc(d.bioTitle || '关于我') + '</h2>' + bio + '\n' : '') +
       '    <h2>' + esc(d.favoritesTitle || '心上人与心头好') + '</h2><div class="fav-grid">' + favs + '</div>\n' +
       '    <h2>写信给我</h2><p>站内不设评论区。想说点什么，下面任选一个入口。</p>\n' +
       '    <div class="hero-links">' + links + '</div>\n' +

@@ -400,6 +400,19 @@
   .rows .r .r-field{display:flex;flex-direction:column;gap:4px}
   .rows .r .row-up{align-self:flex-start;margin-top:2px;padding:4px 10px;font-size:.72rem}
   .rows .r .del{align-self:start;margin-top:2px}
+
+  .avatar-field{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:end}
+  .avatar-field label{grid-column:1;min-width:0}
+  .avatar-prev{width:54px;height:54px;border-radius:12px;object-fit:cover;
+    border:1px solid var(--glass-edge);background:var(--surface-solid)}
+  input[type="checkbox"]{appearance:none!important;-webkit-appearance:none!important;
+    width:17px;height:17px;border-radius:5px;border:1px solid var(--line);
+    background:var(--surface) center/11px no-repeat;cursor:pointer;vertical-align:-3px;
+    transition:background-color .2s,border-color .2s}
+  input[type="checkbox"]:checked{border-color:transparent;
+    background-color:var(--accent);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 6.2l2.6 2.6L10 3.4' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+  input[type="checkbox"]::after{display:none!important;content:none!important}
 </style>
 </head>
 <body class="admin">
@@ -431,7 +444,7 @@
       <button data-tab="publish">发布</button>
     </nav>
     <div class="adm-tools">
-      <a class="ghost" href="/" target="_blank" style="text-decoration:none">查看站点</a>
+      <a class="ghost" href="/?notice=1" target="_blank" style="text-decoration:none">查看站点</a>
       <button class="ghost" id="themeBtn">☀</button>
       <button class="ghost" id="buildBtn">重新构建</button>
       <button class="ghost" id="shutdownBtn">退出</button>
@@ -872,14 +885,14 @@
     box.classList.toggle('is-empty', !ta.value.trim());
   }
   document.addEventListener('input', function (e) {
-    if (e.target.id === 'a-intro' || e.target.id === 'a-story') refreshPrev(e.target.id);
+    if (e.target.id === 'a-intro') refreshPrev(e.target.id);
   });
 
   /* 富文本工具条 */
   var richTarget = null;
   document.addEventListener('focusin', function (e) {
     var t = e.target;
-    if (t && (t.id === 'a-intro' || t.id === 'a-story')) richTarget = t;
+    if (t && t.id === 'a-intro') richTarget = t;
   });
   function richInsert(text, target) {
     var el = target || richTarget;
@@ -1623,21 +1636,17 @@
       '<h4>基本</h4>' +
       '<label>名字<input id="a-name" value="' + esc(d.name) + '"></label>' +
       '<label>副标题<input id="a-handle" value="' + esc(d.handle) + '"></label>' +
-      '<label class="full">头像（路径或链接）<input id="a-avatar" value="' + esc(d.avatar || '') + '"></label>' +
-      '<button class="ghost sm" id="a-avatarUp" style="justify-self:start">上传头像</button>' +
+      '<div class="full avatar-field">' +
+        '<label>头像（路径或链接）<input id="a-avatar" value="' + esc(d.avatar || '') + '"></label>' +
+        '<img class="avatar-prev" id="a-avatarPrev" src="' + esc(d.avatar || '') + '" alt="">' +
+        '<button type="button" class="ghost sm" id="a-avatarUp">↑ 上传头像</button>' +
+      '</div>' +
       '<label class="full">介绍标题<input id="a-introTitle" value="' + esc(d.introTitle || '') + '"></label>' +
       '<label class="full">个人简介（每行一段，可贴图 / 加小表情）</label>' +
       '<div class="rich-field full" data-for="a-intro">' +
       '<div class="toolbar rich-bar"><button type="button" data-rich="img" data-rich-for="a-intro">图片</button><button type="button" data-rich="bold" data-rich-for="a-intro">加粗</button><button type="button" data-rich="link" data-rich-for="a-intro">链接</button><button type="button" data-rich="emoji" data-rich-for="a-intro">表情</button></div>' +
       '<textarea id="a-intro" rows="4">' + esc((d.intro || []).join('\n')) + '</textarea>' +
       '<div class="rich-prev" id="prev-a-intro"></div></div>' +
-      '<h4>关于我（单独一块，可留空）</h4>' +
-      '<label class="full">这一块的标题<input id="a-storyTitle" value="' + esc(d.bioTitle || '关于我') + '"></label>' +
-      '<label class="full">内容（每行一段）</label>' +
-      '<div class="rich-field full" data-for="a-story">' +
-      '<div class="toolbar rich-bar"><button type="button" data-rich="img" data-rich-for="a-story">图片</button><button type="button" data-rich="bold" data-rich-for="a-story">加粗</button><button type="button" data-rich="link" data-rich-for="a-story">链接</button><button type="button" data-rich="emoji" data-rich-for="a-story">表情</button></div>' +
-      '<textarea id="a-story" rows="6" placeholder="我喜欢在夜里写字，也喜欢月亮。配图写 ![](/assets/img/x.jpg)"></textarea>' +
-      '<div class="rich-prev" id="prev-a-story"></div></div>' +
       '<h4>档案（第三格是夜间显示的值，可留空）</h4><div class="rows" id="a-facts"></div>' +
       '<button class="ghost sm" id="addFact" style="justify-self:start">＋ 一行</button>' +
       '<h4>这一栏的标题</h4>' +
@@ -1648,9 +1657,26 @@
       '<button class="ghost sm" id="addLink" style="justify-self:start">＋ 一个</button>';
 
     if ($('#a-favTitle')) $('#a-favTitle').value = d.favoritesTitle || '心上人与心头好';
-    if ($('#a-story')) $('#a-story').value = (d.bio || []).join('\n');
-    setTimeout(function () { refreshPrev('a-intro'); refreshPrev('a-story'); }, 0);
-    if ($('#a-storyTitle')) $('#a-storyTitle').value = d.bioTitle || '关于我';
+
+    var av = $('#a-avatar'), avPrev = $('#a-avatarPrev'), avUp = $('#a-avatarUp');
+    if (av && avPrev) {
+      avPrev.style.display = av.value ? 'block' : 'none';
+      av.addEventListener('input', function () {
+        avPrev.src = av.value;
+        avPrev.style.display = av.value ? 'block' : 'none';
+      });
+    }
+    if (avUp) {
+      avUp.onclick = function () {
+        upload(function (j) {
+          var url = j.path || j.url;
+          if (av) av.value = url;
+          if (avPrev) { avPrev.src = url; avPrev.style.display = 'block'; }
+          toast('头像已上传');
+        }, { max: 400 });
+      };
+    }
+    setTimeout(function () { refreshPrev('a-intro'); }, 0);
     $('#a-facts').innerHTML = rowsHTML(d.facts || [], ['k', 'v', 'vn'], { k: '项目', v: '内容', vn: '夜间内容' });
     $('#a-favs').innerHTML = rowsHTML(d.favorites || [], ['name', 'src'], { name: '角色', src: '出处' });
     $('#a-links').innerHTML = linkRowsHTML(d.links || []);
@@ -1667,8 +1693,6 @@
     d.avatar = $('#a-avatar').value; d.introTitle = $('#a-introTitle').value;
     d.favoritesTitle = $('#a-favTitle') ? $('#a-favTitle').value : d.favoritesTitle;
     d.intro = $('#a-intro').value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
-    d.bioTitle = $('#a-storyTitle') ? $('#a-storyTitle').value : (d.bioTitle || '关于我');
-    d.bio = $('#a-story').value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
     d.facts = readRows($('#a-facts'), d.facts || [], []);
     d.favorites = readRows($('#a-favs'), d.favorites || [], []);
     d.links = readRows($('#a-links'), d.links || [], []);
