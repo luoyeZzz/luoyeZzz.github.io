@@ -328,12 +328,15 @@
           if (remember && remember.checked) { try { localStorage.setItem(KEY, '1'); } catch (er) {} }
           if (act === 'play') {
             try { if (window.__luoyueMusic) window.__luoyueMusic.play(); } catch (er) {}
+          } else {
+            window.__luoyueQuiet = true;
           }
           hide();
           return;
         }
         if (e.target === mask || (e.target.classList && e.target.classList.contains('notice-close'))) {
           if (remember && remember.checked) { try { localStorage.setItem(KEY, '1'); } catch (er) {} }
+          window.__luoyueQuiet = true;
           hide();
         }
       });
@@ -466,6 +469,7 @@
         fab.classList.remove('is-armed');
         document.removeEventListener('pointerdown', kick);
         document.removeEventListener('keydown', kick);
+        if (window.__luoyueQuiet) return;
         if (audio.paused) play();
       };
       document.addEventListener('pointerdown', kick, { once: true });
