@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>洛月 · 写作台</title>
 <link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
+<script src="/tools/lame.min.js" defer></script>
 <script>(function(){try{var q=new URLSearchParams(location.search).get('theme');if(q==='dark')document.documentElement.setAttribute('data-theme','dark');else if(localStorage.getItem('sb-theme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
 <link rel="stylesheet" href="/assets/css/style.css">
 <style>
@@ -1023,6 +1024,48 @@
     });
   }
 
+  /* 浏览器端把音频转成单声道 96kbps MP3，减小体积 */
+  function compressAudio(file, kbps) {
+    kbps = kbps || 96;
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC || typeof lamejs === 'undefined') return reject(new Error('浏览器不支持音频转码'));
+        var ctx = new AC();
+        ctx.decodeAudioData(reader.result, function (buf) {
+          try { ctx.close(); } catch (e) {}
+          var ch = buf.numberOfChannels;
+          var len = buf.length;
+          var rate = buf.sampleRate;
+          var mono = new Float32Array(len);
+          for (var c = 0; c < ch; c++) {
+            var data = buf.getChannelData(c);
+            for (var i = 0; i < len; i++) mono[i] += data[i] / ch;
+          }
+          var enc = new lamejs.Mp3Encoder(1, rate, kbps);
+          var block = 1152;
+          var parts = [];
+          for (var b = 0; b < len; b += block) {
+            var end = Math.min(b + block, len);
+            var int16 = new Int16Array(end - b);
+            for (var j = 0; j < int16.length; j++) {
+              var v = mono[b + j];
+              int16[j] = v < -1 ? -32767 : v > 1 ? 32767 : (v < 0 ? v * 0x8000 : v * 0x7FFF);
+            }
+            var out = enc.encodeBuffer(int16);
+            if (out.length) parts.push(new Uint8Array(out));
+          }
+          var tail = enc.flush();
+          if (tail.length) parts.push(new Uint8Array(tail));
+          resolve(new Blob(parts, { type: 'audio/mpeg' }));
+        }, function () { try { ctx.close(); } catch (e) {} reject(new Error('音频解码失败')); });
+      };
+      reader.onerror = function () { reject(new Error('读取文件失败')); };
+      reader.readAsArrayBuffer(file);
+    });
+  }
+
   function upload(cb, opts) {
     opts = opts || {};
     var inp = document.createElement('input');
@@ -1032,12 +1075,36 @@
       var f = inp.files[0]; if (!f) return;
 
       if (opts.audio) {
-        var r0 = new FileReader();
-        r0.onload = function () {
-          post('/api/upload', { name: f.name, data: r0.result, type: 'audio' })
-            .then(cb).catch(function (e) { toast(e.message, true); });
+        var sendAudio = function (dataUrl, name2, note) {
+          post('/api/upload', { name: name2, data: dataUrl, type: 'audio' })
+            .then(function (j) { if (note) toast(note); cb(j); })
+            .catch(function (e) { toast(e.message, true); });
         };
-        r0.readAsDataURL(f);
+
+        /* 小于 800KB 不用压 */
+        if (f.size < 8 * 1024 * 1024) {
+          var r0 = new FileReader();
+          r0.onload = function () { sendAudio(r0.result, f.name, '已上传 ' + fmtSize(f.size)); };
+          r0.readAsDataURL(f);
+          return;
+        }
+
+        toast('正在压缩音频（约 5–20 秒）…');
+        var t0 = Date.now();
+        compressAudio(f, 96).then(function (blob) {
+          var r1 = new FileReader();
+          r1.onload = function () {
+            var sec = ((Date.now() - t0) / 1000).toFixed(0);
+            var name2 = f.name.replace(/\.[^.]+$/, '') + '-96k.mp3';
+            sendAudio(r1.result, name2, '已压缩 ' + fmtSize(f.size) + ' → ' + fmtSize(blob.size) + '（' + sec + 's）');
+          };
+          r1.readAsDataURL(blob);
+        }).catch(function () {
+          /* 转码失败就原样上传 */
+          var r2 = new FileReader();
+          r2.onload = function () { sendAudio(r2.result, f.name, '转码失败，已原样上传'); };
+          r2.readAsDataURL(f);
+        });
         return;
       }
 
