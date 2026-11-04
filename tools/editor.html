@@ -371,6 +371,35 @@
   input[type="checkbox"]:checked{background:var(--accent);border-color:transparent}
   input[type="checkbox"]:checked::after{content:"";position:absolute;left:5px;top:2px;width:4px;height:8px;
     border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+
+  #body{min-height:62vh}
+  @media (max-width:760px){ #body{min-height:52vh} }
+  .row-thumb{display:none;width:42px;height:42px;border-radius:10px;object-fit:cover;
+    border:1px solid var(--line);background:var(--surface);margin-top:6px}
+  .row-thumb.is-on{display:block}
+  .ed-field{display:block;margin-top:10px;font-size:.75rem;color:var(--ink-3);letter-spacing:.06em}
+  .ed-field .ed-modal-input{margin-top:4px}
+  .fs-editor{position:fixed;inset:0;z-index:400;display:flex;flex-direction:column;gap:10px;
+    padding:14px 16px 18px;background:var(--bg)}
+  .fs-head{display:flex;align-items:center;justify-content:space-between}
+  .fs-head b{font-size:.9375rem;letter-spacing:.12em}
+  .fs-body{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
+  .fs-body textarea{flex:1;min-height:0!important;height:auto;resize:none;
+    font-size:1rem;line-height:2;padding:16px 18px}
+  .fs-body .rich-prev{max-height:28vh;overflow:auto}
+
+  /* 行编辑器：卡片化 + 缩略图 */
+  .rows .r{padding:10px 12px;border:1px solid var(--line);border-radius:12px;
+    background:var(--surface);align-items:start;transition:border-color .2s}
+  .rows .r:hover{border-color:var(--accent-soft)}
+  .rows .r label{font-size:.6875rem}
+  .rows .r .row-thumb{width:46px;height:46px;border-radius:10px;margin:0 0 6px;
+    display:none;object-fit:cover;border:1px solid var(--glass-edge);background:var(--surface-solid)}
+  .rows .r .row-thumb.is-on{display:block}
+
+  .rows .r .r-field{display:flex;flex-direction:column;gap:4px}
+  .rows .r .row-up{align-self:flex-start;margin-top:2px;padding:4px 10px;font-size:.72rem}
+  .rows .r .del{align-self:start;margin-top:2px}
 </style>
 </head>
 <body class="admin">
@@ -452,10 +481,8 @@
       </div>
       <div class="toolbar" id="toolbar">
         <button data-ins="h2">小标题</button><button data-ins="dialogue">对白</button><button data-ins="note">便签</button>
-        <button data-ins="quote">引用</button><button data-ins="img">图片</button><button data-ins="hr">分割线</button>
-        <button id="uploadBody">＋ 上传图片</button>
-        <button id="linkBody">＋ 图片链接</button>
-        <button id="linkText">🔗 文字链接</button>
+        <button data-ins="quote">引用</button><button data-ins="hr">分割线</button>
+        <button data-act="img">🖼 图片</button><button data-act="link">🔗 链接</button><button data-act="full">⛶ 全屏</button>
       </div>
       <div class="body-wrap">
         <textarea id="body" placeholder="用 Markdown 写正文…"></textarea>
@@ -665,8 +692,15 @@
     return arr.map(function (row, i) {
       return '<div class="r" style="grid-template-columns:' + cols.map(function () { return '1fr'; }).join(' ') + ' auto">' +
         cols.map(function (c) {
-          var extra = IMG_KEYS[c] ? '<button type="button" class="ghost sm row-up" data-up="' + c + '">↑ 上传</button>' : '';
-          return '<label>' + esc(labels[c]) + '<input data-i="' + i + '" data-k="' + c + '" value="' + esc(row[c] || '') + '"></label>' + extra;
+          var isImg = !!IMG_KEYS[c];
+          var thumb = isImg
+            ? '<img class="row-thumb' + (row[c] ? ' is-on' : '') + '" data-thumb="' + c + '" src="' + esc(row[c] || '') + '" alt="">'
+            : '';
+          var up = isImg
+            ? '<button type="button" class="ghost sm row-up" data-up="' + c + '">↑ 上传头像</button>'
+            : '';
+          return '<label class="r-field">' + esc(labels[c]) + thumb +
+            '<input data-i="' + i + '" data-k="' + c + '" value="' + esc(row[c] || '') + '">' + up + '</label>';
         }).join('') + '<button class="ghost sm del" data-del="' + i + '">×</button></div>';
     }).join('');
   }
@@ -1324,9 +1358,6 @@
     upload(function (j) { $('#cover').value = j.path; }, { max: 1600 });
   };
   $('#coverClear').onclick = function () { $('#cover').value = ''; };
-  $('#uploadBody').onclick = function () {
-    upload(function (j) { insert('\n\n![](' + j.path + ')\n\n'); }, { max: 1600 });
-  };
   var SNIP = {
     h2: '\n\n## 小标题\n\n',
     dialogue: '\n\n:::dialogue\n「第一句」\n「第二句」\n:::\n\n',
@@ -1342,53 +1373,129 @@
     ta.selectionStart = ta.selectionEnd = s + text.length;
   }
   $('#toolbar').onclick = function (e) {
-    var b = e.target.closest('button[data-ins]');
-    if (b) insert(SNIP[b.getAttribute('data-ins')] || '');
+    var b = e.target.closest('button');
+    if (!b) return;
+    var ins = b.getAttribute('data-ins');
+    if (ins) { insert(SNIP[ins] || ''); return; }
+    var act = b.getAttribute('data-act');
+    if (act === 'img') pickImage($('#body'));
+    if (act === 'link') insertLink($('#body'));
+    if (act === 'full') openFull($('#body'));
   };
 
   /* 文字链接：选中文字 → Ctrl+K 或点「🔗 文字链接」 */
-  function askUrl(cb) {
+  function askLink(defaultText, cb) {
     var mask = document.createElement('div');
     mask.className = 'ed-modal';
     mask.innerHTML = '<div class="ed-modal-card"><h3>插入链接</h3>' +
-      '<input class="ed-modal-input" placeholder="https://example.com" value="https://">' +
+      '<label class="ed-field">显示文字<input class="ed-modal-input" data-f="text" placeholder="点这里看看"></label>' +
+      '<label class="ed-field">链接地址<input class="ed-modal-input" data-f="url" placeholder="https://example.com" value="https://"></label>' +
       '<div class="ed-modal-actions"><button type="button" class="ghost" data-x="cancel">取消</button>' +
       '<button type="button" class="primary" data-x="ok">插入</button></div></div>';
     document.body.appendChild(mask);
-    var input = mask.querySelector('input');
-    input.focus();
-    input.select();
+    var textEl = mask.querySelector('[data-f="text"]');
+    var urlEl = mask.querySelector('[data-f="url"]');
+    textEl.value = defaultText || '';
+    textEl.focus();
+    if (defaultText) textEl.select(); else urlEl.focus();
     function close() { if (mask.parentNode) mask.remove(); }
     function ok() {
-      var v = input.value.trim();
+      var text = textEl.value.trim() || '链接';
+      var url = urlEl.value.trim();
       close();
-      if (v && v !== 'https://') cb(v);
+      if (url && url !== 'https://') cb(text, url);
     }
     mask.addEventListener('click', function (ev) {
       if (ev.target === mask || ev.target.getAttribute('data-x') === 'cancel') close();
       if (ev.target.getAttribute('data-x') === 'ok') ok();
     });
-    input.addEventListener('keydown', function (ev) {
+    mask.addEventListener('keydown', function (ev) {
       if (ev.key === 'Enter') { ev.preventDefault(); ok(); }
       if (ev.key === 'Escape') close();
     });
   }
 
+  function insertAt(ta, text) {
+    var s = ta.selectionStart, e2 = ta.selectionEnd;
+    ta.value = ta.value.slice(0, s) + text + ta.value.slice(e2);
+    ta.focus();
+    ta.selectionStart = ta.selectionEnd = s + text.length;
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
   function insertLink(ta) {
     if (!ta) return;
-    var s = ta.selectionStart, e2 = ta.selectionEnd;
-    var sel = ta.value.slice(s, e2);
-    askUrl(function (url) {
-      var text = sel || '链接文字';
-      var md = '[' + text + '](' + url + ')';
-      ta.value = ta.value.slice(0, s) + md + ta.value.slice(e2);
-      ta.focus();
-      ta.selectionStart = s;
-      ta.selectionEnd = s + md.length;
+    var sel = ta.value.slice(ta.selectionStart, ta.selectionEnd);
+    askLink(sel, function (text, url) {
+      insertAt(ta, '[' + text + '](' + url + ')');
     });
   }
-  var linkTextBtn = $('#linkText');
-  if (linkTextBtn) linkTextBtn.onclick = function () { insertLink($('#body')); };
+
+  function pickImage(ta) {
+    if (!ta) return;
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = function () {
+      var f = input.files && input.files[0];
+      if (!f) return;
+      toast('正在上传…');
+      upload(function (j) {
+        insertAt(ta, String.fromCharCode(10, 10) + '![' + (f.name || '') + '](' + j.url + ')' + String.fromCharCode(10, 10));
+        toast('已插入图片');
+      }, { max: 1600 });
+    };
+    input.click();
+  }
+
+  var fsEl = null;
+  function openFull(ta) {
+    if (!ta || fsEl) return;
+    var host = ta.parentNode;
+    var toolbar = host.querySelector('.toolbar, .mini-linkbar, .rich-bar');
+    if (!toolbar && host.previousElementSibling &&
+        host.previousElementSibling.matches('.toolbar, .mini-linkbar, .rich-bar')) {
+      toolbar = host.previousElementSibling;
+    }
+    if (!toolbar && host.parentNode) {
+      toolbar = host.parentNode.querySelector('.toolbar, .rich-bar');
+    }
+    var next = ta.nextSibling;
+
+    fsEl = document.createElement('div');
+    fsEl.className = 'fs-editor';
+    fsEl.innerHTML = '<div class="fs-head"><b>写作</b>' +
+      '<button type="button" class="ghost sm" data-fs="close">退出全屏（Esc）</button></div><div class="fs-body"></div>';
+    document.body.appendChild(fsEl);
+    var body = fsEl.querySelector('.fs-body');
+
+    if (toolbar) body.appendChild(toolbar);
+    body.appendChild(ta);
+    var preview = host.querySelector('.rich-prev');
+    if (preview) body.appendChild(preview);
+    ta.focus();
+
+    function close() {
+      if (!fsEl) return;
+      /* 先把 textarea 放回原处，再把工具栏插回它前面 */
+      if (next && next.parentNode === host) host.insertBefore(ta, next);
+      else host.appendChild(ta);
+      if (toolbar) host.insertBefore(toolbar, ta);
+      if (preview) host.appendChild(preview);
+      fsEl.remove();
+      fsEl = null;
+      ta.focus();
+      document.removeEventListener('keydown', onEsc);
+    }
+    function onEsc(ev) { if (ev.key === 'Escape') close(); }
+    document.addEventListener('keydown', onEsc);
+    fsEl.addEventListener('click', function (ev) {
+      if (ev.target === fsEl || (ev.target.getAttribute && ev.target.getAttribute('data-fs') === 'close')) close();
+    });
+  }
+
+  function insertLink_old_unused() {}
+
   document.addEventListener('keydown', function (e) {
     if (!(e.ctrlKey || e.metaKey) || e.key.toLowerCase() !== 'k') return;
     var t = document.activeElement;
@@ -2056,6 +2163,17 @@
   if (startTab && $('[data-tab="' + startTab + '"]')) $('[data-tab="' + startTab + '"]').click();
   else loadPosts();
 
+  /* ===== 行内缩略图 ===== */
+  document.addEventListener('input', function (ev) {
+    var inp = ev.target;
+    if (!inp || !inp.getAttribute || !inp.getAttribute('data-k')) return;
+    var label = inp.closest('label');
+    var img = label ? label.querySelector('.row-thumb') : null;
+    if (!img) return;
+    img.src = inp.value;
+    img.classList.toggle('is-on', !!inp.value);
+  });
+
   /* ===== 行内图片上传 ===== */
   document.addEventListener('click', function (e) {
     var b = e.target.closest ? e.target.closest('.row-up') : null;
@@ -2066,61 +2184,55 @@
     var key = b.getAttribute('data-up');
     var inp = row.querySelector('input[data-k="' + key + '"]');
     if (!inp) return;
-    upload(function (j) { inp.value = j.url; toast('已上传 ' + j.url); }, { max: key === 'avatar' ? 400 : 1600 });
+    upload(function (j) {
+      inp.value = j.url;
+      var img = inp.closest('label') ? inp.closest('label').querySelector('.row-thumb') : null;
+      if (img) { img.src = j.url; img.classList.add('is-on'); }
+      toast('已上传');
+    }, { max: key === 'avatar' ? 400 : 1600 });
   });
 
-  /* ===== 没有工具栏的文本框，补一条：链接 / 加粗 / 表情 ===== */
+  /* ===== 没有工具栏的文本框：链接 / 图片 / 加粗 / 表情 / 全屏 ===== */
   var EMOJIS = ['🌙','✨','🍃','☕','🎐','😊','💭','🌸'];
+  function mkBtn(text, fn) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'ghost sm';
+    b.textContent = text;
+    b.onclick = fn;
+    return b;
+  }
+  function addFullToRich(ta) {
+    var field = ta.closest('.rich-field');
+    if (!field) return;
+    var bar = field.querySelector('.rich-bar');
+    if (!bar || bar.querySelector('[data-fsbtn]')) return;
+    var b = mkBtn('⛶ 全屏', function () { openFull(ta); });
+    b.setAttribute('data-fsbtn', '1');
+    bar.appendChild(b);
+  }
   function addMiniBar(ta) {
     if (!ta || ta.id === 'body' || ta.dataset.minibar) return;
-    if (ta.closest('.rich-field')) return;
+    if (ta.closest('.rich-field')) { addFullToRich(ta); return; }
     ta.dataset.minibar = '1';
     var bar = document.createElement('div');
     bar.className = 'mini-linkbar';
-
-    var link = document.createElement('button');
-    link.type = 'button';
-    link.className = 'ghost sm';
-    link.textContent = '🔗 链接';
-    link.onclick = function () { insertLink(ta); };
-    bar.appendChild(link);
-
-    var bold = document.createElement('button');
-    bold.type = 'button';
-    bold.className = 'ghost sm';
-    bold.textContent = 'B 加粗';
-    bold.onclick = function () {
+    bar.appendChild(mkBtn('🔗 链接', function () { insertLink(ta); }));
+    bar.appendChild(mkBtn('🖼 图片', function () { pickImage(ta); }));
+    bar.appendChild(mkBtn('B 加粗', function () {
       var s = ta.selectionStart, e2 = ta.selectionEnd;
       var sel = ta.value.slice(s, e2) || '加粗文字';
-      var md = '**' + sel + '**';
-      ta.value = ta.value.slice(0, s) + md + ta.value.slice(e2);
-      ta.focus();
-      ta.selectionStart = s;
-      ta.selectionEnd = s + md.length;
-    };
-    bar.appendChild(bold);
-
-    var emo = document.createElement('button');
-    emo.type = 'button';
-    emo.className = 'ghost sm';
-    emo.textContent = '😊 表情';
-    emo.onclick = function () {
+      insertAt(ta, '**' + sel + '**');
+    }));
+    var emo = mkBtn('😊 表情', function () {
       var pop = document.createElement('div');
       pop.className = 'emoji-pop';
       var r = emo.getBoundingClientRect();
       pop.style.left = Math.max(8, r.left - 40) + 'px';
       pop.style.top = (r.bottom + window.scrollY + 6) + 'px';
       EMOJIS.forEach(function (ch) {
-        var b2 = document.createElement('button');
-        b2.type = 'button';
-        b2.textContent = ch;
-        b2.onclick = function () {
-          var s = ta.selectionStart, e2 = ta.selectionEnd;
-          ta.value = ta.value.slice(0, s) + ch + ta.value.slice(e2);
-          ta.focus();
-          ta.selectionStart = ta.selectionEnd = s + ch.length;
-          pop.remove();
-        };
+        var b2 = mkBtn(ch, function () { insertAt(ta, ch); pop.remove(); });
+        b2.style.fontSize = '1.1rem';
         pop.appendChild(b2);
       });
       document.body.appendChild(pop);
@@ -2129,9 +2241,9 @@
           if (!pop.contains(ev.target)) { pop.remove(); document.removeEventListener('click', close); }
         });
       }, 0);
-    };
+    });
     bar.appendChild(emo);
-
+    bar.appendChild(mkBtn('⛶ 全屏', function () { openFull(ta); }));
     ta.parentNode.insertBefore(bar, ta);
   }
   function scanTextareas() {
