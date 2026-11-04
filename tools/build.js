@@ -301,7 +301,9 @@ function u(site, p) {
 function themeBoot() {
   return '<script>(function(){try{var q=new URLSearchParams(location.search).get("theme");' +
     'if(q==="dark"||q==="light"){document.documentElement.setAttribute("data-theme",q);return;}' +
-    'if(localStorage.getItem("sb-theme")==="dark"){document.documentElement.setAttribute("data-theme","dark");}' +
+    'var d=null;try{d=localStorage.getItem("sb-theme");}catch(e){}' +
+    'if(!d){try{d=(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";}catch(e){d="light";}}' +
+    'document.documentElement.setAttribute("data-theme",d==="dark"?"dark":"light");' +
     '}catch(e){}})();</script>';
 }
 
@@ -422,7 +424,7 @@ function layout(site, opts) {
     '<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
     '<title>' + esc(o.title) + '</title>\n' +
     '<meta name="description" content="' + esc(desc) + '">\n' +
-    '<meta name="theme-color" content="#F5EDE6">\n' +
+    '<meta name="theme-color" content="#FBF7F5">\n' +
     '<link rel="canonical" href="' + esc(url) + '">\n' +
     '<meta property="og:type" content="' + (o.type || 'website') + '">\n' +
     '<meta property="og:title" content="' + esc(o.title) + '">\n' +

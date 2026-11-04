@@ -832,3 +832,42 @@ body{font-size:1.0625rem;line-height:1.9;-webkit-font-smoothing:antialiased;-moz
   .nav-toggle[aria-expanded="true"] span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
 }
 @keyframes menu-fade{from{opacity:0}to{opacity:1}}
+
+
+/* v3.3 手机端与浅色修正 */
+
+/* 白天背景提亮，减少发黄 */
+[data-theme="light"]{
+  --bg:#FBF7F5;
+  --bg-2:#F4EDEA;
+  --surface-solid:#FFFDFB;
+  --nameplate:rgba(255,253,251,.95);
+}
+
+@media (max-width:640px){
+  /* 引言卡片：单列，避免右侧“贴在书桌前的一句话”被挤 */
+  .quote{grid-template-columns:1fr;gap:8px;padding:22px 20px;margin-top:42px;align-items:start}
+  .quote::before{font-size:6rem;right:14px;top:-16px;opacity:.08}
+  .quote .jp{font-size:1.125rem;line-height:1.75}
+  .quote .cn{font-size:.75rem}
+  .quote .by{justify-self:start;text-align:left}
+
+  /* 首页入口卡片：收紧留白 */
+  .entries{gap:14px;margin-top:44px}
+  .entry{padding:20px 18px 18px;min-height:0}
+
+  /* 区块间距 */
+  .sec{margin-top:44px}
+  .hero{padding-top:40px}
+  .site-foot{margin-top:48px}
+}
+
+/* 手机端音乐续播提示 */
+.music-hint{
+  position:absolute;right:0;bottom:66px;white-space:nowrap;
+  padding:8px 12px;border-radius:12px;font-size:.75rem;color:var(--ink);
+  background:var(--surface-solid);border:1px solid var(--glass-edge);
+  box-shadow:var(--shadow-soft);opacity:0;transform:translateY(6px);
+  animation:hint-in .3s ease .2s both;pointer-events:none;
+}
+@keyframes hint-in{to{opacity:1;transform:none}}

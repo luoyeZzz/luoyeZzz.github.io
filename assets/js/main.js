@@ -20,7 +20,7 @@
     root.setAttribute('data-theme', t);
     if (save !== false && !forced) { try { localStorage.setItem('sb-theme', t); } catch (e) {} }
     var meta = $('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', t === 'dark' ? '#141017' : '#F5EDE6');
+    if (meta) meta.setAttribute('content', t === 'dark' ? '#141017' : '#FBF7F5');
     if (themeBtn) themeBtn.setAttribute('aria-label', t === 'dark' ? '切换到白天' : '切换到夜间');
   }
   applyTheme(root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light', false);
@@ -301,6 +301,17 @@
       if (armed) return;
       armed = true;
       fab.classList.add('is-armed');
+      /* 手机端给一句可见提示：点一下继续播放 */
+      try {
+        if (window.innerWidth <= 900 && st && (st.playing || autoplay) && !document.getElementById('music-hint')) {
+          var tip = document.createElement('div');
+          tip.id = 'music-hint';
+          tip.className = 'music-hint';
+          tip.textContent = '点一下继续播放';
+          dock.appendChild(tip);
+          setTimeout(function () { if (tip.parentNode) tip.remove(); }, 8000);
+        }
+      } catch (e) {}
       var kick = function () {
         armed = false;
         fab.classList.remove('is-armed');
