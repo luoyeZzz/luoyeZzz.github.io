@@ -330,6 +330,18 @@
   .toolbar button:hover{transform:translateY(-1px)}
 
   .toast{backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+
+  .mini-linkbar{display:flex;justify-content:flex-end;margin:2px 0 4px}
+  .mini-linkbar .ghost{padding:4px 10px;font-size:.75rem}
+  body.writing-full .body-wrap{
+    position:fixed;inset:0;z-index:300;margin:0;padding:18px 18px 20px;
+    background:var(--bg);display:flex;flex-direction:column;gap:10px;
+  }
+  body.writing-full .body-wrap textarea{
+    flex:1;min-height:0;height:auto;font-size:1.05rem;line-height:2;padding:20px 22px;
+    border-radius:16px;resize:none;
+  }
+  body.writing-full .pane{filter:none}
 </style>
 </head>
 <body class="admin">
@@ -407,6 +419,7 @@
         <button id="uploadBody">＋ 上传图片</button>
         <button id="linkBody">＋ 图片链接</button>
         <button id="linkText">🔗 文字链接</button>
+        <button id="fullWrite">⛶ 全屏写作</button>
       </div>
       <div class="body-wrap">
         <textarea id="body" placeholder="用 Markdown 写正文…"></textarea>
@@ -612,10 +625,12 @@
 
   /* 通用行编辑 */
   function rowsHTML(arr, cols, labels) {
+    var IMG_KEYS = { avatar: 1, img: 1, image: 1, cover: 1, src: 1, photo: 1 };
     return arr.map(function (row, i) {
       return '<div class="r" style="grid-template-columns:' + cols.map(function () { return '1fr'; }).join(' ') + ' auto">' +
         cols.map(function (c) {
-          return '<label>' + esc(labels[c]) + '<input data-i="' + i + '" data-k="' + c + '" value="' + esc(row[c] || '') + '"></label>';
+          var extra = IMG_KEYS[c] ? '<button type="button" class="ghost sm row-up" data-up="' + c + '">↑ 上传</button>' : '';
+          return '<label>' + esc(labels[c]) + '<input data-i="' + i + '" data-k="' + c + '" value="' + esc(row[c] || '') + '"></label>' + extra;
         }).join('') + '<button class="ghost sm del" data-del="' + i + '">×</button></div>';
     }).join('');
   }
@@ -1961,6 +1976,64 @@
   try { startTab = new URLSearchParams(location.search).get('tab') || ''; } catch (e) {}
   if (startTab && $('[data-tab="' + startTab + '"]')) $('[data-tab="' + startTab + '"]').click();
   else loadPosts();
+
+  /* ===== 行内图片上传 ===== */
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('.row-up') : null;
+    if (!b) return;
+    e.preventDefault();
+    var row = b.closest('.r');
+    if (!row) return;
+    var key = b.getAttribute('data-up');
+    var inp = row.querySelector('input[data-k="' + key + '"]');
+    if (!inp) return;
+    upload(function (j) { inp.value = j.url; toast('已上传 ' + j.url); }, { max: key === 'avatar' ? 400 : 1600 });
+  });
+
+  /* ===== 全屏写作 ===== */
+  var fullBtn = $('#fullWrite');
+  if (fullBtn) {
+    var toggleFull = function (on) {
+      document.body.classList.toggle('writing-full', on);
+      fullBtn.textContent = on ? '⛶ 退出全屏' : '⛶ 全屏写作';
+      if (on) { var ta = $('#body'); if (ta) ta.focus(); }
+    };
+    fullBtn.onclick = function () { toggleFull(!document.body.classList.contains('writing-full')); };
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && document.body.classList.contains('writing-full')) toggleFull(false);
+    });
+  }
+
+  /* ===== 所有文本框都加一条「插入链接」 ===== */
+  function addLinkBar(ta) {
+    if (!ta || ta.id === 'body' || ta.dataset.linkbar) return;
+    ta.dataset.linkbar = '1';
+    var bar = document.createElement('div');
+    bar.className = 'mini-linkbar';
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'ghost sm';
+    b.textContent = '🔗 插入链接';
+    b.onclick = function () {
+      var s = ta.selectionStart, e2 = ta.selectionEnd;
+      var sel = ta.value.slice(s, e2);
+      var url = window.prompt('链接地址（https://…）', 'https://');
+      if (!url || url === 'https://') return;
+      var md = '[' + (sel || '链接文字') + '](' + url + ')';
+      ta.value = ta.value.slice(0, s) + md + ta.value.slice(e2);
+      ta.focus();
+      ta.selectionStart = s;
+      ta.selectionEnd = s + md.length;
+    };
+    bar.appendChild(b);
+    ta.parentNode.insertBefore(bar, ta);
+  }
+  function scanTextareas() {
+    [].slice.call(document.querySelectorAll('textarea')).forEach(addLinkBar);
+  }
+  scanTextareas();
+  new MutationObserver(function () { setTimeout(scanTextareas, 60); }).observe(document.body, { childList: true, subtree: true });
+
 })();
 </script>
 </div>

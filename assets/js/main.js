@@ -80,13 +80,6 @@
     doc.body.classList.remove('is-loading');
   }
   var timer = null;
-  var firstVisit = false;
-  try { firstVisit = !sessionStorage.getItem('luoyue.entered'); } catch (e) { firstVisit = false; }
-
-  function markEntered() {
-    try { sessionStorage.setItem('luoyue.entered', '1'); } catch (e) {}
-  }
-
   function finish() {
     if (done) return;
     done = true;
@@ -95,53 +88,10 @@
     setTimeout(close, Math.max(0, 420 - (Date.now() - start)) + 100);
   }
 
-  /* 首次访问：进度走完后不留自动消失，给一个「进入」按钮换一次真实点击 */
-  function showEnter() {
-    if (done) return;
-    done = true;
-    if (timer) clearInterval(timer);
-    pct = 100; paint();
-    if (!loader) return;
-    if (statusEl) statusEl.textContent = 'ready';
-
-    var btn = doc.createElement('button');
-    btn.type = 'button';
-    btn.className = 'loader-enter';
-    btn.textContent = '进入';
-    loader.querySelector('.loader-inner').appendChild(btn);
-
-    var kick = function () {
-      markEntered();
-      try { if (window.__luoyueMusic && typeof window.__luoyueMusic.play === 'function') window.__luoyueMusic.play(); } catch (e) {}
-      close();
-      loader.removeEventListener('click', onLoaderClick);
-      doc.removeEventListener('keydown', onKey);
-      clearTimeout(autoClose);
-    };
-    var onLoaderClick = function (e) { e.preventDefault(); kick(); };
-    var onKey = function (e) {
-      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') { e.preventDefault(); kick(); }
-    };
-    loader.addEventListener('click', onLoaderClick);
-    doc.addEventListener('keydown', onKey);
-    /* 兜底：9 秒没点也放行，避免卡死 */
-    var autoClose = setTimeout(function () {
-      markEntered();
-      close();
-      loader.removeEventListener('click', onLoaderClick);
-      doc.removeEventListener('keydown', onKey);
-    }, 9000);
-  }
-
   if (loader) {
     paint();
     if (reduce) finish();
-    else if (firstVisit) {
-      timer = setInterval(function () { pct = Math.min(92, pct + 8 + Math.random() * 10); paint(); }, 110);
-      if (doc.readyState === 'complete') { setTimeout(showEnter, 500); }
-      else window.addEventListener('load', function () { setTimeout(showEnter, 500); }, { once: true });
-      setTimeout(showEnter, 2400);
-    } else {
+    else {
       timer = setInterval(function () { pct = Math.min(92, pct + 8 + Math.random() * 10); paint(); }, 110);
       if (doc.readyState === 'complete') finish();
       else window.addEventListener('load', finish);
@@ -294,6 +244,7 @@
       if (!mask) return;
       var m = mask;
       mask = null;
+      if (m.__cleanups) m.__cleanups.forEach(function (fn) { try { fn(); } catch (e) {} });
       m.classList.remove('is-on');
       setTimeout(function () { if (m.parentNode) m.remove(); }, 280);
     }
@@ -321,24 +272,38 @@
 
       var remember = mask.querySelector('[data-notice="remember"]');
 
-      mask.addEventListener('click', function (e) {
-        var btn = e.target.closest ? e.target.closest('[data-notice]') : null;
-        var act = btn && btn.getAttribute('data-notice');
-        if (act === 'play' || act === 'quiet') {
-          if (remember && remember.checked) { try { localStorage.setItem(KEY, '1'); } catch (er) {} }
-          if (act === 'play') {
-            try { if (window.__luoyueMusic) window.__luoyueMusic.play(); } catch (er) {}
-          } else {
-            window.__luoyueQuiet = true;
-          }
-          hide();
-          return;
-        }
-        if (e.target === mask || (e.target.classList && e.target.classList.contains('notice-close'))) {
-          if (remember && remember.checked) { try { localStorage.setItem(KEY, '1'); } catch (er) {} }
+      function closeWith(playIt) {
+        if (remember && remember.checked) { try { localStorage.setItem(KEY, '1'); } catch (er) {} }
+        if (playIt) {
+          try { if (window.__luoyueMusic) window.__luoyueMusic.play(); } catch (er) {}
+        } else {
           window.__luoyueQuiet = true;
-          hide();
         }
+        hide();
+      }
+
+      function onKey(e) {
+        if (e.key === 'Escape') { e.preventDefault(); closeWith(false); }
+      }
+      doc.addEventListener('keydown', onKey);
+      var cleanups = mask.__cleanups = [];
+      cleanups.push(function () { doc.removeEventListener('keydown', onKey); });
+
+      function bind(sel, fn) {
+        var el = mask.querySelector(sel);
+        if (!el) return;
+        el.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          fn();
+        });
+      }
+      bind('[data-notice="play"]', function () { closeWith(true); });
+      bind('[data-notice="quiet"]', function () { closeWith(false); });
+      bind('.notice-close', function () { closeWith(false); });
+
+      mask.addEventListener('click', function (e) {
+        if (e.target === mask) closeWith(false);
       });
     }
 
@@ -800,6 +765,18 @@
 
       var apply = function (html) {
         var doc2 = new DOMParser().parseFromString(html, 'text/html');
+        var c = doc2.querySelector('link[rel="canonical"]');
+        if (c) {
+          var cp = '';
+          try { cp = new URL(c.getAttribute('href'), location.origin).pathname; } catch (e) {}
+          if (cp && cp !== url.pathname) {
+            delete cache[href];
+            busy = false;
+            progress(false);
+            location.href = href;
+            return;
+          }
+        }
         var finished = false;
         var finish = function () {
           if (finished) return;
@@ -867,19 +844,19 @@
     });
 
     /* 悬停预取，点击更快 */
-    var hoverTimer = null, hoverUrl = null;
+    var hoverTimer = null;
     doc.addEventListener('mouseover', function (e) {
       var a = e.target.closest ? e.target.closest('a') : null;
       if (!a) return;
       var url = internal(a);
       if (!url || cache[url.href] || samePage(url)) return;
-      hoverUrl = url;
+      var target = url;
       clearTimeout(hoverTimer);
       hoverTimer = setTimeout(function () {
-        if (!hoverUrl) return;
-        fetch(hoverUrl.href, { credentials: 'same-origin' })
+        if (!target) return;
+        fetch(target.href, { credentials: 'same-origin' })
           .then(function (r) { return r.ok ? r.text() : ''; })
-          .then(function (t) { if (t) cache[hoverUrl.href] = t; })
+          .then(function (t) { if (t) cache[target.href] = t; })
           .catch(function () {});
       }, 120);
     }, { passive: true });

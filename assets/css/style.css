@@ -872,15 +872,6 @@ body{font-size:1.0625rem;line-height:1.9;-webkit-font-smoothing:antialiased;-moz
 }
 @keyframes hint-in{from{transform:translateY(6px)}to{transform:none}}
 
-/* 入场页按钮 */
-.loader-enter{
-  margin-top:18px;padding:12px 34px;border-radius:var(--r-pill);border:1px solid var(--glass-edge);
-  background:var(--accent);color:#fff;border-color:transparent;font-size:.9375rem;font-weight:600;letter-spacing:.1em;
-  cursor:pointer;box-shadow:0 14px 30px -14px rgba(179,65,104,.65);transition:transform .25s var(--ease),box-shadow .25s;
-}
-.loader-enter:hover{transform:translateY(-2px);box-shadow:0 20px 36px -16px rgba(179,65,104,.7)}
-.loader-enter:active{transform:none}
-
 /* 音乐提示按钮 */
 .music-hint{pointer-events:auto!important;cursor:pointer;font-family:inherit}
 .music-hint:hover{border-color:var(--accent-soft);color:var(--accent)}
