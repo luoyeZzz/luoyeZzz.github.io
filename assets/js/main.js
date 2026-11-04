@@ -361,8 +361,10 @@
       if (!resumeAt || resumeAt < 1) return;
       var dur = audio.duration;
       if (!isFinite(dur) || dur < 1) return;
-      if (Math.abs(audio.currentTime - resumeAt) < 1.5) return;
+      if (Math.abs(audio.currentTime - resumeAt) < 1.5) { resumeAt = 0; return; }
       try { audio.currentTime = Math.min(resumeAt, dur - 1); } catch (e) {}
+      /* 只跳一次：之后暂停/继续都从当前位置走，不要反复弹回 */
+      resumeAt = 0;
     }
     audio.addEventListener('loadedmetadata', seekToResume);
     audio.addEventListener('canplay', seekToResume);
