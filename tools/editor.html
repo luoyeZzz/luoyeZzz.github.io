@@ -364,6 +364,7 @@
         <button data-ins="quote">引用</button><button data-ins="img">图片</button><button data-ins="hr">分割线</button>
         <button id="uploadBody">＋ 上传图片</button>
         <button id="linkBody">＋ 图片链接</button>
+        <button id="linkText">🔗 文字链接</button>
       </div>
       <div class="body-wrap">
         <textarea id="body" placeholder="用 Markdown 写正文…"></textarea>
@@ -1250,6 +1251,31 @@
     var b = e.target.closest('button[data-ins]');
     if (b) insert(SNIP[b.getAttribute('data-ins')] || '');
   };
+
+  /* 文字链接：选中文字 → Ctrl+K 或点「🔗 文字链接」 */
+  function insertLink(ta) {
+    if (!ta) return;
+    var s = ta.selectionStart, e2 = ta.selectionEnd;
+    var sel = ta.value.slice(s, e2);
+    var url = window.prompt('链接地址（https://…）', 'https://');
+    if (!url || url === 'https://') return;
+    var text = sel || '链接文字';
+    var md = '[' + text + '](' + url + ')';
+    ta.value = ta.value.slice(0, s) + md + ta.value.slice(e2);
+    ta.focus();
+    ta.selectionStart = s;
+    ta.selectionEnd = s + md.length;
+  }
+  var linkTextBtn = $('#linkText');
+  if (linkTextBtn) linkTextBtn.onclick = function () { insertLink($('#body')); };
+  document.addEventListener('keydown', function (e) {
+    if (!(e.ctrlKey || e.metaKey) || e.key.toLowerCase() !== 'k') return;
+    var t = document.activeElement;
+    if (t && (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && (!t.type || t.type === 'text')))) {
+      e.preventDefault();
+      insertLink(t);
+    }
+  });
   $('#previewBtn').onclick = function () {
     var wrap = $('.body-wrap');
     var on = !wrap.classList.contains('split');
@@ -1284,6 +1310,14 @@
     { p: 'footer.note1', l: '第一行' }, { p: 'footer.note2', l: '第二行' },
     { p: 'footer.tag', l: '日文小字' }, { p: 'footer.copyright', l: '版权后缀' },
     { p: 'footer.meta', l: '运行天数后的话', full: true },
+
+    { h: '进站提示弹窗' },
+    { p: 'notice.enabled', l: '启用弹窗', type: 'check' },
+    { p: 'notice.title', l: '标题', full: true },
+    { p: 'notice.body', l: '正文（每行一段）', type: 'area', full: true },
+    { p: 'notice.playLabel', l: '按钮：播放音乐' },
+    { p: 'notice.quietLabel', l: '按钮：安静阅读' },
+    { p: 'notice.remember', l: '勾选框文字（留空隐藏）' },
 
     { h: '功能开关' },
     { p: 'features.loader', l: '加载动画', type: 'check' },

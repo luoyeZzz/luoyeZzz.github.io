@@ -443,6 +443,9 @@ function layout(site, opts) {
     '\n<main id="main">\n' + (o.content || '') + '\n</main>\n' +
     footer(site) + '</div>\n' +
     musicDock(site) + toTop(site) + clickFx(site) +
+    '<script type="application/json" id="notice-data">' +
+      JSON.stringify(site.notice || {}).replace(/</g, '\\u003c') +
+    '</script>\n' +
     '<script src="' + u(site, '/assets/js/main.js') + '" defer></script>\n' +
     '</body>\n</html>\n';
 }
@@ -677,7 +680,7 @@ function momentsPage(site, items) {
         return '<img src="' + esc(typeof src === 'string' ? src : src.src) + '" alt="" data-zoom>';
       }).join('') + '</div>'
       : '';
-    const text = esc(m.text).split('\n').join('<br>');
+    const text = richText(site, m.text).split(String.fromCharCode(10)).join('<br>');
     return '<article class="moment">' +
       '<img class="ava" src="' + u(site, site.avatar || '/assets/img/avatar.svg') + '" alt="' + esc(site.brand.name) + '">' +
       '<time>' + esc(dateLabel(m.date, true)) + '</time>' +
@@ -746,7 +749,7 @@ function quotesPage(site) {
       '  <p class="page-lead">' + esc(pg.lead || '') + '</p>\n' +
       '</div></section>\n' +
       '<div class="quote-grid">' + (list.length ? list.map(function (q) {
-        return '<figure class="quote-card"><blockquote>' + esc(q.text) + '</blockquote>' +
+        return '<figure class="quote-card"><blockquote>' + richText(site, q.text) + '</blockquote>' +
           (q.from ? '<figcaption>' + esc(q.from) + '</figcaption>' : '') + '</figure>';
       }).join('') : '<div class="empty"><b>还没有收藏</b>在写作台里加几句。</div>') + '</div>\n'
   });

@@ -934,3 +934,86 @@ html[data-theme="dark"]{color-scheme:dark}
 @media (max-width:900px){
   .music-hint{left:0;right:0;margin:0 auto;bottom:96px;padding:11px 18px;font-size:.8125rem}
 }
+
+/* 白昼顶栏：给玻璃一点可见的轮廓 */
+[data-theme="light"] .nav-in{
+  background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(255,250,252,.64));
+  border-color:rgba(36,27,33,.09);
+  box-shadow:0 20px 44px -30px rgba(36,27,33,.55),inset 0 1px 0 rgba(255,255,255,.95);
+}
+[data-theme="dark"] .nav-in{
+  background:linear-gradient(180deg,rgba(32,24,34,.72),rgba(24,18,26,.55));
+}
+
+/* ============ 局部导航：进度条 / 换页过渡 / 菜单滑块 ============ */
+.spa-bar{
+  position:fixed;left:0;top:0;height:2px;width:0;z-index:200;pointer-events:none;
+  background:linear-gradient(90deg,var(--accent-soft),var(--accent));
+  box-shadow:0 0 12px rgba(179,65,104,.55);
+  opacity:0;transition:width .25s ease,opacity .2s ease;
+}
+.spa-bar.is-on{opacity:1}
+.spa-bar.is-on:not(.is-done){width:72%;transition:width 1.4s cubic-bezier(.1,.8,.2,1)}
+.spa-bar.is-done{width:100%;opacity:0;transition:width .2s ease,opacity .3s ease .1s}
+
+/* 菜单滑块 */
+.menu{position:relative}
+.nav-glider{
+  position:absolute;left:0;top:50%;height:34px;width:0;
+  transform:translateY(-50%);border-radius:999px;
+  background:var(--accent-wash);border:1px solid rgba(179,65,104,.16);
+  opacity:0;pointer-events:none;
+  transition:left .38s cubic-bezier(.22,1,.36,1),width .38s cubic-bezier(.22,1,.36,1),opacity .25s;
+  z-index:0;
+}
+.menu a{position:relative;z-index:1}
+body.nav-glider-ready .menu a[aria-current="page"]{background:none;border-color:transparent}
+
+/* 换页过渡（View Transitions 可用时） */
+::view-transition-old(root){animation:vt-out .18s ease both}
+::view-transition-new(root){animation:vt-in .32s cubic-bezier(.22,1,.36,1) both}
+@keyframes vt-out{to{opacity:0}}
+@keyframes vt-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* 不支持 View Transitions 时的兜底 */
+main.spa-enter{animation:main-in .38s cubic-bezier(.22,1,.36,1) both}
+@keyframes main-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ============ 进站提示弹窗 ============ */
+.notice-mask{
+  position:fixed;inset:0;z-index:150;display:flex;align-items:center;justify-content:center;
+  padding:22px;background:rgba(20,16,23,.42);
+  -webkit-backdrop-filter:blur(8px) saturate(1.1);backdrop-filter:blur(8px) saturate(1.1);
+  opacity:0;transition:opacity .28s var(--ease);
+}
+.notice-mask.is-on{opacity:1}
+.notice-card{
+  position:relative;width:min(430px,100%);max-height:86vh;overflow:auto;
+  padding:28px 26px 22px;border-radius:22px;
+  background:var(--surface-solid);border:1px solid var(--glass-edge);
+  box-shadow:0 40px 90px -40px rgba(20,16,23,.55),inset 0 1px 0 rgba(255,255,255,.7);
+  transform:translateY(12px) scale(.985);transition:transform .34s var(--ease);
+}
+.notice-mask.is-on .notice-card{transform:none}
+.notice-card h2{margin:0 0 10px;font-size:1.25rem;letter-spacing:.06em}
+.notice-body p{margin:0 0 8px;font-size:.875rem;line-height:1.9;color:var(--ink-2)}
+.notice-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.notice-btn{
+  flex:1 1 0;min-width:130px;padding:12px 16px;border-radius:999px;cursor:pointer;
+  font-size:.875rem;font-weight:600;letter-spacing:.04em;
+  border:1px solid var(--line);background:transparent;color:var(--ink);
+  transition:transform .2s var(--ease),border-color .2s,background .2s;
+}
+.notice-btn:hover{transform:translateY(-1px)}
+.notice-btn.primary{background:var(--accent);border-color:transparent;color:#fff;box-shadow:0 14px 28px -16px rgba(179,65,104,.75)}
+.notice-remember{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:.8125rem;color:var(--ink-3)}
+.notice-remember input{width:15px;height:15px;accent-color:var(--accent)}
+.notice-close{
+  position:absolute;top:8px;right:10px;width:34px;height:34px;border-radius:50%;
+  border:1px solid transparent;background:transparent;color:var(--ink-3);font-size:1.1rem;cursor:pointer;
+}
+.notice-close:hover{border-color:var(--line);color:var(--ink)}
+@media (max-width:560px){
+  .notice-card{padding:24px 20px 18px;border-radius:18px}
+  .notice-btn{min-width:0}
+}
