@@ -438,6 +438,18 @@
   textarea::-webkit-scrollbar-thumb, .adm-main::-webkit-scrollbar-thumb{
     background:rgba(179,65,104,.4);border-radius:8px;border:2px solid transparent;background-clip:content-box;
   }
+
+  /* 顶栏不再用毛玻璃：hover 重绘会出白色块 */
+  .adm-bar-in{
+    background:linear-gradient(180deg,rgba(38,28,40,.96),rgba(26,19,28,.94))!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+  }
+  [data-theme="light"] .adm-bar-in{
+    background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(252,246,248,.92))!important;
+  }
+  .adm-tabs button{background-color:transparent}
+  .adm-tabs button:hover,.adm-tabs button.on{background-color:rgba(179,65,104,.16)!important;color:var(--ink)}
+  [data-theme="light"] .adm-tabs button:hover,[data-theme="light"] .adm-tabs button.on{background-color:rgba(179,65,104,.10)!important}
 </style>
 </head>
 <body class="admin">
