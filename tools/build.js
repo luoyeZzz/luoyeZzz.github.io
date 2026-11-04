@@ -433,6 +433,7 @@ function layout(site, opts) {
     '<link rel="icon" type="image/svg+xml" href="' + u(site, '/assets/img/favicon.svg') + '">\n' +
     themeBoot() + '\n' +
     '<link rel="stylesheet" href="' + u(site, '/assets/css/style.css') + '">\n' +
+    '<noscript><style>#loader{display:none!important}body.is-loading{overflow:auto!important}</style></noscript>\n' +
     '</head>\n<body class="is-loading">\n\n' +
     '<a class="skip-link" href="#main">跳到正文</a>\n\n' +
     '<div class="atmo" aria-hidden="true"><i></i><i></i><i></i><b></b></div>\n' +

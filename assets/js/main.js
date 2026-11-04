@@ -79,6 +79,13 @@
     doc.body.classList.remove('is-loading');
   }
   var timer = null;
+  var firstVisit = false;
+  try { firstVisit = !sessionStorage.getItem('luoyue.entered'); } catch (e) { firstVisit = false; }
+
+  function markEntered() {
+    try { sessionStorage.setItem('luoyue.entered', '1'); } catch (e) {}
+  }
+
   function finish() {
     if (done) return;
     done = true;
@@ -86,10 +93,54 @@
     pct = 100; paint();
     setTimeout(close, Math.max(0, 420 - (Date.now() - start)) + 100);
   }
+
+  /* 首次访问：进度走完后不留自动消失，给一个「进入」按钮换一次真实点击 */
+  function showEnter() {
+    if (done) return;
+    done = true;
+    if (timer) clearInterval(timer);
+    pct = 100; paint();
+    if (!loader) return;
+    if (statusEl) statusEl.textContent = 'ready';
+
+    var btn = doc.createElement('button');
+    btn.type = 'button';
+    btn.className = 'loader-enter';
+    btn.textContent = '进入';
+    loader.querySelector('.loader-inner').appendChild(btn);
+
+    var kick = function () {
+      markEntered();
+      try { if (window.__luoyueMusic && typeof window.__luoyueMusic.play === 'function') window.__luoyueMusic.play(); } catch (e) {}
+      close();
+      loader.removeEventListener('click', onLoaderClick);
+      doc.removeEventListener('keydown', onKey);
+      clearTimeout(autoClose);
+    };
+    var onLoaderClick = function (e) { e.preventDefault(); kick(); };
+    var onKey = function (e) {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') { e.preventDefault(); kick(); }
+    };
+    loader.addEventListener('click', onLoaderClick);
+    doc.addEventListener('keydown', onKey);
+    /* 兜底：9 秒没点也放行，避免卡死 */
+    var autoClose = setTimeout(function () {
+      markEntered();
+      close();
+      loader.removeEventListener('click', onLoaderClick);
+      doc.removeEventListener('keydown', onKey);
+    }, 9000);
+  }
+
   if (loader) {
     paint();
     if (reduce) finish();
-    else {
+    else if (firstVisit) {
+      timer = setInterval(function () { pct = Math.min(92, pct + 8 + Math.random() * 10); paint(); }, 110);
+      if (doc.readyState === 'complete') { setTimeout(showEnter, 500); }
+      else window.addEventListener('load', function () { setTimeout(showEnter, 500); }, { once: true });
+      setTimeout(showEnter, 2400);
+    } else {
       timer = setInterval(function () { pct = Math.min(92, pct + 8 + Math.random() * 10); paint(); }, 110);
       if (doc.readyState === 'complete') finish();
       else window.addEventListener('load', finish);
@@ -278,6 +329,10 @@
       if (nowEl) nowEl.textContent = items[idx].name;
     }
     function setPlaying(on) {
+      if (on) {
+        var tip0 = document.getElementById('music-hint');
+        if (tip0 && tip0.parentNode) tip0.remove();
+      }
       if (playBtn) {
         playBtn.textContent = on ? '❚❚' : '▶';
         playBtn.setAttribute('aria-label', on ? '暂停' : '播放');
@@ -300,14 +355,27 @@
     function showHint() {
       try {
         if (document.getElementById('music-hint')) return;
-        var tip = document.createElement('div');
+        var tip = document.createElement('button');
+        tip.type = 'button';
         tip.id = 'music-hint';
         tip.className = 'music-hint';
-        tip.textContent = '点一下开始播放音乐';
+        tip.textContent = '▶ 听背景音乐';
+        tip.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          play();
+          if (tip.parentNode) tip.remove();
+        });
         dock.appendChild(tip);
-        setTimeout(function () { if (tip.parentNode) tip.remove(); }, 9000);
+        setTimeout(function () { if (tip.parentNode) tip.remove(); }, 12000);
       } catch (e) {}
     }
+
+    /* 开场页点「进入」时调用 */
+    window.__luoyueMusic = {
+      play: function () { if (audio.paused) play(); },
+      isPlaying: function () { return !audio.paused; }
+    };
 
     function armGesture() {
       if (armed) return;

@@ -871,3 +871,26 @@ body{font-size:1.0625rem;line-height:1.9;-webkit-font-smoothing:antialiased;-moz
   animation:hint-in .3s ease both;
 }
 @keyframes hint-in{from{transform:translateY(6px)}to{transform:none}}
+
+/* 入场页按钮 */
+.loader-enter{
+  margin-top:18px;padding:12px 34px;border-radius:var(--r-pill);border:1px solid var(--glass-edge);
+  background:var(--accent);color:#fff;border-color:transparent;font-size:.9375rem;font-weight:600;letter-spacing:.1em;
+  cursor:pointer;box-shadow:0 14px 30px -14px rgba(179,65,104,.65);transition:transform .25s var(--ease),box-shadow .25s;
+}
+.loader-enter:hover{transform:translateY(-2px);box-shadow:0 20px 36px -16px rgba(179,65,104,.7)}
+.loader-enter:active{transform:none}
+
+/* 音乐提示按钮 */
+.music-hint{pointer-events:auto!important;cursor:pointer;font-family:inherit}
+.music-hint:hover{border-color:var(--accent-soft);color:var(--accent)}
+
+/* 白昼：去掉暖黄光，改冷一点的粉紫，并降低噪点压暗 */
+[data-theme="light"]{
+  --bg:#FCFAF9;
+  --bg-2:#F5F0EE;
+  --glow-1:rgba(244,170,190,.34);
+  --glow-2:rgba(160,184,240,.26);
+  --glow-3:rgba(198,172,238,.16);
+}
+[data-theme="light"] .atmo b{opacity:.16;mix-blend-mode:soft-light}
