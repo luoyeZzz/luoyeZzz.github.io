@@ -319,7 +319,15 @@
         seekToResume();
       }).catch(function () {
         setPlaying(false);
-        armGesture();
+        /* 有一次自动重试：等资源可以播放时再试 */
+        var retried = false;
+        var retry = function () {
+          if (retried || !audio.paused) return;
+          retried = true;
+          audio.play().then(function () { setPlaying(true); seekToResume(); }).catch(function () { armGesture(); });
+        };
+        audio.addEventListener('canplay', retry, { once: true });
+        setTimeout(retry, 1500);
       });
     }
 
@@ -328,7 +336,9 @@
       idx = i;
       mark();
       audio.src = src(i);
-      resumeAt = (!usedResume && st && st.time) ? st.time : 0;
+      try { audio.load(); } catch (e) {}
+      var same = !!(st && st.time && (String(st.id) === String(items[i].id) || items[i].src === st.id));
+      resumeAt = (!usedResume && same) ? st.time : 0;
       usedResume = true;
       if (autoplayNow) play();
     }
@@ -351,11 +361,25 @@
     audio.addEventListener('ended', function () { load((idx + 1) % items.length, true); });
     audio.addEventListener('error', function () {
       items[idx].el.classList.add('is-bad');
+      var badUrl = audio.currentSrc || audio.src || '';
+      if (window.console) console.warn('[music] 加载失败：', badUrl, audio.error);
       if (nowEl) nowEl.textContent = items[idx].name + '（这首放不了，可能是 VIP）';
       setPlaying(false);
       if (items.length > 1) {
         setTimeout(function () { load((idx + 1) % items.length, true); }, 1600);
       }
+    });
+
+    var bufferingTimer = null;
+    audio.addEventListener('waiting', function () {
+      bufferingTimer = setTimeout(function () {
+        if (audio.paused) return;
+        if (nowEl) nowEl.textContent = items[idx].name + '（缓冲中…）';
+      }, 6000);
+    });
+    audio.addEventListener('playing', function () {
+      if (bufferingTimer) { clearTimeout(bufferingTimer); bufferingTimer = null; }
+      if (nowEl) nowEl.textContent = items[idx].name;
     });
 
     var lastSave = 0;
@@ -421,7 +445,7 @@
       } else {
         var kickoff = function () {
           setTimeout(function () {
-            if (!audio.src) load(idx, false);
+            load(idx, false);
             play();
           }, 800);
         };
