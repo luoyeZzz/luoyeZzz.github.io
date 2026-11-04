@@ -427,6 +427,17 @@
   .list::-webkit-scrollbar-corner{background:transparent}
   /* 左侧列表：去掉毛玻璃，避免滚动/聚焦时出现白色渲染残影 */
   .card.list{background:var(--surface-solid);-webkit-backdrop-filter:none;backdrop-filter:none}
+
+  /* 输入框/正文滚动条与主题一致，避免深色下亮白 */
+  textarea, .list, .adm-main{
+    scrollbar-width:thin;
+    scrollbar-color:rgba(179,65,104,.45) transparent;
+  }
+  textarea::-webkit-scrollbar, .adm-main::-webkit-scrollbar{width:10px;height:10px}
+  textarea::-webkit-scrollbar-track, .adm-main::-webkit-scrollbar-track{background:transparent}
+  textarea::-webkit-scrollbar-thumb, .adm-main::-webkit-scrollbar-thumb{
+    background:rgba(179,65,104,.4);border-radius:8px;border:2px solid transparent;background-clip:content-box;
+  }
 </style>
 </head>
 <body class="admin">
