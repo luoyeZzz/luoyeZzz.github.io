@@ -894,3 +894,24 @@ body{font-size:1.0625rem;line-height:1.9;-webkit-font-smoothing:antialiased;-moz
   --glow-3:rgba(198,172,238,.16);
 }
 [data-theme="light"] .atmo b{opacity:.16;mix-blend-mode:soft-light}
+
+/* 手机端：菜单按钮与音乐提示更醒目 */
+.nav-toggle{display:none;align-items:center;justify-content:center}
+.nav-toggle svg{transition:transform .25s var(--ease)}
+
+@media (max-width:900px){
+  .nav-toggle{display:flex;width:38px;height:38px;border-color:var(--line)}
+
+  .music-hint{
+    position:fixed;left:14px;right:14px;bottom:86px;z-index:95;white-space:normal;text-align:center;
+    padding:12px 16px;border-radius:14px;
+    background:var(--accent);color:#fff;border:1px solid transparent;
+    font-size:.875rem;font-weight:600;letter-spacing:.02em;
+    box-shadow:0 18px 40px -18px rgba(179,65,104,.75);
+  }
+  .music-hint:hover{color:#fff;border-color:transparent}
+  .music-fab{width:52px;height:52px}
+}
+
+/* 菜单打开时收起音乐提示 */
+body.nav-open .music-hint{opacity:0;pointer-events:none}
