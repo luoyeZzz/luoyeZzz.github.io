@@ -364,6 +364,13 @@
   .tone-pick .t2.on{background:linear-gradient(135deg,#9db4e0,#7f9ad6)}
   .tone-pick .t3.on{background:linear-gradient(135deg,#8ac0b4,#6aa89b)}
   .tone-pick .t4.on{background:linear-gradient(135deg,#b993cf,#9a74bb)}
+
+  input[type="checkbox"]{appearance:none;-webkit-appearance:none;width:17px;height:17px;border-radius:5px;
+    border:1px solid var(--line);background:var(--surface);cursor:pointer;position:relative;vertical-align:-3px;
+    transition:background .2s,border-color .2s}
+  input[type="checkbox"]:checked{background:var(--accent);border-color:transparent}
+  input[type="checkbox"]:checked::after{content:"";position:absolute;left:5px;top:2px;width:4px;height:8px;
+    border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
 </style>
 </head>
 <body class="admin">
