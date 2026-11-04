@@ -867,7 +867,7 @@ body{font-size:1.0625rem;line-height:1.9;-webkit-font-smoothing:antialiased;-moz
   position:absolute;right:0;bottom:66px;white-space:nowrap;
   padding:8px 12px;border-radius:12px;font-size:.75rem;color:var(--ink);
   background:var(--surface-solid);border:1px solid var(--glass-edge);
-  box-shadow:var(--shadow-soft);opacity:0;transform:translateY(6px);
-  animation:hint-in .3s ease .2s both;pointer-events:none;
+  box-shadow:var(--shadow-soft);opacity:1;pointer-events:none;
+  animation:hint-in .3s ease both;
 }
-@keyframes hint-in{to{opacity:1;transform:none}}
+@keyframes hint-in{from{transform:translateY(6px)}to{transform:none}}

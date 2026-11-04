@@ -297,21 +297,23 @@
 
     /* 浏览器不让自动响：等第一次点击/按键再放 */
     var armed = false;
+    function showHint() {
+      try {
+        if (document.getElementById('music-hint')) return;
+        var tip = document.createElement('div');
+        tip.id = 'music-hint';
+        tip.className = 'music-hint';
+        tip.textContent = '点一下开始播放音乐';
+        dock.appendChild(tip);
+        setTimeout(function () { if (tip.parentNode) tip.remove(); }, 9000);
+      } catch (e) {}
+    }
+
     function armGesture() {
       if (armed) return;
       armed = true;
       fab.classList.add('is-armed');
-      /* 手机端给一句可见提示：点一下继续播放 */
-      try {
-        if ((st || autoplay) && !document.getElementById('music-hint')) {
-          var tip = document.createElement('div');
-          tip.id = 'music-hint';
-          tip.className = 'music-hint';
-          tip.textContent = '点一下开始播放音乐';
-          dock.appendChild(tip);
-          setTimeout(function () { if (tip.parentNode) tip.remove(); }, 8000);
-        }
-      } catch (e) {}
+      showHint();
       var kick = function () {
         armed = false;
         fab.classList.remove('is-armed');
@@ -457,6 +459,10 @@
       };
       if (document.readyState === 'complete') kickoff();
       else window.addEventListener('load', kickoff, { once: true });
+
+      setTimeout(function () {
+        if (audio.paused) showHint();
+      }, 4500);
     }
   })();
 
