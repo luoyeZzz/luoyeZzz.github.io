@@ -4,7 +4,7 @@ date: 2026-10-21
 tag: "公告"
 word: "はじめた理由"
 tone: 1
-cover: "/assets/img/posts/feature-cover.jpg"
+cover: "/assets/img/posts/feature-cover.webp"
 pinned: true
 excerpt: "「想做个自己的网站」这句话我说了几年 以前一直套用别人的模板 今天终于用dsh实现了我自己的想法"
 ---

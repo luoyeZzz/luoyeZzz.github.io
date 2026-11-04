@@ -5,18 +5,18 @@
       "title": "夜の記録",
       "date": "2026-10-20",
       "desc": "测试相册",
-      "cover": "/assets/img/hero-night.jpg",
+      "cover": "/assets/img/hero-night.webp",
       "images": [
         {
-          "src": "/assets/img/hero-night.jpg",
+          "src": "/assets/img/hero-night.webp",
           "caption": "流星划过的那一秒"
         },
         {
-          "src": "/assets/img/feature-cover.jpg",
+          "src": "/assets/img/feature-cover.webp",
           "caption": "粉色的云海"
         },
         {
-          "src": "/assets/img/columbina-photo.jpg",
+          "src": "/assets/img/columbina-photo.webp",
           "caption": "月亮下面的人"
         }
       ]

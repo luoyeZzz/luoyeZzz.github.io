@@ -17,3 +17,6 @@ Thumbs.db
 desktop.ini
 # 删除的备份（回收站）
 _trash/
+
+# 本地转换工具依赖
+node_modules/

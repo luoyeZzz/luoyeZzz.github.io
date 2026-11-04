@@ -7,7 +7,7 @@
     "latin": "LUOYUE",
     "jp": "らくげつ"
   },
-  "avatar": "/assets/img/posts/白毛nb666.jpg",
+  "avatar": "/assets/img/posts/白毛nb666.webp",
   "title": "洛月 ｜ 把日常写成轻小说",
   "description": "洛月是一个日系轻小说风格的个人博客。记录清晨的便利店、雨后的天桥，以及那些没能说出口的独白。",
   "since": "2026-10-21",
@@ -132,7 +132,7 @@
       "role": "昼の看板娘",
       "speechJp": "べ、別に<em>アンタ</em>を待ってたわけじゃないんだからね！",
       "speechCn": "才、才没有在等你呢。……不过，来了就坐吧。",
-      "img": "/assets/img/taiga-photo.jpg",
+      "img": "/assets/img/taiga-photo.webp",
       "width": 1334,
       "height": 1761
     },
@@ -143,7 +143,7 @@
       "role": "夜の看板娘",
       "speechJp": "夜明けまで、<em>あなた</em>のそばにいてあげる。",
       "speechCn": "在黎明之前，就让我陪着你吧。",
-      "img": "/assets/img/columbina-photo.jpg",
+      "img": "/assets/img/columbina-photo.webp",
       "width": 3000,
       "height": 4500
     }
