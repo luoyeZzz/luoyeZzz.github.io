@@ -240,6 +240,7 @@
     function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
 
     var mask = null;
+    var dismissed = false;
     function hide() {
       if (!mask) return;
       var m = mask;
@@ -273,6 +274,7 @@
       var remember = mask.querySelector('[data-notice="remember"]');
 
       function closeWith(playIt) {
+        dismissed = true;
         if (remember && remember.checked) { try { localStorage.setItem(KEY, '1'); } catch (er) {} }
         if (playIt) {
           try { if (window.__luoyueMusic) window.__luoyueMusic.play(); } catch (er) {}
@@ -309,6 +311,7 @@
     }
 
     function show() {
+      if (dismissed) return false;
       if (isOff()) return false;
       if (mask) return true;
       build();
@@ -440,7 +443,7 @@
     }
 
     function armGesture() {
-      if (armed) return;
+      if (armed || window.__luoyueQuiet) return;
       armed = true;
       fab.classList.add('is-armed');
       showNoticeOrHint();
@@ -592,7 +595,7 @@
       else window.addEventListener('load', kickoff, { once: true });
 
       setTimeout(function () {
-        if (audio.paused) showNoticeOrHint();
+        if (audio.paused && !window.__luoyueQuiet) showNoticeOrHint();
       }, 3200);
     }
   })();
