@@ -161,8 +161,9 @@
     "volume": 0.2,
     "songs": [
       {
-        "src": "/assets/audio/橋本由香利 - Lost my pieces.mp3",
-        "name": "Lost my pieces"
+        "id": "28910248",
+        "name": "Lost my pieces (Piano Ver.)",
+        "ok": true
       },
       {
         "id": "2756019215",
