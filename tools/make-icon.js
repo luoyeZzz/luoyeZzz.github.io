@@ -1,4 +1,8 @@
-/* 生成多尺寸 favicon.ico（16/32/48/64/128/256） */
+/* 生成 Windows 友好的 ICO：小尺寸用 BMP(DIB)，256 用 PNG
+   输出：
+     assets/img/favicon.ico
+     assets/img/app-icon.ico   （给桌面快捷方式用，换文件名可绕开图标缓存）
+*/
 const fs = require('fs');
 const sharp = require('sharp');
 
@@ -10,36 +14,75 @@ const SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
 
 const sizes = [16, 32, 48, 64, 128, 256];
 
-(async function () {
-  const pngs = [];
-  for (const s of sizes) {
-    const buf = await sharp(Buffer.from(SVG), { density: 300 })
-      .resize(s, s, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
-      .png({ compressionLevel: 9 })
-      .toBuffer();
-    pngs.push({ size: s, buf });
+function dibFromRGBA(rgba, w, h) {
+  const header = Buffer.alloc(40);
+  header.writeUInt32LE(40, 0);
+  header.writeInt32LE(w, 4);
+  header.writeInt32LE(h * 2, 8);
+  header.writeUInt16LE(1, 12);
+  header.writeUInt16LE(32, 14);
+  header.writeUInt32LE(0, 16);
+  header.writeUInt32LE(w * h * 4, 20);
+
+  const pixels = Buffer.alloc(w * h * 4);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const src = ((h - 1 - y) * w + x) * 4;
+      const dst = (y * w + x) * 4;
+      pixels[dst] = rgba[src + 2];      /* B */
+      pixels[dst + 1] = rgba[src + 1];  /* G */
+      pixels[dst + 2] = rgba[src];      /* R */
+      pixels[dst + 3] = rgba[src + 3];  /* A */
+    }
   }
+
+  const maskRowBytes = Math.ceil(w / 32) * 4;
+  const mask = Buffer.alloc(maskRowBytes * h, 0);
+
+  return Buffer.concat([header, pixels, mask]);
+}
+
+(async function () {
+  const entries = [];
+  for (const s of sizes) {
+    const rgba = await sharp(Buffer.from(SVG), { density: 300 })
+      .resize(s, s, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+      .ensureAlpha()
+      .raw()
+      .toBuffer();
+
+    let data;
+    if (s >= 256) {
+      data = await sharp(rgba, { raw: { width: s, height: s, channels: 4 } }).png({ compressionLevel: 9 }).toBuffer();
+    } else {
+      data = dibFromRGBA(rgba, s, s);
+    }
+    entries.push({ size: s, data });
+  }
+
   const header = Buffer.alloc(6);
   header.writeUInt16LE(0, 0);
   header.writeUInt16LE(1, 2);
-  header.writeUInt16LE(pngs.length, 4);
+  header.writeUInt16LE(entries.length, 4);
 
-  let offset = 6 + 16 * pngs.length;
-  const entries = [];
-  for (const p of pngs) {
-    const e = Buffer.alloc(16);
-    e[0] = p.size >= 256 ? 0 : p.size;
-    e[1] = p.size >= 256 ? 0 : p.size;
-    e[2] = 0;
-    e[3] = 0;
-    e.writeUInt16LE(1, 4);
-    e.writeUInt16LE(32, 6);
-    e.writeUInt32LE(p.buf.length, 8);
-    e.writeUInt32LE(offset, 12);
-    entries.push(e);
-    offset += p.buf.length;
+  let offset = 6 + 16 * entries.length;
+  const dir = [];
+  for (const e of entries) {
+    const b = Buffer.alloc(16);
+    b[0] = e.size >= 256 ? 0 : e.size;
+    b[1] = e.size >= 256 ? 0 : e.size;
+    b[2] = 0;
+    b[3] = 0;
+    b.writeUInt16LE(1, 4);
+    b.writeUInt16LE(32, 6);
+    b.writeUInt32LE(e.data.length, 8);
+    b.writeUInt32LE(offset, 12);
+    dir.push(b);
+    offset += e.data.length;
   }
-  const out = Buffer.concat([header, ...entries, ...pngs.map((p) => p.buf)]);
+
+  const out = Buffer.concat([header, ...dir, ...entries.map((e) => e.data)]);
   fs.writeFileSync('assets/img/favicon.ico', out);
-  console.log('ico written', out.length, 'bytes,', pngs.length, 'sizes');
+  fs.writeFileSync('assets/img/app-icon.ico', out);
+  console.log('ico written', out.length, 'bytes;', entries.length, 'sizes; DIB + PNG');
 })();
