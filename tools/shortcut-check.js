@@ -13,7 +13,20 @@ const { execFileSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
 const START_BAT = path.join(ROOT, 'tools', 'start.bat');
 const CONFIG = path.join(__dirname, 'config.json');
-const ICON = path.join(ROOT, 'assets', 'img', 'shortcut-icon.ico');
+const ICON_SRC = path.join(ROOT, 'assets', 'img', 'moon.ico');
+/* 图标放到没有空格/中文的路径，资源管理器对含空格路径的图标偶尔不认 */
+function iconFile() {
+  const base = process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local');
+  const dir = path.join(base, 'Luoyue');
+  try {
+    fs.mkdirSync(dir, { recursive: true });
+    const dst = path.join(dir, 'icon.ico');
+    fs.copyFileSync(ICON_SRC, dst);
+    return dst;
+  } catch (e) {
+    return ICON_SRC;
+  }
+}
 const LNK_NAME = '洛月写作台.lnk';
 
 function readConfig() {
@@ -102,7 +115,7 @@ function create() {
     "$s=$ws.CreateShortcut('" + q(lnk) + "')",
     "$s.TargetPath='" + q(START_BAT) + "'",
     "$s.WorkingDirectory='" + q(ROOT) + "'",
-    (fs.existsSync(ICON) ? "$s.IconLocation='" + q(ICON) + "'" : ''),
+    "$s.IconLocation='" + q(iconFile()) + "'",
     "$s.Description='Luoyue Writer'",
     "$s.Save()",
     "Write-Output 'ok'"
@@ -122,7 +135,7 @@ function status() {
     target: hit ? hit.target : '',
     suppressed: cfg.shortcutPrompt === false,
     startBat: START_BAT,
-    icon: fs.existsSync(ICON) ? '/assets/img/shortcut-icon.ico' : ''
+    icon: fs.existsSync(ICON_SRC) ? '/assets/img/moon.ico' : ''
   };
 }
 
