@@ -1,0 +1,136 @@
+/* 桌面快捷方式：按目标路径识别，不看名字
+   CLI：
+     node tools/shortcut-check.js --check    只检查
+     node tools/shortcut-check.js --create   直接创建
+     node tools/shortcut-check.js --never    以后不再提示
+     node tools/shortcut-check.js --reset    恢复提示
+*/
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+const { execFileSync } = require('child_process');
+
+const ROOT = path.resolve(__dirname, '..');
+const START_BAT = path.join(ROOT, 'tools', 'start.bat');
+const CONFIG = path.join(__dirname, 'config.json');
+const ICON = path.join(ROOT, 'assets', 'img', 'favicon.ico');
+const LNK_NAME = '洛月写作台.lnk';
+
+function readConfig() {
+  try { return JSON.parse(fs.readFileSync(CONFIG, 'utf8')) || {}; } catch (e) { return {}; }
+}
+function writeConfig(patch) {
+  const cfg = readConfig();
+  Object.assign(cfg, patch);
+  fs.writeFileSync(CONFIG, JSON.stringify(cfg, null, 2) + '\n');
+  return cfg;
+}
+function norm(p) {
+  try { return path.resolve(String(p || '')).toLowerCase(); } catch (e) { return ''; }
+}
+
+/* 用 PowerShell 读桌面所有 .lnk 的目标（编码成 UTF-16 避免中文路径问题） */
+function psRun(script) {
+  const buf = Buffer.from(script, 'utf16le');
+  const b64 = buf.toString('base64');
+  return execFileSync('powershell', ['-NoProfile', '-NonInteractive', '-EncodedCommand', b64], {
+    encoding: 'utf8', timeout: 20000, windowsHide: true
+  });
+}
+
+function desktopDirs() {
+  return [path.join(os.homedir(), 'Desktop')].filter(fs.existsSync);
+}
+
+function listShortcuts() {
+  const script = [
+    "$ErrorActionPreference='SilentlyContinue'",
+    "$ProgressPreference='SilentlyContinue'",
+    "$dirs=@([Environment]::GetFolderPath('Desktop'),[Environment]::GetFolderPath('CommonDesktopDirectory'))|?{$_ -and (Test-Path $_)}",
+    "$ws=New-Object -ComObject WScript.Shell",
+    "$out=@()",
+    "foreach($d in $dirs){Get-ChildItem -LiteralPath $d -Filter *.lnk -ErrorAction SilentlyContinue|%{try{",
+    "$s=$ws.CreateShortcut($_.FullName);",
+    "$out+=[pscustomobject]@{path=$_.FullName;target=$s.TargetPath;args=$s.Arguments;workdir=$s.WorkingDirectory}}catch{}}}",
+    "$out|ConvertTo-Json -Compress -Depth 3"
+  ].join(';');
+  let raw = '';
+  try { raw = psRun(script).trim(); } catch (e) { raw = ''; }
+  if (!raw) return [];
+  try {
+    const data = JSON.parse(raw);
+    return Array.isArray(data) ? data : [data];
+  } catch (e) { return []; }
+}
+
+function matches(entry) {
+  if (!entry) return false;
+  const target = norm(entry.target);
+  const args = String(entry.args || '').toLowerCase();
+  const workdir = norm(entry.workdir);
+  const bat = norm(START_BAT);
+  if (target === bat) return true;
+  if (target.endsWith('start.bat') && workdir === norm(ROOT)) return true;
+  if (args.indexOf(bat) > -1) return true;
+  if (args.indexOf('start.bat') > -1 && workdir === norm(ROOT)) return true;
+  return false;
+}
+
+function find() {
+  const list = listShortcuts();
+  const hit = list.filter(matches)[0];
+  return hit ? hit : null;
+}
+
+function create() {
+  const dir = desktopDirs()[0] || path.join(os.homedir(), 'Desktop');
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  const lnk = path.join(dir, LNK_NAME);
+  const q = function (s) { return String(s).replace(/'/g, "''"); };
+  const script = [
+    "$ProgressPreference='SilentlyContinue'",
+    "$ws=New-Object -ComObject WScript.Shell",
+    "$s=$ws.CreateShortcut('" + q(lnk) + "')",
+    "$s.TargetPath='" + q(START_BAT) + "'",
+    "$s.WorkingDirectory='" + q(ROOT) + "'",
+    (fs.existsSync(ICON) ? "$s.IconLocation='" + q(ICON) + "'" : ''),
+    "$s.Description='Luoyue Writer'",
+    "$s.Save()",
+    "Write-Output 'ok'"
+  ].filter(Boolean).join(';');
+  psRun(script);
+  return { path: lnk, exists: fs.existsSync(lnk) };
+}
+
+function status() {
+  const cfg = readConfig();
+  const hit = find();
+  return {
+    exists: !!hit,
+    path: hit ? hit.path : '',
+    target: hit ? hit.target : '',
+    suppressed: cfg.shortcutPrompt === false,
+    startBat: START_BAT,
+    icon: fs.existsSync(ICON) ? '/assets/img/favicon.ico' : ''
+  };
+}
+
+function suppress() {
+  writeConfig({ shortcutPrompt: false });
+  return status();
+}
+function reset() {
+  writeConfig({ shortcutPrompt: true });
+  return status();
+}
+
+module.exports = { status, create, suppress, reset, find, listShortcuts };
+
+if (require.main === module) {
+  const arg = process.argv[2] || '--check';
+  if (arg === '--create') console.log(JSON.stringify(create()));
+  else if (arg === '--never') console.log(JSON.stringify(suppress()));
+  else if (arg === '--reset') console.log(JSON.stringify(reset()));
+  else if (arg === '--list') console.log(JSON.stringify(listShortcuts(), null, 2));
+  else console.log(JSON.stringify(status(), null, 2));
+}

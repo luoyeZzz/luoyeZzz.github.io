@@ -365,13 +365,6 @@
   .tone-pick .t3.on{background:linear-gradient(135deg,#8ac0b4,#6aa89b)}
   .tone-pick .t4.on{background:linear-gradient(135deg,#b993cf,#9a74bb)}
 
-  input[type="checkbox"]{appearance:none;-webkit-appearance:none;width:17px;height:17px;border-radius:5px;
-    border:1px solid var(--line);background:var(--surface);cursor:pointer;position:relative;vertical-align:-3px;
-    transition:background .2s,border-color .2s}
-  input[type="checkbox"]:checked{background:var(--accent);border-color:transparent}
-  input[type="checkbox"]:checked::after{content:"";position:absolute;left:5px;top:2px;width:4px;height:8px;
-    border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
-
   #body{min-height:62vh}
   @media (max-width:760px){ #body{min-height:52vh} }
   .row-thumb{display:none;width:42px;height:42px;border-radius:10px;object-fit:cover;
@@ -450,6 +443,25 @@
   .adm-tabs button{background-color:transparent}
   .adm-tabs button:hover,.adm-tabs button.on{background-color:rgba(179,65,104,.16)!important;color:var(--ink)}
   [data-theme="light"] .adm-tabs button:hover,[data-theme="light"] .adm-tabs button.on{background-color:rgba(179,65,104,.10)!important}
+
+  .ed-hint{margin:0 0 4px;font-size:.875rem;line-height:1.8;color:var(--ink-2)}
+  .env-row.warn .env-dot{color:var(--accent)}
+
+  /* 复选框：粉底 + 一个居中的大勾，不用伪元素 */
+  input[type="checkbox"]{
+    appearance:none!important;-webkit-appearance:none!important;
+    width:18px;height:18px;border-radius:5px;border:1px solid var(--line);
+    background-color:var(--surface);background-image:none;
+    cursor:pointer;vertical-align:-4px;position:static!important;
+    background-repeat:no-repeat;background-position:center;background-size:13px 13px;
+    transition:background-color .2s,border-color .2s;
+  }
+  input[type="checkbox"]:checked{
+    background-color:var(--accent)!important;border-color:transparent!important;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 12.5l5.2 5.2L20 6.8' fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important;
+  }
+  input[type="checkbox"]::after,
+  input[type="checkbox"]:checked::after{content:none!important;display:none!important}
 </style>
 </head>
 <body class="admin">
@@ -641,6 +653,7 @@
     <div class="card">
       <h3>环境检查</h3>
       <div id="envList"></div>
+      <div id="shortcutRow"></div>
       <div class="row-actions">
         <button class="ghost" id="recheckEnv">重新检查</button>
         <button class="ghost" id="cleanupFiles">清理未用的上传文件</button>
@@ -2184,6 +2197,71 @@
   };
 
   /* ================= 环境 ================= */
+
+  /* ===== 桌面快捷方式 ===== */
+  function shortcutApi(action) {
+    var opt = action
+      ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: action }) }
+      : { method: 'GET' };
+    return fetch('/api/shortcut', opt).then(function (r) { return r.json(); });
+  }
+  function renderShortcutRow(st) {
+    var box = $('#shortcutRow');
+    if (!box) return;
+    box.innerHTML =
+      '<div class="env-row ' + (st.exists ? 'ok' : 'warn') + '">' +
+        '<span class="env-dot">' + (st.exists ? '✓' : '!') + '</span>' +
+        '<span class="env-main"><b>桌面快捷方式</b><span>' +
+          (st.exists ? '已创建：' + esc(st.path || '') : '还没有，创建后双击图标就能打开写作台') +
+        '</span></span>' +
+        (st.exists ? '' : '<button class="ghost sm" data-sc="create">创建</button>') +
+        '<button class="ghost sm" data-sc="' + (st.suppressed ? 'reset' : 'never') + '">' +
+          (st.suppressed ? '恢复提示' : '不再提示') + '</button>' +
+      '</div>';
+  }
+  function checkShortcut(showModal) {
+    return shortcutApi().then(function (st) {
+      renderShortcutRow(st);
+      if (showModal !== false && !st.exists && !st.suppressed) showShortcutModal();
+      return st;
+    }).catch(function () {});
+  }
+  function showShortcutModal() {
+    if (document.querySelector('.ed-modal[data-sc]')) return;
+    var mask = document.createElement('div');
+    mask.className = 'ed-modal';
+    mask.setAttribute('data-sc', '1');
+    mask.innerHTML = '<div class="ed-modal-card"><h3>创建桌面快捷方式</h3>' +
+      '<p class="ed-hint">以后双击桌面上的图标就能打开写作台，不用每次翻文件夹。</p>' +
+      '<div class="ed-modal-actions">' +
+        '<button type="button" class="ghost" data-sc="later">以后再说</button>' +
+        '<button type="button" class="ghost" data-sc="never">不再提示</button>' +
+        '<button type="button" class="primary" data-sc="create">创建到桌面</button>' +
+      '</div></div>';
+    document.body.appendChild(mask);
+    mask.addEventListener('click', function (ev) {
+      var act = ev.target.getAttribute && ev.target.getAttribute('data-sc');
+      if (!act) { if (ev.target === mask) mask.remove(); return; }
+      if (act === 'later') { mask.remove(); return; }
+      shortcutApi(act).then(function (res) {
+        mask.remove();
+        renderShortcutRow(res);
+        toast(act === 'create'
+          ? (res.created ? '已创建桌面快捷方式' : '创建失败，请稍后再试')
+          : (act === 'never' ? '以后不再提示' : '已恢复提示'));
+      }).catch(function (err) { toast(err.message, true); });
+    });
+  }
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest ? ev.target.closest('#shortcutRow [data-sc]') : null;
+    if (!b) return;
+    shortcutApi(b.getAttribute('data-sc')).then(function (res) {
+      renderShortcutRow(res);
+      toast(res.exists ? '桌面快捷方式已就绪' : '设置已保存');
+    });
+  });
+  setTimeout(function () { checkShortcut(); }, 1200);
+
   function loadEnv() {
     $('#envStatus').textContent = '检查中…';
     api('/api/env').then(function (j) {
@@ -2203,7 +2281,7 @@
     });
   }
   document.addEventListener('click', function (e) {
-    if (e.target.closest && e.target.closest('#recheckEnv')) loadEnv();
+    if (e.target.closest && e.target.closest('#recheckEnv')) { loadEnv(); checkShortcut(false); }
     if (e.target.closest && e.target.closest('#cleanupFiles')) {
       confirmBox('清理未使用的文件', '会删除 assets/audio 和 assets/img/posts 里没有被任何文章/说说/相册引用的文件。确定？', '开始清理', true).then(function (yes) {
         if (!yes) return;

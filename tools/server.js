@@ -255,6 +255,29 @@ const server = http.createServer(async function (req, res) {
       return sendJSON(res, 200, { ok: true, config: cfg });
     }
 
+    /* ---- 桌面快捷方式 ---- */
+    if (p === '/api/shortcut') {
+      const sc = require('./shortcut-check');
+      if (req.method === 'GET') {
+        return sendJSON(res, 200, Object.assign({ ok: true }, sc.status()));
+      }
+      const b = JSON.parse(await readBody(req));
+      const action = String(b.action || '');
+      if (action === 'create') {
+        const made = sc.create();
+        return sendJSON(res, 200, Object.assign({ ok: true, created: made.exists }, sc.status()));
+      }
+      if (action === 'never') {
+        sc.suppress();
+        return sendJSON(res, 200, Object.assign({ ok: true }, sc.status()));
+      }
+      if (action === 'reset') {
+        sc.reset();
+        return sendJSON(res, 200, Object.assign({ ok: true }, sc.status()));
+      }
+      return sendJSON(res, 200, Object.assign({ ok: true }, sc.status()));
+    }
+
     /* ---- 网易云链接解析 ---- */
     if (req.method === 'POST' && p === '/api/music/parse') {
       const body = JSON.parse(await readBody(req));
