@@ -13,7 +13,7 @@ const { execFileSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
 const START_BAT = path.join(ROOT, 'tools', 'start.bat');
 const CONFIG = path.join(__dirname, 'config.json');
-const ICON = path.join(ROOT, 'assets', 'img', 'app-icon.ico');
+const ICON = path.join(ROOT, 'assets', 'img', 'shortcut-icon.ico');
 const LNK_NAME = '洛月写作台.lnk';
 
 function readConfig() {
@@ -122,7 +122,7 @@ function status() {
     target: hit ? hit.target : '',
     suppressed: cfg.shortcutPrompt === false,
     startBat: START_BAT,
-    icon: fs.existsSync(ICON) ? '/assets/img/app-icon.ico' : ''
+    icon: fs.existsSync(ICON) ? '/assets/img/shortcut-icon.ico' : ''
   };
 }
 

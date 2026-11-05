@@ -7,9 +7,9 @@ const fs = require('fs');
 const sharp = require('sharp');
 
 const SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="7" fill="#F7DCE6"/>
-  <path d="M21.6 5.8a10.4 10.4 0 1 1 5.6 17.9A8.5 8.5 0 0 1 21.6 5.8z" fill="#B34168"/>
-  <circle cx="24.2" cy="9.4" r="1.1" fill="#FFF3F6"/>
+  <rect width="32" height="32" rx="7" fill="#1B1522"/>
+  <path d="M21.6 5.8a10.4 10.4 0 1 1 5.6 17.9A8.5 8.5 0 0 1 21.6 5.8z" fill="#F3CF8C"/>
+  <circle cx="24.2" cy="9.4" r="1.1" fill="#FFF3D6"/>
 </svg>`;
 
 const sizes = [16, 32, 48, 64, 128, 256];
@@ -83,6 +83,6 @@ function dibFromRGBA(rgba, w, h) {
 
   const out = Buffer.concat([header, ...dir, ...entries.map((e) => e.data)]);
   fs.writeFileSync('assets/img/favicon.ico', out);
-  fs.writeFileSync('assets/img/app-icon.ico', out);
+  fs.writeFileSync('assets/img/shortcut-icon.ico', out);
   console.log('ico written', out.length, 'bytes;', entries.length, 'sizes; DIB + PNG');
 })();
