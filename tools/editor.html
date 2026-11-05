@@ -2232,10 +2232,11 @@
     mask.className = 'ed-modal';
     mask.setAttribute('data-sc', '1');
     mask.innerHTML = '<div class="ed-modal-card"><h3>创建桌面快捷方式</h3>' +
-      '<p class="ed-hint">以后双击桌面上的图标就能打开写作台，不用每次翻文件夹。</p>' +
+      '<p class="ed-hint">以后双击桌面上的图标就能打开写作台，不用每次翻文件夹。<br>' +
+        '现在不创建也没关系，之后可以在「环境」标签页里再创建。</p>' +
       '<div class="ed-modal-actions">' +
-        '<button type="button" class="ghost" data-sc="later">以后再说</button>' +
         '<button type="button" class="ghost" data-sc="never">不再提示</button>' +
+        '<button type="button" class="ghost" data-sc="later">以后再说</button>' +
         '<button type="button" class="primary" data-sc="create">创建到桌面</button>' +
       '</div></div>';
     document.body.appendChild(mask);

@@ -31,15 +31,24 @@ function norm(p) {
 
 /* 用 PowerShell 读桌面所有 .lnk 的目标（编码成 UTF-16 避免中文路径问题） */
 function psRun(script) {
-  const buf = Buffer.from(script, 'utf16le');
+  const full = "[Console]::OutputEncoding=[System.Text.Encoding]::UTF8;" + script;
+  const buf = Buffer.from(full, 'utf16le');
   const b64 = buf.toString('base64');
   return execFileSync('powershell', ['-NoProfile', '-NonInteractive', '-EncodedCommand', b64], {
     encoding: 'utf8', timeout: 20000, windowsHide: true
   });
 }
 
+function realDesktop() {
+  try {
+    const out = psRun("$ProgressPreference='SilentlyContinue';[Environment]::GetFolderPath('Desktop')").trim();
+    if (out && fs.existsSync(out)) return out;
+  } catch (e) {}
+  return path.join(os.homedir(), 'Desktop');
+}
+
 function desktopDirs() {
-  return [path.join(os.homedir(), 'Desktop')].filter(fs.existsSync);
+  return [realDesktop()].filter(fs.existsSync);
 }
 
 function listShortcuts() {
@@ -83,7 +92,7 @@ function find() {
 }
 
 function create() {
-  const dir = desktopDirs()[0] || path.join(os.homedir(), 'Desktop');
+  const dir = realDesktop();
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   const lnk = path.join(dir, LNK_NAME);
   const q = function (s) { return String(s).replace(/'/g, "''"); };
@@ -98,8 +107,10 @@ function create() {
     "$s.Save()",
     "Write-Output 'ok'"
   ].filter(Boolean).join(';');
-  psRun(script);
-  return { path: lnk, exists: fs.existsSync(lnk) };
+  try { psRun(script); } catch (e) {}
+  const ok = fs.existsSync(lnk);
+  const hit = find();
+  return { path: ok ? lnk : '', exists: ok || !!hit, found: hit ? hit.path : '' };
 }
 
 function status() {
