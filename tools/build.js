@@ -702,7 +702,11 @@ function galleryPage(site, albums) {
   const pg = (site.pages || {}).gallery || {};
   const body = albums.map(function (a) {
     return '<a class="album" href="' + u(site, '/gallery/' + a.slug + '/') + '">' +
-      '<img src="' + u(site, a.cover || ((a.images || [])[0] || {}).src || '/assets/img/feature-cover.jpg') + '" alt="">' +
+      '<img src="' + u(site, a.cover || (function () {
+        const list = a.images || [];
+        const last = list[list.length - 1];
+        return last ? (typeof last === 'string' ? last : last.src) : '/assets/img/feature-cover.jpg';
+      })()) + '" alt="">' +
       '<span class="album-info"><b>' + esc(a.title) + '</b><span>' + esc(dateLabel(a.date)) + ' · ' + (a.images || []).length + ' 张</span></span></a>';
   }).join('');
   return layout(site, {

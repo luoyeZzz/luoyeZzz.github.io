@@ -462,6 +462,12 @@
   }
   input[type="checkbox"]::after,
   input[type="checkbox"]:checked::after{content:none!important;display:none!important}
+
+  .img-field{display:flex;gap:8px;align-items:center;margin-top:4px}
+  .img-field input{flex:1;min-width:0}
+  .thumb{cursor:grab}
+  .thumb.dragging{opacity:.45}
+  .thumb.drag-over{outline:2px dashed var(--accent);outline-offset:2px}
 </style>
 </head>
 <body class="admin">
@@ -1716,8 +1722,33 @@
     });
     return data;
   }
+  function enhanceSchemaImages(host, schema) {
+    [].slice.call(host.querySelectorAll('input[data-i]')).forEach(function (inp) {
+      var idx = Number(inp.getAttribute('data-i'));
+      var f = schema[idx];
+      if (!f || !f.p || !/avatar|cover|img|image/i.test(f.p)) return;
+      if (inp.dataset.imgup) return;
+      inp.dataset.imgup = '1';
+      var wrap = document.createElement('span');
+      wrap.className = 'img-field';
+      inp.parentNode.insertBefore(wrap, inp);
+      wrap.appendChild(inp);
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'ghost sm';
+      btn.textContent = '↑ 选择图片';
+      btn.onclick = function () {
+        upload(function (j) { inp.value = j.path || j.url; }, { max: 1600 });
+      };
+      wrap.appendChild(btn);
+    });
+  }
   function loadSite() {
-    api('/api/site').then(function (j) { state.site = j.data; renderSchema($('#siteForm'), SITE_SCHEMA, state.site); });
+    api('/api/site').then(function (j) {
+      state.site = j.data;
+      renderSchema($('#siteForm'), SITE_SCHEMA, state.site);
+      enhanceSchemaImages($('#siteForm'), SITE_SCHEMA);
+    });
   }
   $('#saveSite').onclick = function () {
     readSchema($('#siteForm'), SITE_SCHEMA, state.site);
@@ -1941,10 +1972,20 @@
       '<label>标题<input id="al-title" value="' + esc(a.title) + '"></label>' +
       '<label>短名<input id="al-slug" value="' + esc(a.slug) + '"></label>' +
       '<label>日期时间<input id="al-date" readonly data-dt value="' + esc(toInput(a.date)) + '" placeholder="点这里选时间"></label>' +
-      '<label>封面（路径或链接）<input id="al-cover" value="' + esc(a.cover || '') + '"></label>' +
+      '<label>封面（路径或链接）<span class="img-field"><input id="al-cover" value="' + esc(a.cover || '') + '"><button type="button" class="ghost sm" id="al-cover-up">↑ 选择图片</button></span></label>' +
       '<label class="full">简介<textarea id="al-desc" rows="2">' + esc(a.desc || '') + '</textarea></label>';
     renderAlbumImages();
     renderAlbums();
+    var coverBtn = document.getElementById('al-cover-up');
+    if (coverBtn) {
+      coverBtn.onclick = function () {
+        upload(function (j) {
+          var cover = document.getElementById('al-cover');
+          if (!cover.value.trim()) cover.value = j.path || j.url;
+          toast('已选择封面');
+        }, { max: 1800 });
+      };
+    }
   }
   function renderAlbumImages() {
     var a = state.gallery.albums[state.albumIndex];
@@ -1963,6 +2004,40 @@
       a.images.splice(Number(b.getAttribute('data-delimg')), 1);
       renderAlbumImages();
     };
+    bindAlbumDrag(a);
+  }
+  function syncCaptions(a) {
+    [].slice.call(document.querySelectorAll('#albumImages [data-cap]')).forEach(function (inp) {
+      var i = Number(inp.getAttribute('data-cap'));
+      if (!a.images[i]) return;
+      if (typeof a.images[i] === 'object') a.images[i].caption = inp.value;
+      else a.images[i] = { src: a.images[i], caption: inp.value };
+    });
+  }
+  var dragFrom = null;
+  function bindAlbumDrag(a) {
+    [].slice.call(document.querySelectorAll('#albumImages .thumb')).forEach(function (el) {
+      el.draggable = true;
+      el.addEventListener('dragstart', function (ev) {
+        dragFrom = Number(el.getAttribute('data-th'));
+        el.classList.add('dragging');
+        if (ev.dataTransfer) ev.dataTransfer.effectAllowed = 'move';
+      });
+      el.addEventListener('dragend', function () { el.classList.remove('dragging'); dragFrom = null; });
+      el.addEventListener('dragover', function (ev) { ev.preventDefault(); el.classList.add('drag-over'); });
+      el.addEventListener('dragleave', function () { el.classList.remove('drag-over'); });
+      el.addEventListener('drop', function (ev) {
+        ev.preventDefault();
+        el.classList.remove('drag-over');
+        var to = Number(el.getAttribute('data-th'));
+        if (dragFrom === null || dragFrom === to) return;
+        syncCaptions(a);
+        var moved = a.images.splice(dragFrom, 1)[0];
+        a.images.splice(to, 0, moved);
+        dragFrom = null;
+        renderAlbumImages();
+      });
+    });
   }
   $('#addAlbum').onclick = function () {
     state.gallery.albums.push({ slug: 'album-' + Date.now().toString(36), title: '新相册', date: nowLocal(), desc: '', cover: '', images: [] });
@@ -2433,7 +2508,8 @@
     });
     bar.appendChild(emo);
     bar.appendChild(mkBtn('⛶ 全屏', function () { openFull(ta); }));
-    ta.parentNode.insertBefore(bar, ta);
+    var lbl = ta.closest('label') || ta.parentNode;
+    lbl.parentNode.insertBefore(bar, lbl);
   }
   function scanTextareas() {
     [].slice.call(document.querySelectorAll('textarea')).forEach(addMiniBar);
