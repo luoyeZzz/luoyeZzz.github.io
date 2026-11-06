@@ -1,9 +1,9 @@
 {
   "albums": [
     {
-      "slug": "night",
-      "title": "夜の記録",
-      "date": "2026-10-20",
+      "slug": "test",
+      "title": "测试相册",
+      "date": "2026-10-20 00:00:00",
       "desc": "测试相册",
       "cover": "/assets/img/hero-night.webp",
       "images": [
@@ -18,6 +18,31 @@
         {
           "src": "/assets/img/columbina-photo.webp",
           "caption": "月亮下面的人"
+        }
+      ]
+    },
+    {
+      "slug": "cat",
+      "title": "小猫~",
+      "date": "2026-11-06 19:57:25",
+      "desc": "汤圆大人的照片 还是小时候乖啊……",
+      "cover": "",
+      "images": [
+        {
+          "src": "/assets/img/posts/9AADF57A53FA01A4179EF41AF9BFAD29.jpg",
+          "caption": ""
+        },
+        {
+          "src": "/assets/img/posts/8B81797FBFA19ABDFEE77826ECD13E34.jpg",
+          "caption": ""
+        },
+        {
+          "src": "/assets/img/posts/957D9D153D7EC89641AE8860D9948D1D.jpg",
+          "caption": ""
+        },
+        {
+          "src": "/assets/img/posts/A1D069A98F08D03D2BA535ABE4ADEF69.jpg",
+          "caption": ""
         }
       ]
     }
