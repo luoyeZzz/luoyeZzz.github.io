@@ -1981,7 +1981,7 @@
       coverBtn.onclick = function () {
         upload(function (j) {
           var cover = document.getElementById('al-cover');
-          if (!cover.value.trim()) cover.value = j.path || j.url;
+          cover.value = j.path || j.url;
           toast('已选择封面');
         }, { max: 1800 });
       };
